@@ -59,7 +59,7 @@ class World():
                     self.im_vampire = True
                 elif p[4] != 0:
                     print "You are a wolf"
-                    self.im_campire = False
+                    self.im_vampire = False
                 else:
                     raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))
         # Then update map

@@ -40,21 +40,26 @@ class World():
         "Return the world as a matrix"
         return self.world
 
-    def get_cell(self, line, column):
+    def get_size(self):
+        "Return the size"
+        return (len(self.world), len(self.world[0]))
+
+    def get_cell(self, x, y):
         "Return the content of a cell"
-        return self.world[line][column]
+        return self.world[x][y]
 
     def init_map(self, my_pos, positions):
         "Initialize the map"
         # First know if we are vampire or wolf
+        print my_pos, positions
         for p in positions:
             if my_pos == (p[0], p[1]):
                 if p[3] != 0:
-                    print "You are a wolf"
-                    self.im_vampire = False
-                elif p[4] != 0:
                     print "You are a vampire"
-                    self.im_campire = True
+                    self.im_vampire = True
+                elif p[4] != 0:
+                    print "You are a wolf"
+                    self.im_campire = False
                 else:
                     raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))
         # Then update map
@@ -91,7 +96,7 @@ class ClientAPI(threading.Thread):
     "Create a simple connection to the vampire/wolves server"
     def __default_callback(self, world):
         "This is called when it's our turn to play"
-        print str(self.name) + ", your time to play!"
+        print str(self.__name) + ", your time to play!"
     
     def __init__(self, server = DEFAULT_SERVER, port = DEFAULT_PORT, turn_callback = None):
         "Connect to the server"
@@ -109,10 +114,10 @@ class ClientAPI(threading.Thread):
     def connect(self, my_name):
         "Connect to the server"
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.settimeout(2)
         self.s.connect((self.ip, self.port))
         self.__name = my_name
         self._init_com()
+        self.s.settimeout(2)
         # Start the callback to handle map update
         self.start()
 
@@ -128,6 +133,14 @@ class ClientAPI(threading.Thread):
     def close(self):
         "Close the client"
         self.running = False
+        
+    def __enter__(self):
+        "RAII Return the screen with the keyword with"
+        return self
+    
+    def __exit__(self, type, value, traceback):
+        "Return the console to normal"
+        self.close()
 
     def run(self):
         "Handle map updates"
@@ -158,7 +171,7 @@ class ClientAPI(threading.Thread):
                     # Change str to int
                     data = map(lambda a: ord(a), data)
                     # Group by 5
-                    pos = [data[i:i+5] for i in range(len(data)/5)]
+                    pos = [data[(i*5):(i*5)+5] for i in range(len(data)/5)]
                     for p in pos:
                         self.world.update(p[0], p[1], p[2], p[3], p[4])
                     # Call callback
@@ -178,6 +191,29 @@ class ClientAPI(threading.Thread):
     def get_map(self):
         "Get the Map Obejct"
         return self.world
+
+    def move(self, move1, move2 = None, move3 = None):
+        "Move your player move is (initial_x, initial_y, nb, dest_x, dest_y)"
+        cmd = "MOV"
+        nb_moves = 1
+        if move2: nb_moves += 1
+        if move3: nb_moves += 1
+        cmd += chr(nb_moves)
+        if move1:
+            for i in range(len(move1)):
+                cmd += chr(move1[i])
+        if move2:
+            for i in range(len(mov2)):
+                cmd += chr(move1[i])
+        if move3:
+            for i in range(len(move3)):
+                cmd += chr(move1[i])
+        self.s.send(cmd)
+
+    def attack(self, x, y):
+        "Attack at coordinates (x, y)"
+        cmd = "ATK" + chr(x) + chr(y)
+        self.s.send(cmd)
     
 ###################
 ### DEFINITIONS ###
@@ -195,7 +231,10 @@ if __name__ == "__main__":
     c = ClientAPI()
     c.connect("Viq")
     print "Quitting in 4s..."
-    time.sleep(4)
+    time.sleep(2)
+    print "MOVING"
+    c.move((5,4,2,4,4))
+    time.sleep(2)
     print "Closing..."
     print c.get_map()
     c.close()

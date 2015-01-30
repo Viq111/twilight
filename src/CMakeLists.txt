@@ -31,4 +31,6 @@ if(Boost_FOUND)
     # Creates a folder "executables" and adds target 
     # project (app.vcproj) under it
     set_property(TARGET twilight PROPERTY FOLDER "executables")
+else()
+	message( FATAL_ERROR "Boost library not found !" )
 endif()

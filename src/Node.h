@@ -12,6 +12,7 @@ public:
     ~Node();
     int addChildren(Node* child);
     std::vector<Node*> getSortedChildren();
+    std::vector<Node*> getReverseSortedChildren();
     int getScore(){ return score; };
     int getAlpha() { return alpha; };
     int getBeta(){ return beta; };

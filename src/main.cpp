@@ -14,28 +14,27 @@ Node* testTree(int depth, int nbChildMin, int nbChildRange);
 int main(){
     srand(time(NULL));
 
-
     /*
     std::cout << "begin... " << std::endl;
     Node* testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 à 12 fils
     int* count = new int(0);
     (*count) = 0;                           // compte le nombre de noeuds parcourus (interessant à comparer avec le nombre total de noeuds pour mesurer l'efficacite de alpha-beta)
-    std::cout << "max value sur profondeur 1 : " << maxValue(testNode, -100000000, 100000000, 1, count) << endl;
+    std::cout << "max value sur profondeur 1 : " << maxValue(testNode, -100000000, 100000000, 1, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     (*count) = 0;
-    std::cout << "max value sur profondeur 2 : " << maxValue(testNode, -100000000, 100000000, 2, count) << endl;
+    std::cout << "max value sur profondeur 2 : " << maxValue(testNode, -100000000, 100000000, 2, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     (*count) = 0;
-    std::cout << "max value sur profondeur 3 : " << maxValue(testNode, -100000000, 100000000, 3, count) << endl;
+    std::cout << "max value sur profondeur 3 : " << maxValue(testNode, -100000000, 100000000, 3, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     (*count) = 0;
-    std::cout << "max value sur profondeur 4 : " << maxValue(testNode, -100000000, 100000000, 4, count) << endl;
+    std::cout << "max value sur profondeur 4 : " << maxValue(testNode, -100000000, 100000000, 4, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     (*count) = 0;
-    std::cout << "max value sur profondeur 5 : " << maxValue(testNode, -100000000, 100000000, 5, count) << endl;
+    std::cout << "max value sur profondeur 5 : " << maxValue(testNode, -100000000, 100000000, 5, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     (*count) = 0;
-    std::cout << "max value sur profondeur 6 : " << maxValue(testNode, -100000000, 100000000, 6, count) << endl;
+    std::cout << "max value sur profondeur 6 : " << maxValue(testNode, -100000000, 100000000, 6, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     system("PAUSE");
     */
@@ -68,10 +67,10 @@ Node* testTree(int depth, int nbChildMin, int nbChildRange){
 //fonction alpha-beta récursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
 int maxValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
-    if ((depth <= 0) || (current->getSortedChildren().size() == 0)){    //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
+    if ((depth <= 0) || (current->getReverseSortedChildren().size() == 0)){    //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
-    std::vector<Node*> children = current->getSortedChildren();
+    std::vector<Node*> children = current->getReverseSortedChildren();
     for (int i = 0; i < children.size(); i++){
         alpha = std::max(alpha, minValue(children[i], alpha, beta, depth - 1, count));
         if (alpha >= beta){

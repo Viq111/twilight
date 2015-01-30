@@ -27,8 +27,19 @@ bool comparaisonInverse(Node* first, Node* second)
     return (first->getScore() > second->getScore());
 }
 
+bool comparaison(Node* first, Node* second)
+{
+    return (first->getScore() < second->getScore());
+}
+
 std::vector<Node*> Node::getSortedChildren()
 {
-    std::sort(children.begin(), children.begin(), comparaisonInverse);
+    std::sort(children.begin(), children.end(), comparaison);
+    return children;
+}
+
+std::vector<Node*> Node::getReverseSortedChildren()
+{
+    std::sort(children.begin(), children.end(), comparaisonInverse);
     return children;
 }

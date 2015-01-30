@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 # Name of the project
-project (Tutorial)
+project (Twilight)
 
 # Turn on the ability to create folders to organize projects (.vcproj)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

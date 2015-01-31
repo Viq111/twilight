@@ -14,7 +14,7 @@ Node* testTree(int depth, int nbChildMin, int nbChildRange);
 int main(){
     srand(time(NULL));
 
-    /*
+    
     std::cout << "begin... " << std::endl;
     Node* testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 à 12 fils
     int* count = new int(0);
@@ -37,14 +37,14 @@ int main(){
     std::cout << "max value sur profondeur 6 : " << maxValue(testNode, -100000000, 100000000, 6, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     system("PAUSE");
-    */
+    
     return 0;
 }
 
 // cree un arbre de test
 Node* testTree(int depth, int nbChildMin, int nbChildRange){
     int nbNodes = 1;
-    Node* root = new Node(0);
+    Node* root = new Node(); //new Node(0);
     std::vector<Node*> leaves;
     leaves.push_back(root);
     for (int i = 0; i < depth; i++){
@@ -52,7 +52,7 @@ Node* testTree(int depth, int nbChildMin, int nbChildRange){
         for (int j = 0; j < leaves.size(); j++){
             int nbChild = nbChildMin + rand() % nbChildRange;
             for (int k = 0; k < nbChild; k++){
-                Node* newLeaf = new Node(leaves[j]->getScore());
+                Node* newLeaf = new Node();  //new Node(leaves[j]->getScore());
                 leaves[j]->addChildren(newLeaf);
                 newLeaves.push_back(newLeaf);
                 nbNodes++;
@@ -67,10 +67,10 @@ Node* testTree(int depth, int nbChildMin, int nbChildRange){
 //fonction alpha-beta récursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
 int maxValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
-    if ((depth <= 0) || (current->getReverseSortedChildren().size() == 0)){    //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
+    if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
-    std::vector<Node*> children = current->getReverseSortedChildren();
+    std::vector<Node*> children = current->getChildren();  //getReverseSortedChildren()
     for (int i = 0; i < children.size(); i++){
         alpha = std::max(alpha, minValue(children[i], alpha, beta, depth - 1, count));
         if (alpha >= beta){
@@ -83,10 +83,10 @@ int maxValue(Node* current, int alpha, int beta, int depth, int* count){
 //fonction alpha-beta récursive simple : minValue (cf. Chapitre 4 : Jeux, slide 66)
 int minValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
-    if ((depth <= 0) || (current->getSortedChildren().size() == 0)){    //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
+    if ((depth <= 0) || (current->getChildren().size() == 0)){  //current->getSortedChildren().size()  //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
-    std::vector<Node*> children = current->getSortedChildren();
+    std::vector<Node*> children = current->getChildren();  //getSortedChildren()
     for (int i = 0; i < children.size(); i++){
         beta = std::min(beta, maxValue(children[i], alpha, beta, depth - 1, count));
         if (alpha >= beta){

@@ -1,4 +1,3 @@
-#include "Node.h"
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
@@ -6,15 +5,11 @@
 #include <queue>
 #include <stdlib.h>
 #include <time.h>
+#include "MinMax.h"
 
-int minValue(Node* current, int alpha, int beta, int depth, int* count);
-int maxValue(Node* current, int alpha, int beta, int depth, int* count);
-Node* testTree(int depth, int nbChildMin, int nbChildRange);
-
-int main(){
+MinMax::MinMax()
+{
     srand(time(NULL));
-
-    
     std::cout << "begin... " << std::endl;
     Node* testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 à 12 fils
     int* count = new int(0);
@@ -37,12 +32,10 @@ int main(){
     std::cout << "max value sur profondeur 6 : " << maxValue(testNode, -100000000, 100000000, 6, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     system("PAUSE");
-    
-    return 0;
 }
 
 // cree un arbre de test
-Node* testTree(int depth, int nbChildMin, int nbChildRange){
+Node* MinMax::testTree(int depth, int nbChildMin, int nbChildRange){
     int nbNodes = 1;
     Node* root = new Node(); //new Node(0);
     std::vector<Node*> leaves;
@@ -65,7 +58,7 @@ Node* testTree(int depth, int nbChildMin, int nbChildRange){
 }
 
 //fonction alpha-beta récursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
-int maxValue(Node* current, int alpha, int beta, int depth, int* count){
+int MinMax::maxValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
     if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
@@ -81,7 +74,7 @@ int maxValue(Node* current, int alpha, int beta, int depth, int* count){
 }
 
 //fonction alpha-beta récursive simple : minValue (cf. Chapitre 4 : Jeux, slide 66)
-int minValue(Node* current, int alpha, int beta, int depth, int* count){
+int MinMax::minValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
     if ((depth <= 0) || (current->getChildren().size() == 0)){  //current->getSortedChildren().size()  //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();

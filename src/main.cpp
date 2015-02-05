@@ -5,18 +5,18 @@
 #include <vector>
 
 // ToDo: Include socket
-//#include "MoveManager.h"
+#include "MoveManager.h"
 
 int main(int argc, char* argv[])
 {
 	// Parse the arguments
 	std::vector<std::string> params(argv, argv + argc);
 
-	/*
+	
 	// First create a connetion to the server
-	std::unique_ptr<Socket> socket = std::make_unique<Socket>();
+	//std::unique_ptr<Socket> socket = std::make_unique<Socket>();
 	// Then create the root of the tree
-	//std::shared_ptr<Node> root = std::make_shared<Node>();
+	std::shared_ptr<Node> root = std::make_shared<Node>();
 
 	// Create the MoveManager with the root node
 	unsigned int nbCores = std::thread::hardware_concurrency();
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 
 	// Currently only benchmark
 	mm.benchmark();
-	*/
+	
 
 	return 0;
 }

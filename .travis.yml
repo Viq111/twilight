@@ -1,0 +1,19 @@
+language: cpp
+compiler:
+  - gcc
+  - clang
+addons:
+  apt_packages: "curl"
+install:
+  # Get boost
+  - wget https://github.com/Viq111/static-files/releases/download/boost_1_57_travis/boost.tar.bz2
+  - tar -xjf boost.tar.bz2
+  - rm boost.tar.bz2
+  - cd boost
+  - export BOOST_ROOT=$(pwd)
+script: 
+  - mkdir build && cd build
+  - cmake ..
+  - make
+os:
+  - linux

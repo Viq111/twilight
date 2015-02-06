@@ -11,7 +11,7 @@ int minValue(Node* current, int alpha, int beta, int depth, int* count);
 int maxValue(Node* current, int alpha, int beta, int depth, int* count);
 Node* testTree(int depth, int nbChildMin, int nbChildRange);
 
-int main(){
+int main2(){
     srand(time(NULL));
 
     

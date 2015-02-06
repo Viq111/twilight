@@ -11,6 +11,7 @@ install:
   - rm boost.tar.bz2
   - cd boost
   - export BOOST_ROOT=$(pwd)
+  - cd $TRAVIS_BUILD_DIR
 script: 
   - mkdir build && cd build
   - cmake ..

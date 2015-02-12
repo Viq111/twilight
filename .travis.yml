@@ -26,7 +26,9 @@ before_install:
   - if [ "$COMPILER_NAME" == "clang" ]; then export CXXFLAGS="-stdlib=libc++"; fi
   - echo 'Compiling with:'
   - $CXX --version
+  - which $CXX
   - $CC --version
+  - which $CC
 install:
   # Get boost
   - wget https://github.com/Viq111/static-files/releases/download/boost_1_57_travis/boost.tar.bz2

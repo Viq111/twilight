@@ -5,8 +5,7 @@ CMAKE_POLICY(SET CMP0015 NEW)
 project (Twilight)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
-LIST(APPEND CMAKE_CXX_FLAGS "-std=c++0x")
-
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 # Turn on the ability to create folders to organize projects (.vcproj)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

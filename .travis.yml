@@ -9,13 +9,13 @@ before_install:
   - if [ "$CXX" == "g++" ]; then export COMPILER_NAME="gcc"; fi
   - if [ "$CXX" == "g++" ]; then export COMPILER_URL="https://github.com/Viq111/travis-container-packets/releases/download/gcc-4.8.2/gcc.tar.bz2"; fi
   - if [ "$CXX" == "clang++" ]; then export COMPILER_NAME="clang"; fi
-  - if [ "$CXX" == "clang++" ]; then export COMPILER_URL="https://github.com/Viq111/travis-container-packets/releases/download/clang%2Blibcxx-3.4.2/clang-libcxx.tar.bz2"; fi
+  - if [ "$CXX" == "clang++" ]; then export COMPILER_URL="https://github.com/Viq111/travis-container-packets/releases/download/clang%2Blibcxx-3.4.2/clang_libcxx.tar.bz2"; fi
   # Get compiler
   - wget $COMPILER_URL
-  - if [ "$CXX" == "clang++" ]; then mv clang-libcxx.tar.bz2 clang.tar.bz2; fi
+  - if [ "$CXX" == "clang++" ]; then mv clang_libcxx.tar.bz2 clang.tar.bz2; fi
   - tar -xjf $COMPILER_NAME.tar.bz2
   - rm $COMPILER_NAME.tar.bz2
-  - if [ "$CXX" == "clang++" ]; then mv clang-libcxx clang; fi
+  - if [ "$CXX" == "clang++" ]; then mv clang_libcxx clang; fi
   - export PATH=$(pwd)/$COMPILER_NAME/bin:$PATH
   - if [ "$COMPILER_NAME" == "gcc" ]; then export LIBRARY_PATH=$(pwd)/$COMPILER_NAME/lib64:$LIBRARY_PATH; fi
   - if [ "$COMPILER_NAME" == "clang" ]; then export LIBRARY_PATH=$(pwd)/$COMPILER_NAME/lib:$LIBRARY_PATH; fi

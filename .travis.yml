@@ -15,7 +15,6 @@ before_install:
   - if [ "$CXX" == "g++" ]; then export COMPILER_URL="https://github.com/Viq111/travis-container-packets/releases/download/gcc-4.8.2/gcc.tar.bz2"; fi
   - if [ "$CXX" == "clang++" ]; then export COMPILER_NAME="clang"; fi
   - if [ "$CXX" == "clang++" ]; then export COMPILER_URL="https://github.com/Viq111/travis-container-packets/releases/download/clang%2Blibcxx-3.4.2/clang_libcxx.tar.bz2"; fi
-  # Get compiler
   - wget $COMPILER_URL
   - if [ "$CXX" == "clang++" ]; then mv clang_libcxx.tar.bz2 clang.tar.bz2; fi
   - tar -xjf $COMPILER_NAME.tar.bz2
@@ -28,12 +27,9 @@ before_install:
   - if [ "$COMPILER_NAME" == "clang" ]; then export LD_LIBRARY_PATH=$(pwd)/$COMPILER_NAME/lib:$LD_LIBRARY_PATH; fi
   - if [ "$COMPILER_NAME" == "gcc" ]; then export CPLUS_INCLUDE_PATH=$(pwd)/$COMPILER_NAME/include/c++/4.8.2:$CPLUS_INCLUDE_PATH; fi
   - if [ "$COMPILER_NAME" == "clang" ]; then export CPLUS_INCLUDE_PATH=$(pwd)/$COMPILER_NAME/include/c++/v1:$CPLUS_INCLUDE_PATH; fi
-  #- if [ "$COMPILER_NAME" == "clang" ]; then export CXXFLAGS="-stdlib=libc++"; fi
   - echo 'Compiling with:'
-  - $CXX --version
-  - which $CXX
-  - $CC --version
-  - which $CC
+  - which $CXX && $CXX --version
+  - which $CC && $CC --version
 install:
   # Get boost
   - wget https://github.com/Viq111/static-files/releases/download/boost_1_57_travis/boost.tar.bz2

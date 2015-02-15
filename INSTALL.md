@@ -7,7 +7,7 @@ Download Boost source code. As far as you can, take the 1.57.0 version of Boost 
 Unzip it in a folder whose path doesn't contain any accent (otherwise, it can't compile correctly). Open a command line and get in Boost folder.
 
     bootstrap
-    b2 -j4 --toolset=msvc-12.0 address-model=64 --build-type=complete --with_chrono --with-iostreams --with-thread --with-date_time --prefix=build -q install
+    b2 -j4 --toolset=msvc-12.0 address-model=64 --build-type=complete --with-chrono --with-iostreams --with-thread --with-date_time --prefix=build -q install
 
 Then we have to change some few things in build folder. The build folder contains two directories : `include` and `lib`. You should have this structure :
 

@@ -11,9 +11,9 @@ MinMax::MinMax()
 {
     srand(time(NULL));
     std::cout << "begin... " << std::endl;
-    Node* testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 à 12 fils
+    Node* testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 a 12 fils
     int* count = new int(0);
-    (*count) = 0;                           // compte le nombre de noeuds parcourus (interessant à comparer avec le nombre total de noeuds pour mesurer l'efficacite de alpha-beta)
+    (*count) = 0;                           // compte le nombre de noeuds parcourus (interessant a comparer avec le nombre total de noeuds pour mesurer l'efficacite de alpha-beta)
     std::cout << "max value sur profondeur 1 : " << maxValue(testNode, -100000000, 100000000, 1, count) << std::endl;
     std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
     (*count) = 0;
@@ -57,10 +57,10 @@ Node* MinMax::testTree(int depth, int nbChildMin, int nbChildRange){
     return root;
 }
 
-//fonction alpha-beta récursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
+//fonction alpha-beta recursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
 int MinMax::maxValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
-    if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
+    if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
     std::vector<Node*> children = current->getChildren();  //getReverseSortedChildren()
@@ -73,10 +73,10 @@ int MinMax::maxValue(Node* current, int alpha, int beta, int depth, int* count){
     return alpha;
 }
 
-//fonction alpha-beta récursive simple : minValue (cf. Chapitre 4 : Jeux, slide 66)
+//fonction alpha-beta recursive simple : minValue (cf. Chapitre 4 : Jeux, slide 66)
 int MinMax::minValue(Node* current, int alpha, int beta, int depth, int* count){
     (*count)++;
-    if ((depth <= 0) || (current->getChildren().size() == 0)){  //current->getSortedChildren().size()  //on est arrivé au bas de l'arbre, sur "une feuille" => scoring
+    if ((depth <= 0) || (current->getChildren().size() == 0)){  //current->getSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
     std::vector<Node*> children = current->getChildren();  //getSortedChildren()

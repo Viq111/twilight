@@ -3,12 +3,7 @@
 
 #include <memory>
 #include <boost/thread.hpp>
-
-class Socket // ToDo: Include real socket class
-{
-public:
-	Socket();
-};
+#include <GameSocket.h>
 
 #include "Node.h"
 class MinMaxAlgorithm;	// ToDo: Inlude real algorithm
@@ -18,7 +13,7 @@ class MoveManager
 {
 public:
 	MoveManager(std::shared_ptr<Node> root, int nbCores);
-	void setSocket(std::unique_ptr<Socket> socket); // Set socket to be able to talk to it
+	void setSocket(std::unique_ptr<GameSocket> socket); // Set socket to be able to talk to it
 	void benchmark(); // Benchmark the current hardware
 	void mainloop();
 
@@ -28,7 +23,7 @@ public:
 	std::shared_ptr<Node> getWork(); // Get a work item
 protected:
 	unsigned int cores;
-	std::unique_ptr<Socket> socket;
+	std::unique_ptr<GameSocket> socket;
 	std::shared_ptr<Node> root;
 };
 

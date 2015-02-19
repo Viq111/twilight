@@ -6,6 +6,7 @@
 
 #include "GameSocket.h"
 #include "MoveManager.h"
+#include "standardFunctions.h" // For make_unique
 
 int getNbCores()
 {
@@ -46,7 +47,7 @@ int main(int argc, char* argv[])
 	int port = std::stoi(params.at(2));
 
 	// First create a connetion to the server
-	std::unique_ptr<GameSocket> socket = std::make_unique<GameSocket>();
+	std::unique_ptr<GameSocket> socket = make_unique<GameSocket>();
 	socket->connect(ip, port, "Edward");
 	GameState initialState = socket->getNewGameState(); // Get initial State
 	// Then create the root of the tree

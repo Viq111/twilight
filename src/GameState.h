@@ -43,6 +43,7 @@ public:
     const char humansCount;
     const char enemiescount;
     
+	GameState(); // Empty game
     GameState(std::vector<Group> allies,
               std::vector<Group> humans,
               std::vector<Group> enemies);

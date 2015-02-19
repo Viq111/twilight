@@ -4,33 +4,58 @@
 #include <thread>
 #include <vector>
 
-// ToDo: Include socket
+#include "GameSocket.h"
 #include "MoveManager.h"
 
-int main(int argc, char* argv[])
+int getNbCores()
 {
-	// Parse the arguments
-	std::vector<std::string> params(argv, argv + argc);
-
-	
-	// First create a connetion to the server
-	//std::unique_ptr<Socket> socket = std::make_unique<Socket>();
-	// Then create the root of the tree
-	std::shared_ptr<Node> root = std::make_shared<Node>();
-
-	// Create the MoveManager with the root node
 	unsigned int nbCores = std::thread::hardware_concurrency();
 	if (nbCores == 0)	// Couldn't determine the number of threads, use 2 by default
 	{
 		std::cerr << "[WARNING] Cannot find the real number of cores, using default 2" << std::endl;
 		nbCores = 2;
 	}
-	std::cout << "Number of cores detected: " << nbCores << std::endl;
+	return nbCores;
+}
+
+int main(int argc, char* argv[])
+{
+	// Parse the arguments
+	std::vector<std::string> params(argv, argv + argc);
+
+	// Get cores
+	int nbCores = getNbCores();
+
+	// If params is benchmark, do it
+	if (((params.size() == 2) && params[1] == "benchmark") || params.size() == 1)
+	{
+		std::cout << "Benchmarking ..." << std::endl;
+		std::shared_ptr<Node> root = std::make_shared<Node>(); // Empty Node
+		MoveManager mm(root, nbCores);
+		mm.benchmark();
+		return 0;
+	}
+	// Check number of arguments
+	if (params.size() != 3)
+	{
+		std::cout << "Usage: " << params.at(0) << " <ip> <port>" << std::endl;
+		return -1;
+	}
+	// Number of arguments seems good, get ip and port
+	std::string ip = params.at(1);
+	int port = std::stoi(params.at(2));
+
+	// First create a connetion to the server
+	std::unique_ptr<GameSocket> socket = std::make_unique<GameSocket>();
+	socket->connect(ip, port, "Edward");
+	GameState initialState = socket->getNewGameState(); // Get initial State
+	// Then create the root of the tree
+	std::shared_ptr<Node> root = std::make_shared<Node>(initialState);
+
+	// Create the MoveManager with the root node
 	MoveManager mm(root, nbCores);
+	mm.setSocket(std::move(socket));
 
-	// Currently only benchmark
-	mm.benchmark();
-	
-
+	mm.mainloop();
 	return 0;
 }

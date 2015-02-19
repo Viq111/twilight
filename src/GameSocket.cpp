@@ -7,7 +7,7 @@ void GameSocket::connect(std::string ip, int port, std::string name)
 	// ToDo: Connect to the server and set the name
 }
 
-GameState getNewGameState()
+GameState GameSocket::getNewGameState()
 {
 	// ToDo: Block until the server send a UPD
 	// Compute the new gameState

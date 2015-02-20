@@ -1,8 +1,11 @@
 #include "MoveManager.h"
 
-MoveManager::MoveManager(std::shared_ptr<Node> r, int n) : cores(n), root(r), socket(nullptr)
+MoveManager::MoveManager(int n) : cores(n), socket(nullptr)
 {
+}
 
+MoveManager::MoveManager(std::shared_ptr<Node> r, int n) : cores(n), socket(nullptr), root(r)
+{
 }
 
 void MoveManager::setSocket(std::unique_ptr<GameSocket> s)
@@ -23,4 +26,11 @@ void MoveManager::mainloop()
 bool MoveManager::stillWork() // Still work to do ?
 {
 	return true;
+}
+
+GameState MoveManager::callback(GameState initialGameState)
+{
+	// ToDo: Implement
+	std::cout << "Server has a new GameState!" << std::endl;
+	return initialGameState;
 }

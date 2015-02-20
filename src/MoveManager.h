@@ -12,6 +12,7 @@ class MinMaxAlgorithm;	// ToDo: Inlude real algorithm
 class MoveManager
 {
 public:
+	MoveManager(int nbCores);
 	MoveManager(std::shared_ptr<Node> root, int nbCores);
 	void setSocket(std::unique_ptr<GameSocket> socket); // Set socket to be able to talk to it
 	void benchmark(); // Benchmark the current hardware
@@ -21,6 +22,9 @@ public:
 	bool stillWork(); // Return true is the worker thread should worker
 	float timeRemaining(); // Time remaining before having to give the result or going to next phase
 	std::shared_ptr<Node> getWork(); // Get a work item
+
+	// Callback for the server
+	GameState callback(GameState);
 protected:
 	unsigned int cores;
 	std::unique_ptr<GameSocket> socket;

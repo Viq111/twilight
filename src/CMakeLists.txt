@@ -1,5 +1,5 @@
 # Find Boost packages
-find_package( Boost COMPONENTS chrono iostreams thread )
+find_package( Boost COMPONENTS chrono iostreams system thread )
 
 if(Boost_FOUND)
 

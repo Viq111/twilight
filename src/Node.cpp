@@ -17,6 +17,13 @@ Node::Node(){
     scoreNotGet = true;
 }
 
+Node::Node(GameState game)
+{
+	// ToDo: Inplement
+	childNotGet = true;
+	scoreNotGet = true;
+}
+
 int Node::getScore(){  //temp : création de score moins couteuse que rand(), mais un suffisament aléatoire pour nous (j'ai utilisé un truc basé sur la conjecture de Syracuse et commencant arbitrairement à 14 et qui passe au suivant avant de boucler...)
     if (scoreNotGet){
         scoreNotGet = false;

@@ -42,5 +42,6 @@ script:
   - mkdir build && cd build
   - cmake ..
   - make
+  - ./twilight benchmark
 os:
   - linux

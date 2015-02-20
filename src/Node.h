@@ -1,5 +1,8 @@
-#pragma once
+#ifndef INCLUDE_NODE
+#define INCLUDE_NODE
+
 #include <vector>
+#include "GameState.h"
 
 class Node
 {
@@ -14,6 +17,7 @@ class Node
 public:
     Node(int parentScore);              //provisoir pour des tests (tant qu'on a pas un implémente un calcul du score avec l'AS)
     Node();
+	Node(GameState);
     ~Node();
     int addChildren(Node* child);
     std::vector<Node*> getChildren();
@@ -24,3 +28,4 @@ public:
     int getBeta(){ return beta; };
 };
 
+#endif

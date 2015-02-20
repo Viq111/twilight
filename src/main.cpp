@@ -31,7 +31,8 @@ int main(int argc, char* argv[])
 	if (((params.size() == 2) && params[1] == "benchmark") || params.size() == 1)
 	{
 		std::cout << "Benchmarking ..." << std::endl;
-		std::shared_ptr<Node> root = std::make_shared<Node>(); // Empty Node
+		GameState::setBoardSize(10, 15); // Set default board size
+		std::shared_ptr<Node> root = std::make_shared<Node>(GameState()); // Empty Node
 		MoveManager mm(root, nbCores);
 		mm.benchmark();
 		return 0;
@@ -49,12 +50,9 @@ int main(int argc, char* argv[])
 	// First create a connetion to the server
 	std::unique_ptr<GameSocket> socket = make_unique<GameSocket>();
 	socket->connect(ip, port, "Edward");
-	GameState initialState = socket->getNewGameState(); // Get initial State
-	// Then create the root of the tree
-	std::shared_ptr<Node> root = std::make_shared<Node>(initialState);
 
 	// Create the MoveManager with the root node
-	MoveManager mm(root, nbCores);
+	MoveManager mm(nbCores);
 	mm.setSocket(std::move(socket));
 
 	mm.mainloop();

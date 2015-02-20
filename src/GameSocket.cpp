@@ -6,6 +6,8 @@ void GameSocket::connect(std::string ip, int port, std::string name)
 {
 	// ToDo: Connect to the server and set the name
 	// Create a thread to listen for answer and fire callback
+	// When fiering callback, the return Node is the move
+	// Compare to old Node and check where we moved
 	// If callback is nullptr, do nothing (or maybe print)
 }
 

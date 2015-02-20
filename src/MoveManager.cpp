@@ -28,7 +28,7 @@ bool MoveManager::stillWork() // Still work to do ?
 	return true;
 }
 
-GameState MoveManager::callback(GameState initialGameState)
+std::shared_ptr<Node> MoveManager::callback(std::shared_ptr<Node> initialGameState)
 {
 	// ToDo: Implement
 	std::cout << "Server has a new GameState!" << std::endl;

@@ -2,7 +2,7 @@
 #define INCLUDE_NODE
 
 #include <vector>
-#include <GameState.h>
+#include "GameState.h"
 
 class Node
 {

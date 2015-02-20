@@ -3,9 +3,9 @@
 
 #include <string>
 #include <memory>
-#include "GameState.h"
+#include "Node.h"
 
-typedef GameState(*PlayCallback)(GameState); // Define a callback which take the new GameState and return the played moved (GameState)
+typedef std::shared_ptr<Node>(*PlayCallback)(std::shared_ptr<Node>); // Define a callback which take the new GameState and return the played moved (GameState)
 
 class GameSocket
 {
@@ -19,7 +19,7 @@ public:
 	void close(); // Close the socket
 protected:
 	std::string myName;
-	GameState currentGameState;
+	std::shared_ptr<Node> currentNode;
 	PlayCallback callback;
 };
 

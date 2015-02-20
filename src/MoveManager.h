@@ -24,7 +24,7 @@ public:
 	std::shared_ptr<Node> getWork(); // Get a work item
 
 	// Callback for the server
-	GameState callback(GameState);
+	std::shared_ptr<Node> callback(std::shared_ptr<Node>);
 protected:
 	unsigned int cores;
 	std::unique_ptr<GameSocket> socket;

@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 
+// Represent a group of creature with its position and size
 struct Group {
     char x;
     char y;
@@ -29,34 +30,32 @@ enum Direction {
     DownLeft
 };
 
+// Represent a current board
 class GameState {
 public:
-    static char n;
-    static char m;
-    static void setBoardSize(char n, char m);
-    
-    std::vector<Group> allies;
+	// Size is static because it should not change during the game
+    static unsigned int n;
+	static unsigned int m;
+    static void setBoardSize(unsigned int n, unsigned int m);
+
+	// Constructor
+	GameState(); // Create an empty game for Benchmarking
+	GameState(	std::vector<Group> allies,
+				std::vector<Group> humans,
+				std::vector<Group> enemies);
+
+	const unsigned int alliesCount;
+	const unsigned int humansCount;
+	const unsigned int enemiescount;
+	std::vector<Group> allies;
     const std::vector<Group> humans;
     std::vector<Group> enemies;
-    
-    const char alliesCount;
-    const char humansCount;
-    const char enemiescount;
-    
-	GameState(); // Empty game
-    GameState(std::vector<Group> allies,
-              std::vector<Group> humans,
-              std::vector<Group> enemies);
-    
-    void moveGroup (char index, Direction dir, char count);
-    
-    std::vector<std::shared_ptr<GameState>> getChildren();
-    
-    void print();
 
+    std::vector<std::unique_ptr<GameState>> getChildren();
 private:
     void tryDirection(std::shared_ptr<GameState> head, Direction dir, char index, std::vector<std::shared_ptr<GameState>> children, char popMax);
     void getChildrenRecursive(char index, GameState head, std::vector<std::shared_ptr<GameState>> children);
+	void moveGroup(char index, Direction dir, char count);
 };
 
 #endif

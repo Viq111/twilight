@@ -6,44 +6,15 @@ Download Boost source code. As far as you can, take the 1.57.0 version of Boost 
 
 Unzip it in a folder whose path doesn't contain any accent (otherwise, it can't compile correctly). Open a command line and get in Boost folder.
 
+    cd tools/build
     bootstrap
-    b2 -j4 --toolset=msvc-12.0 address-model=64 --build-type=complete --with-chrono --with-iostreams --with-thread --with-date_time --prefix=build -q install
+    b2 install --prefix=/path/to/boost_1_57_0
 
-Then we have to change some few things in build folder. The build folder contains two directories : `include` and `lib`. You should have this structure :
+Add `/path/to/boost_1_57_0/bin` to the `PATH` environment variable. Then, go back in Boost folder.
 
-```
-├── boost_1_57_0
-│   ├── ...
-|   ├── ...
-│   ├── build
-│   │   ├── include
-│   │   │   ├── boost-1_57
-│   │   │   │   ├── boost
-│   │   │   │   │   ├── ...
-│   │   │   │   │   ├── ...
-│   │   │   │   │   ├── version.hpp
-│   │   │   │   │   ├── ...
-│   │   ├── lib
-│   ├── ...
-```
+    b2 -j4 --toolset=msvc --build-type=complete --with-chrono --with-iostreams --with-thread --with-date_time stage
 
-You need to change the structure in order to obtain this one :
-
-```
-├── boost_1_57_0
-│   ├── ...
-|   ├── ...
-│   ├── build
-│   │   ├── boost
-│   │   |   ├── ...
-│   │   |   ├── ...
-│   │   │   ├── version.hpp
-│   │   │   ├── ...
-│   │   ├── lib
-│   ├── ...
-```
-
-Then, an environment variable `BOOST_ROOT` needs to be created whose value is `/path/to/boost_1_57_0/build`. You can even delete `boost_1_57_0` folder until you keep `BOOST_ROOT` pointing at your build directory.
+Then, an environment variable `BOOST_ROOT` needs to be created whose value is `/path/to/boost_1_57_0`.
 
 ## Installing CMake
 

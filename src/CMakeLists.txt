@@ -1,5 +1,8 @@
+# Use static Boost libraries to link
+set(Boost_USE_STATIC_LIBS  ON)
+
 # Find Boost packages
-find_package( Boost COMPONENTS chrono iostreams system thread )
+find_package( Boost COMPONENTS chrono iostreams system thread date_time )
 
 if(Boost_FOUND)
 

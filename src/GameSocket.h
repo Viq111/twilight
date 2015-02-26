@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <boost/asio.hpp>
 #include "Node.h"
 
 typedef std::shared_ptr<Node>(*PlayCallback)(std::shared_ptr<Node>); // Define a callback which take the new GameState and return the played moved (GameState)

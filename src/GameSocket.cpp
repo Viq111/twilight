@@ -1,4 +1,5 @@
 #include "GameSocket.h"
+#include <iostream>
 
 GameSocket::GameSocket(PlayCallback c) : myName("Edward"), callback(c) {}
 
@@ -9,6 +10,21 @@ void GameSocket::connect(std::string ip, int port, std::string name)
 	// When fiering callback, the return Node is the move
 	// Compare to old Node and check where we moved
 	// If callback is nullptr, do nothing (or maybe print)
+    boost::asio::io_service io_service;
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
+    boost::asio::ip::tcp::socket socket(io_service);
+
+    boost::system::error_code error;
+    socket.connect(endpoint, error);
+    if (error)
+    {
+        socket.close();
+        std::cerr << "[FATAL] Couldn't connect to remote server";
+    }
+    else
+    {
+        std::cout << "[INFO] Connection to remote server succeeded";
+    }
 }
 
 void GameSocket::setCallback(PlayCallback c)

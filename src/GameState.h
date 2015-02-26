@@ -9,6 +9,7 @@
 #ifndef INCLUDE_GAMESTATE
 #define INCLUDE_GAMESTATE
 
+#include <cstdlib>
 #include <vector>
 #include <memory>
 

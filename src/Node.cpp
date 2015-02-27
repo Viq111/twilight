@@ -10,11 +10,12 @@ Node::Node(){
     scoreNotGet = true;
 }
 
-Node::Node(GameState game)
+Node::Node(std::unique_ptr<GameState> game_)
 {
 	// ToDo: Implement
 	childNotGet = true;
 	scoreNotGet = true;
+    game = (std::move(game_));
 }
 
 int Node::getScore(){

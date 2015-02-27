@@ -12,18 +12,36 @@ void GameSocket::connect(std::string ip, int port, std::string name)
 	// If callback is nullptr, do nothing (or maybe print)
     boost::asio::io_service io_service;
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
-    boost::asio::ip::tcp::socket socket(io_service);
+    socket = std::make_unique<boost::asio::ip::tcp::socket>(io_service);
 
     boost::system::error_code error;
-    socket.connect(endpoint, error);
+    std::cout << "Hello" << socket.get() << std::endl;
+    socket->connect(endpoint, error);
     if (error)
     {
-        socket.close();
+        this->socket->close();
         std::cerr << "[FATAL] Couldn't connect to remote server";
     }
     else
     {
+        this->socket->send(boost::asio::buffer("NME" + myName));
+        setup();
         std::cout << "[INFO] Connection to remote server succeeded";
+    }
+}
+
+void GameSocket::setup()
+{
+//    this->socket.async_receive(boost::asio::buffer(receiveBuffer, 128), boost::bind(&GameSocket::handler_receive, this, boost::asio::placeholders::error));
+}
+
+void GameSocket::handler_receive(const boost::system::error_code& error)
+{
+    if (!error)
+    {
+        // Get 3 letters code from receive buffer
+        std::string code(receiveBuffer, receiveBuffer + 2);
+        std::cout << code << std::endl;
     }
 }
 

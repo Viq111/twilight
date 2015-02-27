@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Benchmarking ..." << std::endl;
 		GameState::setBoardSize(10, 15); // Set default board size
-		std::shared_ptr<Node> root = std::make_shared<Node>(GameState()); // Empty Node
+		std::shared_ptr<Node> root = std::make_shared<Node>(std::make_unique<GameState>()); // Empty Node
 		MoveManager mm(root, nbCores);
 		mm.benchmark();
 		return 0;

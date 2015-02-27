@@ -2,15 +2,8 @@
 #include <stdlib.h>
 #include <algorithm>
 
-int Node::currentSyracusNumber = 14;
+int Node::currentSyracusNumber = 14;                 //temp
 int Node::currentClassScore = currentSyracusNumber;  //temp
-
-Node::Node(int parentScore)  //temp
-{
-    childNotGet = true;
-    scoreNotGet = true;
-    score = parentScore + rand() % 100 - 50;
-}
 
 Node::Node(){
     childNotGet = true;
@@ -19,14 +12,16 @@ Node::Node(){
 
 Node::Node(GameState game)
 {
-	// ToDo: Inplement
+	// ToDo: Implement
 	childNotGet = true;
 	scoreNotGet = true;
 }
 
-int Node::getScore(){  //temp : création de score moins couteuse que rand(), mais un suffisament aléatoire pour nous (j'ai utilisé un truc basé sur la conjecture de Syracuse et commencant arbitrairement à 14 et qui passe au suivant avant de boucler...)
+int Node::getScore(){
     if (scoreNotGet){
         scoreNotGet = false;
+
+        //temp : création de score moins couteuse que rand(), mais un suffisament aléatoire pour nous (j'ai utilisé un truc basé sur la conjecture de Syracuse et commencant arbitrairement à 14 et qui passe au suivant avant de boucler...)
         if (currentClassScore == 1){
             currentClassScore = currentSyracusNumber;
         }
@@ -40,7 +35,7 @@ int Node::getScore(){  //temp : création de score moins couteuse que rand(), mai
     return score; 
 }
 
-int Node::addChildren(Node* child)
+int Node::addChild(Node* child)
 {
     children.push_back(child);
     return 0;

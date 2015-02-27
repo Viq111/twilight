@@ -1,5 +1,6 @@
 #include "GameSocket.h"
 #include <iostream>
+#include "standardFunctions.h"
 
 GameSocket::GameSocket(PlayCallback c) : myName("Edward"), callback(c) {}
 
@@ -10,9 +11,8 @@ void GameSocket::connect(std::string ip, int port, std::string name)
 	// When fiering callback, the return Node is the move
 	// Compare to old Node and check where we moved
 	// If callback is nullptr, do nothing (or maybe print)
-    boost::asio::io_service io_service;
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
-    socket = std::make_unique<boost::asio::ip::tcp::socket>(io_service);
+    socket = make_unique<boost::asio::ip::tcp::socket>(io_service);
 
     boost::system::error_code error;
     std::cout << "Hello" << socket.get() << std::endl;

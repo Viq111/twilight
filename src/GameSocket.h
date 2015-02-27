@@ -27,6 +27,7 @@ protected:
     char sendBuffer[128];
     char receiveBuffer[128];
 
+    boost::asio::io_service io_service;
     std::unique_ptr<boost::asio::ip::tcp::socket> socket = nullptr;
 	std::string myName;
 	std::shared_ptr<Node> currentNode;

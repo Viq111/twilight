@@ -19,6 +19,44 @@ int getNbCores()
 	return nbCores;
 }
 
+void testGameState()
+{
+	GameState::n = 10;
+    GameState::m = 10;
+
+    auto allies = std::vector<Group>();
+    auto humans = std::vector<Group>();
+    auto enemies = std::vector<Group>();
+
+    std::cout << "* Deux exemples en 1d (la 2d fonctionne), montrant ce qui marche et ce qui déconne. *" << std::endl;
+
+    std::cout << "* Premier exemple où cela fonctionne *" << std::endl;
+
+    Group initialGroup1 = {3, 2, 10}; // {x, y, pop}
+    Group initialGroup2 = {1, 9, 10}; // {x, y, pop}
+    Group initialGroup3 = {3, 9, 10}; // {x, y, pop}
+    allies.push_back(initialGroup1);
+    allies.push_back(initialGroup2);
+    allies.push_back(initialGroup3);
+    GameState* initial = new GameState(allies, humans, enemies);
+
+    std::cout << "Situation de départ : " << std::endl;
+    initial->print();
+
+
+    std::cout << "Enfants : " << std::endl;
+
+    clock_t t;
+    t = clock();
+    auto children = initial->getChildren();
+    t = clock() - t;
+//    for (GameState* child : *children) {
+//        child->print();
+//    }
+    std::cout << "nb d'enfants : " << children->size() << std::endl;
+    std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
 	// Parse the arguments
@@ -35,6 +73,11 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Node> root = std::make_shared<Node>(GameState()); // Empty Node
 		MoveManager mm(root, nbCores);
 		mm.benchmark();
+		return 0;
+	}
+	if (((params.size() == 2) && params[1] == "testGameState"))
+	{
+		testGameState();
 		return 0;
 	}
 	// Check number of arguments

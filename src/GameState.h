@@ -41,6 +41,11 @@ public:
 	static int m;
     // Multiplication factor used in all scoring operations
     static int opsFactor;
+    // Weights of the different parts of the score
+    static int populationCountsWeight;
+    static int humanProximityWeight;
+    static int enemyProximityWeight;
+
     static void setBoardSize(int n, int m);
 
 	// Constructor

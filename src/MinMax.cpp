@@ -46,7 +46,7 @@ Node* MinMax::testTree(int depth, int nbChildMin, int nbChildRange){
             int nbChild = nbChildMin + rand() % nbChildRange;
             for (int k = 0; k < nbChild; k++){
                 Node* newLeaf = new Node();  //new Node(leaves[j]->getScore());
-                leaves[j]->addChildren(newLeaf);
+                leaves[j]->addChild(newLeaf);
                 newLeaves.push_back(newLeaf);
                 nbNodes++;
             }

@@ -15,7 +15,6 @@ void GameSocket::connect(std::string ip, int port, std::string name)
     socket = make_unique<boost::asio::ip::tcp::socket>(io_service);
 
     boost::system::error_code error;
-    std::cout << "Hello" << socket.get() << std::endl;
     socket->connect(endpoint, error);
     if (error)
     {
@@ -24,15 +23,21 @@ void GameSocket::connect(std::string ip, int port, std::string name)
     }
     else
     {
-        this->socket->send(boost::asio::buffer("NME" + myName));
+        char* data = new char[myName.size() + 4];
+        strncpy(data, "NME", 3);
+        data[3] = (char)myName.size();
+        strncpy(data + 4, myName.c_str(), myName.size());
+        std::cout << data << std::endl;
+        this->socket->send(boost::asio::buffer(data, myName.size() + 4));
+        std::cout << "[INFO] Connection to remote server succeeded" << std::endl;
         setup();
-        std::cout << "[INFO] Connection to remote server succeeded";
     }
 }
 
 void GameSocket::setup()
 {
-//    this->socket.async_receive(boost::asio::buffer(receiveBuffer, 128), boost::bind(&GameSocket::handler_receive, this, boost::asio::placeholders::error));
+    socket->async_receive(boost::asio::buffer(receiveBuffer, 4), boost::bind(&GameSocket::handler_receive, this, boost::asio::placeholders::error));
+    io_service.run();
 }
 
 void GameSocket::handler_receive(const boost::system::error_code& error)
@@ -40,8 +45,12 @@ void GameSocket::handler_receive(const boost::system::error_code& error)
     if (!error)
     {
         // Get 3 letters code from receive buffer
-        std::string code(receiveBuffer, receiveBuffer + 2);
+        std::string code(receiveBuffer, receiveBuffer + 3);
         std::cout << code << std::endl;
+        setup();
+    }
+    else {
+        std::cout << "Reception failed !" << std::endl;
     }
 }
 

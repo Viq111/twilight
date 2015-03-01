@@ -5,9 +5,9 @@
 int GameState::n = 0;
 int GameState::m = 0;
 int GameState::opsFactor = 60;
-int GameState::populationCountsWeight = 1;
-int GameState::humanProximityWeight = 1;
-int GameState::enemyProximityWeight = 1;
+int GameState::populationCountsWeight = 30;
+int GameState::humanProximityWeight = 20;
+int GameState::enemyProximityWeight = 20;
 
 void GameState::setBoardSize(int n_, int m_)
 {
@@ -32,24 +32,24 @@ GameState::GameState(
     }
 }
 
-// TODO: add coefficients
+// TODO: add coefficients (by machine learning or manual benchmarking)
 int GameState::getScore() {
 	int score = 0;
 
 	// Number of allies and enemies
-	score += opsFactor * populationCountsWeight * (alliesCount - enemiesCount) / (alliesCount + enemiesCount);
+    score += (opsFactor * populationCountsWeight * (alliesCount - enemiesCount)) / (alliesCount + enemiesCount);
 
 	// Proximity to human groups
 	for (auto&& human: humans) {
 		for (auto&& ally: allies) {
 			if (human.count <= ally.count) {
-				score += opsFactor * humanProximityWeight * human.count / distance(ally, human);
-			}
+                score += (opsFactor * humanProximityWeight * human.count) / distance(ally, human);
+            }
 		}
 		for (auto&& enemy: enemies) {
 			if (human.count <= enemy.count) {
-				score += -opsFactor * humanProximityWeight * enemy.count / distance(enemy, human);
-			}
+                score += -(opsFactor * humanProximityWeight * enemy.count) / distance(enemy, human);
+            }
 		}
 	}
 
@@ -57,11 +57,11 @@ int GameState::getScore() {
 	for (auto&& ally: allies) {
 		for (auto&& enemy: enemies) {
 			if (3 * enemy.count <= 2 * ally.count) {
-				score += opsFactor * enemyProximityWeight * enemy.count / distance(enemy, ally);
-			}
+                score += (opsFactor * enemyProximityWeight * enemy.count) / distance(enemy, ally);
+            }
 			else if (3 * ally.count <= 2 * enemy.count) {
-				score += -opsFactor * enemyProximityWeight * ally.count / distance(enemy, ally);
-			}
+                score += -(opsFactor * enemyProximityWeight * ally.count) / distance(enemy, ally);
+            }
 		}
 	}
 
@@ -86,19 +86,23 @@ void GameState::print(){
                     std::cout << "A ";
                     std::cout << std::to_string(group.count) << " ";
                     empty = false;
+                    break;
                 }
             }
 
-            for (Group group : enemies) {
-                if (group.x == x && group.y == y) {
-                    std::cout << "E ";
-                    std::cout << std::to_string(group.count) << " ";
-                    empty = false;
+            if (!empty){
+                for (Group group : enemies) {
+                    if (group.x == x && group.y == y) {
+                        std::cout << "E ";
+                        std::cout << std::to_string(group.count) << " ";
+                        empty = false;
+                        break;
+                    }
                 }
             }
 
             if (empty) {
-                std::cout << "  .  ";
+                std::cout << ".";
             }
             //std::cout << "\t";
         }

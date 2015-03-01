@@ -14,6 +14,8 @@
 #include <iostream>
 #include <ctime>
 #include <memory>
+#include <algorithm>
+#include <string>
 
 // Represent a group of creatures
 struct Group {

@@ -21,7 +21,13 @@ public:
 	void close(); // Close the socket
 protected:
     void setup();
-    void handler_receive(const boost::system::error_code& error);
+    void receive();
+    void sendName();
+    void sendMovement();
+    void handler_receive_code(const boost::system::error_code& error);
+    void handler_receive_size(const boost::system::error_code& error, const std::string& code);
+    void handler_receive_data(const boost::system::error_code& error, const std::string& code, const int size);
+    void handler_send(const boost::system::error_code& error);
 
     //Buffers
     char sendBuffer[128];

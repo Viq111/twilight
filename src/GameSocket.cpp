@@ -32,13 +32,26 @@ void GameSocket::setup()
 
 void GameSocket::sendName()
 {
-    char* data = new char[myName.size() + 4];   // Sending buffer
+    std::cout << "NME" << std::endl;
+    std::cout << myName << std::endl;
+    std::cout << std::endl;
 
-    strncpy(data, "NME", 3);   // The code "NME" uses the first three bytes
-    data[3] = (char)myName.size();   // The size of the name uses the 4th byte
-    strncpy(data + 4, myName.c_str(), myName.size());   // We copy the name after the 4th byte in the buffer
+    strncpy(sendBuffer, "NME", 3);   // The code "NME" uses the first three bytes
+    sendBuffer[3] = (char)myName.size();   // The size of the name uses the 4th byte
+    strncpy(sendBuffer + 4, myName.c_str(), myName.size());   // We copy the name after the 4th byte in the buffer
 
-    socket->send(boost::asio::buffer(data, myName.size() + 4));
+    socket->send(boost::asio::buffer(sendBuffer, myName.size() + 4));
+}
+
+void GameSocket::sendMovement()
+{
+    std::cout << "MOV" << std::endl;
+    std::cout << std::endl;
+
+    strncpy(sendBuffer, "MOV", 3);
+    sendBuffer[3] = 0;
+
+    socket->send(boost::asio::buffer(sendBuffer, 4));
 }
 
 void GameSocket::receive()
@@ -94,7 +107,9 @@ void GameSocket::handler_receive_size(const boost::system::error_code& error, co
         }
         else if (code == "UPD")
         {
+            timer = make_unique<boost::asio::deadline_timer>(io_service, boost::posix_time::milliseconds(2000));
             socket->async_receive(boost::asio::buffer(receiveBuffer + 4, 5 * size), boost::bind(&GameSocket::handler_receive_data, this, boost::asio::placeholders::error, code, size));
+            timer->async_wait(boost::bind(&GameSocket::sendMovement, this));
         }
         else if (code == "MAP")
         {
@@ -184,7 +199,7 @@ void GameSocket::handler_receive_data(const boost::system::error_code& error, co
         receive();
     }
     else {
-        std::cout << "Reception failed !" << std::endl;
+        std::cerr << "[FATAL] Reception failed !" << std::endl;
     }
 }
 

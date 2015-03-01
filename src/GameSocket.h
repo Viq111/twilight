@@ -32,7 +32,8 @@ protected:
 
     boost::asio::io_service io_service;
     std::unique_ptr<boost::asio::ip::tcp::socket> socket = nullptr;
-	std::string myName;
+    std::unique_ptr<boost::asio::deadline_timer> timer = nullptr;
+    std::string myName;
 	std::shared_ptr<Node> currentNode;
 	PlayCallback callback;
 };

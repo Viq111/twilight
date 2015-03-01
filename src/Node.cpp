@@ -35,12 +35,12 @@ int Node::getScore(){
     return score; 
 }
 
-int Node::addChild(Node* child)
+int Node::addChild(std::shared_ptr<Node> child)
 {
     children.push_back(child);
     return 0;
 }
-
+/*
 Node::~Node()
 {
     if (children.size() > 0){
@@ -48,34 +48,34 @@ Node::~Node()
             delete(children[i]);
         }
     }
-}
+}*/
 
-bool comparaisonInverse(Node* first, Node* second)  //temp
+bool comparaisonInverse(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
 {
     return (first->getScore() > second->getScore());
 }
 
-bool comparaison(Node* first, Node* second)  //temp
+bool comparaison(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
 {
     return (first->getScore() < second->getScore());
 }
 
-std::vector<Node*> Node::getChildren()
+std::vector<std::shared_ptr<Node>> Node::getChildren()
 {
     if (childNotGet){
         childNotGet = false;
-        // To add : on récupère les enfants ici et on les ajoutent à children
+        // To do : on récupère les enfants ici et on les ajoutent à children
     }
     return children;
 }
 
-std::vector<Node*> Node::getSortedChildren()  //temp
+std::vector<std::shared_ptr<Node>> Node::getSortedChildren()  //temp
 {
     std::sort(children.begin(), children.end(), comparaison);
     return children;
 }
 
-std::vector<Node*> Node::getReverseSortedChildren()  //temp
+std::vector<std::shared_ptr<Node>> Node::getReverseSortedChildren()  //temp
 {
     std::sort(children.begin(), children.end(), comparaisonInverse);
     return children;

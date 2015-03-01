@@ -2,11 +2,12 @@
 #define INCLUDE_NODE
 
 #include <vector>
+#include <memory>
 #include "GameState.h"
 
 class Node
 {
-    std::vector<Node*> children;
+    std::vector<std::shared_ptr<Node>> children;
     int score;
     int alpha;
     int beta;
@@ -18,10 +19,10 @@ public:
     Node();
 	Node(GameState);
     ~Node();
-    int addChild(Node* child);
-    std::vector<Node*> getChildren();
-    std::vector<Node*> getSortedChildren();
-    std::vector<Node*> getReverseSortedChildren();
+    int addChild(std::shared_ptr<Node> child);
+    std::vector<std::shared_ptr<Node>> getChildren();
+    std::vector<std::shared_ptr<Node>> getSortedChildren();
+    std::vector<std::shared_ptr<Node>> getReverseSortedChildren();
     int getScore();
     int getAlpha() { return alpha; };
     int getBeta(){ return beta; };

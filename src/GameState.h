@@ -16,6 +16,7 @@
 #include <memory>
 #include <algorithm>
 #include <string>
+#include <queue>
 
 // Represent a group of creatures
 struct Group {
@@ -67,9 +68,16 @@ public:
 				std::vector<Group> humans,
 				std::vector<Group> enemies);
 
+    GameState(std::vector<Group> allies,
+        std::vector<Group> humans,
+        std::vector<Group> enemies,
+        int alliesCount,
+        int humansCount,
+        int enemiesCount);
+
     // Number of _groups_ for each race
 	int alliesCount;
-	const int humansCount;
+	int humansCount;
 	int enemiesCount;
 
     // Listes of groups of each race
@@ -99,10 +107,12 @@ private:
 
     // Compute all the possible evolution of a given group
     // its a list of moves : for instance two guys go right, three go down
-    std::vector<std::vector<Move>> possibleEvolution (std::shared_ptr<Group> group);
+    // [WARNING] THE "NO ONE MOVES" POSSIBILITY MUST NOT BE CONSIDERED
+    std::vector<Move> possibleEvolution (std::shared_ptr<Group> group);
 
-    // Apply an evolution to current GameState to create a new one
-    std::shared_ptr<GameState> applyEvolution(std::vector<std::vector<Move>> evolution);
+    // Apply an evolution (or a list of evolutions) to a given copied GameState to create a new one
+    std::shared_ptr<GameState> applyEvolution(GameState, Move evolution);
+    std::shared_ptr<GameState> applyEvolution(GameState, std::vector<Move> evolution);
 
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);

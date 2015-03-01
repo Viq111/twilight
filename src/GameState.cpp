@@ -68,6 +68,30 @@ int GameState::getScore() {
 	return score;
 }
 
+std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(){
+    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> results;
+
+    for (int i = 0; i < allies.size(); i++){
+        const int resultSize = results->size();
+        std::vector<Move> possibleMoves = possibleEvolution(std::make_shared<Group>(allies[i]));
+
+        // particular case "no one moved yet" (so we have to move). "this" is the root of it.
+        for (int k = 0; k < possibleMoves.size(); k++){
+            results->push_back(applyEvolution(*this, possibleMoves[k]));
+        }
+
+        // general case
+        for (int j = 0; j < resultSize; j++){
+            std::shared_ptr<GameState> currentState = results->at(j);
+            for (int k = 0; k < possibleMoves.size(); k++){
+                results->push_back(applyEvolution(*currentState, possibleMoves[k]));
+            }
+        }
+    }
+
+    return results;
+}
+
 int GameState::distance(const Group& group1, const Group& group2) {
 	return std::max(std::abs(group2.x - group1.x), std::abs(group2.y - group1.y));
 }

@@ -19,6 +19,7 @@ int getNbCores()
 	return nbCores;
 }
 
+/*
 void testGameState()
 {
 	GameState::n = 10;
@@ -48,14 +49,14 @@ void testGameState()
 
     clock_t t;
     t = clock();
-    auto children = initial->getChildren();
+    auto children = initial->getChild();
     t = clock() - t;
 //    for (GameState* child : *children) {
 //        child->print();
 //    }
     std::cout << "nb d'enfants : " << children->size() << std::endl;
     std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;
-}
+}*/
 
 int main(int argc, char* argv[])
 {
@@ -75,11 +76,11 @@ int main(int argc, char* argv[])
 		mm.benchmark();
 		return 0;
 	}
-	if (((params.size() == 2) && params[1] == "testGameState"))
+/*	if (((params.size() == 2) && params[1] == "testGameState"))
 	{
 		testGameState();
 		return 0;
-	}
+	}*/
 	// Check number of arguments
 	if (params.size() != 3)
 	{

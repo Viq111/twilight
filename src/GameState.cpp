@@ -68,7 +68,7 @@ int GameState::getScore() {
 	return score;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(){
+/*std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(){
     std::shared_ptr<std::vector<std::shared_ptr<GameState>>> results;
 
     for (int i = 0; i < allies.size(); i++){
@@ -90,7 +90,7 @@ std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(
     }
 
     return results;
-}
+}*/
 
 int GameState::distance(const Group& group1, const Group& group2) {
 	return std::max(std::abs(group2.x - group1.x), std::abs(group2.y - group1.y));

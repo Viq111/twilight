@@ -114,6 +114,7 @@ void GameSocket::handler_receive_data(const boost::system::error_code& error, co
         {
             char n = receiveBuffer[3];
             char m = receiveBuffer[4];
+            GameState::setBoardSize(n, m);
             std::cout << "Size : " << (int)n << " x " << (int)m << std::endl;
         }
         else if (code == "HUM")

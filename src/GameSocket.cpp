@@ -192,17 +192,6 @@ void GameSocket::setCallback(PlayCallback c)
 	callback = c;
 }
 
-bool GameSocket::isAlive()
-{
-	// ToDo: Check if the thread or connection is still alive
-	return true;
-}
-
-void GameSocket::join()
-{
-	// ToDo: Wait the thread
-}
-
 void GameSocket::close()
 {
     socket->close();

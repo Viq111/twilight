@@ -4,7 +4,7 @@ MinMax::MinMax()
 {
     srand(time(NULL));
     std::cout << "begin... " << std::endl;
-    std::shared_ptr<Node> testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 a 12 fils
+    std::shared_ptr<Node> testNode = testTree(6, 10, 3, std::make_shared<Node>());    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 a 12 fils
     int* count = new int(0);
     (*count) = 0;                           // compte le nombre de noeuds parcourus (interessant a comparer avec le nombre total de noeuds pour mesurer l'efficacite de alpha-beta)
     std::cout << "max value sur profondeur 1 : " << maxValue(testNode, -100000000, 100000000, 1, count) << std::endl;
@@ -28,9 +28,9 @@ MinMax::MinMax()
 }
 
 // cree un arbre de test
-std::shared_ptr<Node> MinMax::testTree(int depth, int nbChildMin, int nbChildRange){
+std::shared_ptr<Node> MinMax::testTree(int depth, int nbChildMin, int nbChildRange, std::shared_ptr<Node> rootNode){
     int nbNodes = 1;
-    std::shared_ptr<Node> root = std::make_shared<Node>(); //new Node(0);
+    std::shared_ptr<Node> root = rootNode;
     std::vector<std::shared_ptr<Node>> leaves;
     leaves.push_back(root);
     for (int i = 0; i < depth; i++){
@@ -80,4 +80,15 @@ int MinMax::minValue(std::shared_ptr<Node> current, int alpha, int beta, int dep
         }
     }
     return beta;
+}
+
+int MinMax::testNodePointersDesalocation(int nbIterations){
+    std::shared_ptr<Node> rootNode = std::make_shared<Node>();
+    for (int i = 0; i < nbIterations; i++){
+        rootNode = testTree(2, 150, 2, rootNode);
+        rootNode = rootNode->getChildren().at(0);
+        std::cout << i << std::endl;
+    }
+    system("PAUSE");
+    return 0;
 }

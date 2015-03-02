@@ -7,6 +7,7 @@
 #include "GameSocket.h"
 #include "MoveManager.h"
 #include "standardFunctions.h" // For make_unique
+#include "MinMax.h"
 
 int getNbCores()
 {

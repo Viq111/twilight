@@ -13,12 +13,13 @@
 
 class MinMax
 {
-	public:
-		MinMax();
+public:
+	MinMax();
+    static int testNodePointersDesalocation(int nbIterations);
 protected:
-    int minValue(std::shared_ptr<Node> current, int alpha, int beta, int depth, int* count);
-    int maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth, int* count);
-    std::shared_ptr<Node> testTree(int depth, int nbChildMin, int nbChildRange);
+    static int minValue(std::shared_ptr<Node> current, int alpha, int beta, int depth, int* count);
+    static int maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth, int* count);
+    static std::shared_ptr<Node> testTree(int depth, int nbChildMin, int nbChildRange, std::shared_ptr<Node> rootNode);
 };
 
 #endif

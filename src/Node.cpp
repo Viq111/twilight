@@ -40,15 +40,6 @@ int Node::addChild(std::shared_ptr<Node> child)
     children.push_back(child);
     return 0;
 }
-/*
-Node::~Node()
-{
-    if (children.size() > 0){
-        for (int i = 0; i < children.size(); i++){
-            delete(children[i]);
-        }
-    }
-}*/
 
 bool comparaisonInverse(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
 {

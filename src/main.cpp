@@ -3,7 +3,6 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-
 #include "GameSocket.h"
 #include "MoveManager.h"
 #include "standardFunctions.h" // For make_unique

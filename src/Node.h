@@ -18,7 +18,7 @@ class Node
 public:
     Node();
 	Node(GameState);
-    ~Node();
+    //~Node();
     int addChild(std::shared_ptr<Node> child);
     std::vector<std::shared_ptr<Node>> getChildren();
     std::vector<std::shared_ptr<Node>> getSortedChildren();

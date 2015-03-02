@@ -136,7 +136,7 @@ void GameState::print(){
 
 int GameState::racePopulation(std::vector<Group> race)
 {
-    int count;
+    int count = 0;
     for (Group group : race)
     {
         count += group.count;

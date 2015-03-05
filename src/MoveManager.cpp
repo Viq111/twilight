@@ -43,8 +43,8 @@ void MoveManager::_initThreads()
 	for (int i = 0; i < cores; i++)
 	{
 		std::string name = "Thread " + std::to_string(i);
-		//threads.push_back(make_unique<WorkerThread>(this, name));
-		threads.push_back(std::unique_ptr<WorkerThread>(new WorkerThread(name, this)));
+		std::unique_ptr<WorkerThread> thread(new WorkerThread(name, this));
+		threads.push_back(std::move(thread));
 	}
 	// Start them
 	for (int i = 0; i < cores; i++)
@@ -134,7 +134,7 @@ WorkerThread::WorkerThread(std::string n, MoveManager* p) : name(n), parent(p), 
 void WorkerThread::start()
 {
 	_stopping = false;
-	boost::thread thread(boost::bind(&WorkerThread::_launchLoop, this));
+	thread = std::unique_ptr<boost::thread>(new boost::thread(boost::bind(&WorkerThread::_launchLoop, this)));
 }
 void WorkerThread::stop()
 {

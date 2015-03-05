@@ -3,9 +3,10 @@
 
 #include <memory>
 #include <boost/thread.hpp>
-#include <GameSocket.h>
 
+#include "GameSocket.h"
 #include "Node.h"
+
 class MinMaxAlgorithm;	// ToDo: Inlude real algorithm
 
 

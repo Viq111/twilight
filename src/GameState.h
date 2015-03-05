@@ -38,8 +38,8 @@ enum Direction {
 };
 
 struct Move{
-     int x;
-     int y;
+     //int x;   //un move va toujours avec un groupe ? En tout cas, ca sera redondant sur la liste des moves possibles pour un groupe.
+     //int y;
      Direction dir;
      int count;
 };
@@ -108,7 +108,7 @@ private:
     // Compute all the possible evolution of a given group
     // its a list of moves : for instance two guys go right, three go down
     // [WARNING] THE "NO ONE MOVES" POSSIBILITY MUST NOT BE CONSIDERED
-    std::vector<Move> possibleEvolution (std::shared_ptr<Group> group);
+    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolution(std::shared_ptr<Group> group);
 
     // Apply an evolution (or a list of evolutions) to a given copied GameState to create a new one
     std::shared_ptr<GameState> applyEvolution(GameState, Move evolution);

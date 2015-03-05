@@ -92,7 +92,8 @@ int GameState::getScore() {
     return results;
 }*/
 
-std::vector<Move> GameState::possibleEvolution(std::shared_ptr<Group> group){
+std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> GameState::possibleEvolution(std::shared_ptr<Group> group){
+    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleMoves = std::make_shared<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>>();
 
     //find the available directions (not all directions are possible if the group is on a side of the map)
     std::vector<Direction> availableMoves;
@@ -130,7 +131,70 @@ std::vector<Move> GameState::possibleEvolution(std::shared_ptr<Group> group){
         }
     }
 
+    //implementation 1 : a group should not split in more than two sub-groups
+        //all the group moves
+    for (int i = 0; i < availableMoves.size(); i++){
+        std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+        std::shared_ptr<Move> theMove = std::make_shared<Move>();
+        theMove->count = group->count;
+        theMove->dir = availableMoves[i];
+        currentMove->push_back(theMove);
+        possibleMoves->push_back(currentMove);
+    }
 
+        //all the moves with a split in two different sized moving groups
+    for (int i = 0; i < ((group->count - 1) / 2); i++){
+        for (int j = 0; j < availableMoves.size(); j++){
+            for (int k = 0; k < availableMoves.size(); k++){
+                if (j != k){
+                    std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMoves = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+                    std::shared_ptr<Move> firstMove = std::make_shared<Move>();
+                    firstMove->count = i;
+                    firstMove->dir = availableMoves[j];
+                    currentMoves->push_back(firstMove);
+                    std::shared_ptr<Move> secondMove = std::make_shared<Move>();
+                    secondMove->count = (group->count - i);
+                    secondMove->dir = availableMoves[k];
+                    currentMoves->push_back(secondMove);
+                    possibleMoves->push_back(currentMoves);
+                }
+            }
+        }
+    }
+        //add possibility no moves for one of the two groups
+    for (int i = 0; i < group->count; i++){
+        for (int j = 0; j < availableMoves.size(); j++){
+            std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+            std::shared_ptr<Move> theMove = std::make_shared<Move>();
+            theMove->count = i;
+            theMove->dir = availableMoves[j];
+            currentMove->push_back(theMove);
+            possibleMoves->push_back(currentMove);
+        }
+    }
+        //all the split equally moves if there is an even number of people in the group (if done in the general case, it will be done two times, because of the case symmetry)
+    if ((group->count % 2) == 0){
+        int subGroupCount = (group->count) / 2;
+        for (int i = 0; i < availableMoves.size() - 1; i++){
+            for (int j = i; j < availableMoves.size(); j++){
+                if (i != j){
+                    std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMoves = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+                    std::shared_ptr<Move> firstMove = std::make_shared<Move>();
+                    firstMove->count = subGroupCount;
+                    firstMove->dir = availableMoves[i];
+                    currentMoves->push_back(firstMove);
+                    std::shared_ptr<Move> secondMove = std::make_shared<Move>();
+                    secondMove->count = subGroupCount;
+                    secondMove->dir = availableMoves[j];
+                    currentMoves->push_back(secondMove);
+                    possibleMoves->push_back(currentMoves);
+                }
+            }
+        }
+    }
+    //end of implementation 1
+
+    return possibleMoves;
 }
 
 int GameState::distance(const Group& group1, const Group& group2) {

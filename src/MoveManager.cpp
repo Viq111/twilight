@@ -1,6 +1,7 @@
 #include "MoveManager.h"
 #include <thread>
 #include <boost/chrono.hpp>
+#include "standardFunctions.h"
 
 int __getNbCores()
 {
@@ -43,8 +44,8 @@ void MoveManager::_initThreads()
 	for (int i = 0; i < cores; i++)
 	{
 		std::string name = "Thread " + std::to_string(i);
-		std::unique_ptr<WorkerThread> thread(new WorkerThread(name, this));
-		threads.push_back(std::move(thread));
+		// We need :: before make_unique because of argument-dependent lookup (see http://stackoverflow.com/questions/28521822/c11-14-make-unique-ambigious-overload-for-stdstring)
+		threads.push_back(::make_unique<WorkerThread>(name, this));
 	}
 	// Start them
 	for (int i = 0; i < cores; i++)
@@ -134,7 +135,7 @@ WorkerThread::WorkerThread(std::string n, MoveManager* p) : name(n), parent(p), 
 void WorkerThread::start()
 {
 	_stopping = false;
-	thread = std::unique_ptr<boost::thread>(new boost::thread(boost::bind(&WorkerThread::_launchLoop, this)));
+	thread = ::make_unique<boost::thread>(boost::bind(&WorkerThread::_launchLoop, this));
 }
 void WorkerThread::stop()
 {

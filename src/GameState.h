@@ -107,12 +107,10 @@ private:
 
     // Compute all the possible evolution of a given group
     // its a list of moves : for instance two guys go right, three go down
-    // [WARNING] THE "NO ONE MOVES" POSSIBILITY MUST NOT BE CONSIDERED
     std::vector<Move> possibleEvolution (std::shared_ptr<Group> group);
 
-    // Apply an evolution (or a list of evolutions) to a given copied GameState to create a new one
-    std::shared_ptr<GameState> applyEvolution(GameState, Move evolution);
-    std::shared_ptr<GameState> applyEvolution(GameState, std::vector<Move> evolution);
+    // Apply a list of evolutions to a given copied GameState to create a new one
+    std::shared_ptr<GameState> applyEvolution (std::vector<Move> evolutions);
 
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);

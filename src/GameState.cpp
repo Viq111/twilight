@@ -194,13 +194,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
     }
     //end of implementation 1
 
-<<<<<<< HEAD
-    std::vector<Move> availableMoves;
-    //TODO : generate and return the corrseponding moves
     return availableMoves;
-=======
-    return possibleMoves;
->>>>>>> 858fd5efcbff8e96e4c2e59c2197eb0b8539f630
 }
 
 int GameState::distance(const Group& group1, const Group& group2) {

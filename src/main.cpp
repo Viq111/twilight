@@ -1,31 +1,16 @@
 #include <memory>
 #include <string>
 #include <iostream>
-#include <thread>
 #include <vector>
 
 #include "GameSocket.h"
 #include "MoveManager.h"
 #include "standardFunctions.h" // For make_unique
 
-int getNbCores()
-{
-	unsigned int nbCores = std::thread::hardware_concurrency();
-	if (nbCores == 0)	// Couldn't determine the number of threads, use 2 by default
-	{
-		std::cerr << "[WARNING] Cannot find the real number of cores, using default 2" << std::endl;
-		nbCores = 2;
-	}
-	return nbCores;
-}
-
 int main(int argc, char* argv[])
 {
 	// Parse the arguments
 	std::vector<std::string> params(argv, argv + argc);
-
-	// Get cores
-	int nbCores = getNbCores();
 
 	// If params is benchmark, do it
 	if (((params.size() == 2) && params[1] == "benchmark") || params.size() == 1)
@@ -33,7 +18,7 @@ int main(int argc, char* argv[])
 		std::cout << "Benchmarking ..." << std::endl;
 		GameState::setBoardSize(10, 15); // Set default board size
 		std::shared_ptr<Node> root = std::make_shared<Node>(GameState()); // Empty Node
-		MoveManager mm(root, nbCores);
+		MoveManager mm(root);
 		mm.benchmark();
 		return 0;
 	}
@@ -52,9 +37,7 @@ int main(int argc, char* argv[])
 	socket->connect(ip, port, "Edward");
 
 	// Create the MoveManager with the root node
-	MoveManager mm(nbCores);
-	mm.setSocket(std::move(socket));
-
-	mm.mainloop();
+	MoveManager mm;
+	mm.mainloop(std::move(socket));
 	return 0;
 }

@@ -110,7 +110,7 @@ private:
     std::vector<Move> possibleEvolution (std::shared_ptr<Group> group);
 
     // Apply a list of evolutions to a given copied GameState to create a new one
-    std::shared_ptr<GameState> applyEvolution (std::vector<Move> evolutions);
+    std::shared_ptr<GameState> applyEvolutions (std::vector<Move> evolutions);
 
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);

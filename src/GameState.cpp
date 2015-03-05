@@ -92,7 +92,7 @@ int GameState::getScore() {
     return results;
 }*/
 
-std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> GameState::possibleEvolution(std::shared_ptr<Group> group){
+std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> GameState::possibleEvolutions(std::shared_ptr<Group> group){
     std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleMoves = std::make_shared<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>>();
 
     //find the available directions (not all directions are possible if the group is on a side of the map)
@@ -251,12 +251,59 @@ int GameState::racePopulation(std::vector<Group> race)
     return count;
 }
 
-GameState* applyEvolutions (std::vector<Move> evolutions, GameState* intial)
+GameState* GameState::applyEvolution (std::shared_ptr<Group> group, std::shared_ptr<std::vector<std::shared_ptr<Move>>> evolution, GameState* intial)
 {
     GameState* updatedState = new GameState(*intial);
 
-    //TODO apply evolution to updatedState
+    for (std::shared_ptr<Move> move : *evolution) {
+        int deltaX, deltaY;
+        switch (move->dir) {
+            case Right : deltaX = +1; deltaY = 0; break;
+            case Left : deltaX = -1; deltaY = 0; break;
+            case Up : deltaX = 0; deltaY = +1; break;
+            case Down : deltaX = 0; deltaY = -1; break;
+            case UpRight : deltaX = +1; deltaY = +1; break;
+            case UpLeft : deltaX = -1; deltaY = +1; break;
+            case DownRight : deltaX = +1; deltaY = -1; break;
+            case DownLeft : deltaX = -1; deltaY = -1; break;
+        }
 
+        int newX = group->x + deltaX;
+        int newY = group->y + deltaY;
+        std::shared_ptr<Group> targetGroup;
+
+        for (Group g : humans){
+            if (g.x == newX && g.y == newY) {
+                targetGroup = std::make_shared<Group>(g);
+                // TODO implement eating
+                break;
+            }
+        }
+
+        if (!targetGroup){
+            for (Group g : allies){
+                if (g.x == newX && g.y == newY) {
+                    targetGroup = std::make_shared<Group>(g);
+                    // TODO implement regroupment
+                    break;
+                }
+            }
+            if (!targetGroup){
+                for (Group g : enemies){
+                    if (g.x == newX && g.y == newY) {
+                        targetGroup = std::make_shared<Group>(g);
+                        // TODO implement fight
+                        break;
+                    }
+                }
+                if (!targetGroup){
+                    // TODO implement displacement
+                }
+            }
+        }
+        
+        
+    }
     return updatedState;
 }
 

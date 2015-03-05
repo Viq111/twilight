@@ -39,7 +39,7 @@ install:
   - rm boost.tar.bz2
   - export BOOST_ROOT=$(pwd)/boost
 script: 
-  - export CXXFLAGS="$CXXFLAGS -lpthread"
+  - export CXXFLAGS="$CXXFLAGS -lpthread -lrt"
   - mkdir build && cd build
   - cmake ..
   - make

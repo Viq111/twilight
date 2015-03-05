@@ -111,7 +111,7 @@ private:
     
 
     // Apply a list of evolutions to a given copied GameState to create a new one
-    std::shared_ptr<GameState> applyEvolution (std::vector<Move> evolutions);
+    GameState* applyEvolutions (std::vector<Move> evolutions, GameState* intial);
 
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);

@@ -96,38 +96,38 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
     std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleMoves = std::make_shared<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>>();
 
     //find the available directions (not all directions are possible if the group is on a side of the map)
-    std::vector<Direction> availableMoves;
+    std::vector<Direction> availableDirections;
     if (group->x == 1){
         if (group->y == 1){
-            availableMoves = { Right, Up, UpRight};
+            availableDirections = { Right, Up, UpRight};
         }
         else if (group->y == n){
-            availableMoves = { Right, Down, DownRight};
+            availableDirections = { Right, Down, DownRight};
         }
         else{
-            availableMoves = { Right, Up, Down, UpRight, DownRight };
+            availableDirections = { Right, Up, Down, UpRight, DownRight };
         }
     }
     else if (group->x == m){
         if (group->y == 1){
-            availableMoves = { Left, Up, UpLeft };
+            availableDirections = { Left, Up, UpLeft };
         }
         else if (group->y == m){
-            availableMoves = { Left, Down, DownLeft };
+            availableDirections = { Left, Down, DownLeft };
         }
         else{
-            availableMoves = { Left, Up, Down,UpLeft, DownLeft };
+            availableDirections = { Left, Up, Down,UpLeft, DownLeft };
         }
     }
     else{
         if (group->y == 1){
-            availableMoves = { Right, Left, Up, UpRight, UpLeft};
+            availableDirections = { Right, Left, Up, UpRight, UpLeft};
         }
         else if (group->y == m){
-            availableMoves = { Right, Left, Down, DownRight, DownLeft };
+            availableDirections = { Right, Left, Down, DownRight, DownLeft };
         }
         else{
-            availableMoves = { Right, Left, Up, Down, UpRight, UpLeft, DownRight, DownLeft };
+            availableDirections = { Right, Left, Up, Down, UpRight, UpLeft, DownRight, DownLeft };
         }
     }
 
@@ -194,7 +194,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
     }
     //end of implementation 1
 
-    return possibleMoves;
+    return availableMoves;
 }
 
 int GameState::distance(const Group& group1, const Group& group2) {
@@ -248,3 +248,13 @@ int GameState::racePopulation(std::vector<Group> race)
     }
     return count;
 }
+
+GameState* applyEvolutions (std::vector<Move> evolutions, GameState* intial)
+{
+    GameState* updatedState = new GameState(*intial);
+
+    //TODO apply evolution to updatedState
+
+    return updatedState;
+}
+

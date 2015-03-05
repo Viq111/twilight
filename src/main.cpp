@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include "GameState.h"
 #include "GameSocket.h"
 #include "MoveManager.h"
 #include "standardFunctions.h" // For make_unique
@@ -56,6 +57,26 @@ void testGameState()
 //    }
     std::cout << "nb d'enfants : " << children->size() << std::endl;
     std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;
+}*/
+
+/*
+int testGameStatePossibleEvolution(){
+
+    GameState* test = new GameState();
+    std::shared_ptr<Group> g = std::make_shared<Group>();
+    g->x = 5;
+    g->y = 5;
+    g->hasAlreadyMoved = false;
+
+    std::cout << "before" << std::endl;
+    for (int i = 2; i < 10; i++){
+        g->count = i;
+        std::cout << "for " << g->count << " persons in the group, there are " << (test->possibleEvolution(g))->size() << " possible moves : " << (((test->possibleEvolution(g))->size()) / i) << std::endl;
+        std::cout << "after" << std::endl;
+    }
+    system("PAUSE");
+
+    return 0;
 }*/
 
 int main(int argc, char* argv[])

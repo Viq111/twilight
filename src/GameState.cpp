@@ -2,8 +2,8 @@
 #include "standardFunctions.h"
 
 // Default board size
-int GameState::n = 0;
-int GameState::m = 0;
+int GameState::n = 10;
+int GameState::m = 10;
 int GameState::opsFactor = 60;
 int GameState::populationCountsWeight = 30;
 int GameState::humanProximityWeight = 20;
@@ -143,7 +143,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
     }
 
         //all the moves with a split in two different sized moving groups
-    for (int i = 0; i < ((group->count - 1) / 2); i++){
+    for (int i = 1; i <= ((group->count - 1) / 2); i++){
         for (int j = 0; j < availableMoves.size(); j++){
             for (int k = 0; k < availableMoves.size(); k++){
                 if (j != k){
@@ -162,7 +162,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
         }
     }
         //add possibility no moves for one of the two groups
-    for (int i = 0; i < group->count; i++){
+    for (int i = 1; i < group->count; i++){
         for (int j = 0; j < availableMoves.size(); j++){
             std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
             std::shared_ptr<Move> theMove = std::make_shared<Move>();
@@ -173,7 +173,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
         }
     }
         //all the split equally moves if there is an even number of people in the group (if done in the general case, it will be done two times, because of the case symmetry)
-    if ((group->count % 2) == 0){
+    if (((group->count % 2) == 0) && (group->count > 1)){
         int subGroupCount = (group->count) / 2;
         for (int i = 0; i < availableMoves.size() - 1; i++){
             for (int j = i; j < availableMoves.size(); j++){

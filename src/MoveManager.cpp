@@ -58,6 +58,7 @@ void MoveManager::_stopThreads()
 	{
 		threads.at(i)->stop();
 	}
+	workQueue.free_all();
 }
 void MoveManager::_joinThreads()
 {
@@ -102,7 +103,19 @@ void MoveManager::mainloop(std::unique_ptr<GameSocket> s)
 
 bool MoveManager::stillWork() // Still work to do ?
 {
-	return true;
+	return !(workQueue.empty());
+}
+std::shared_ptr<Node> MoveManager::getWork(bool& stopping)
+{
+	std::shared_ptr<Node> result;
+	if (workQueue.wait_and_pop(stopping))
+	{
+		return result;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 std::shared_ptr<Node> MoveManager::callback(std::shared_ptr<Node> initialGameState)
@@ -152,7 +165,11 @@ void WorkerThread::run()
 	// This function will try to find and do a job while the thread is running
 	while (!_stopping)
 	{
+		std::shared_ptr<Node> work = parent->getWork(_stopping);
+		if (_stopping)
+		{
+			return;
+		}
 		// ToDo: Do something!
-		shortWait();
 	}
 }

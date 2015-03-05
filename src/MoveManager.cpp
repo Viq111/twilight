@@ -86,7 +86,6 @@ void MoveManager::benchmark()
 	std::cout << "[MM] Benchmark completed!" << std::endl;
 	boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 	std::cout << "[MM] The total test took " << static_cast<double>(diff_time.count()) / 1000 << "s" << std::endl;
-	// 
 }
 
 void MoveManager::mainloop(std::unique_ptr<GameSocket> s)
@@ -144,6 +143,7 @@ void WorkerThread::stop()
 void WorkerThread::join()
 {
 	while (running) { shortWait(); }
+	thread->join();
 }
 void WorkerThread::shortWait()
 {

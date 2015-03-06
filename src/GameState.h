@@ -37,11 +37,14 @@ enum Direction {
     DownLeft
 };
 
-struct Move{
-     //int x;   // un move va toujours avec un groupe ? En tout cas, ca sera redondant sur la liste des moves possibles pour un groupe.
-     //int y;   // DAM : dans ce cas la jajoute un groupe en entrée de applyEvolution  
-     Direction dir;
-     int count;
+struct Move {
+    Direction dir;
+    int count;
+};
+
+struct GroupEvolution {
+    Group group;
+    std::vector<Move> moves;
 };
 
 // Represent a current board
@@ -112,7 +115,7 @@ private:
     
 
     // Apply a list of evolutions to a given copied GameState to create a new one
-    GameState* applyEvolution (std::shared_ptr<Group> group, std::shared_ptr<std::vector<std::shared_ptr<Move>>> evolution, GameState* intial);
+    GameState* applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);
 
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);

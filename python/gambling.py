@@ -10,7 +10,7 @@ version = 1
 ##############
 ### IMPORT ###
 ##############
-import os, time, random
+import os, time, random, math
 import names
 import client_api, gui
 
@@ -43,26 +43,37 @@ class Adventurer():
         self.fixed = False
         self.leader = True
 
+    def select_random_objective(self, objectives):
+        "Select a new random objective"
+        self.fixed = False
+        self.leader = True
+        self.objective = random.choice(objectives)
+
     def communicate(self, bids = []):
         "Return (bool, bid) where bool is if it's a new bid and bid the bid"
-        return (False, Bid(self, "human", (2,2), 1))
+        # 0 : Do nothing
+        # 1 : Accept quest
+        # 2 : Propose quest
+        if self.objective.obj == "human": # Kill human, this is good bid!
+            return (2, Bid(self, self.objective, 20))
+        else:
+            if len(bids) > 0:
+                # Follow something
+                return (1, random.choice(bids))
+            else:
+                # Do nothing
+                return (0, None)
 
-    def new_turn(self):
-        "This is a new turn"
-        self.fixed = False
-
-    def accepted(self, objective, position, price):
+    def accepted(self, objective, price):
         "Someone accepted your quest"
         self.objective = objective
-        self.position = position
         self.score -= price
         self.leader = True
         self.fixed = True
 
-    def following(self, objective, position, wage):
+    def following(self, objective, wage):
         "You followed a quest"
         self.objective = objective
-        self.position = position
         self.score += wage
         self.fixed = True
         self.leader = False
@@ -73,27 +84,63 @@ class Adventurer():
         s += "Current objective: " + str(self.objective)+ " (definite: " + str(self.fixed) + ")\n"
         return s
         
+class Objective():
+    def __init__(self, type, position, number):
+        "Define an objective"
+        self.obj = type # Type of objetive: "human", "ennemy"
+        self.pos = position # Position of the objective
+        self.number = number
+        if self.obj == "human":
+            # Reward tier a la kickstarter
+            self.tier = self._create_human_reward(self.number)
+        elif self.obj == "ennemy":
+            self.tier = self._create_ennemy_reward(self.number)
+        else:
+            raise RuntimeError("Cannot find objective: " + str(self.obj))
+            
+    def _create_human_reward(self, number):
+        "Return a reward tier"
+        # When me < number, P = me/(me+number)
+        tier = {number : 100 * number}
+        for i in range(1, number):
+            reward = 100 * number * i / (i+number)
+            tier[i] = reward
+        return tier
+    def _create_ennemy_reward(self, number):
+        "Return a reward tier for the ennemy"
+        critic = int(math.ceil(number*1.5))
+        tier = {critic : 150 * number}
+        for i in range(1, critic):
+            reward = 150 * number * i / (i+number)
+            tier[i] = reward
+        return tier
+
+    def __repr__(self):
+        "Show an objetive"
+        s = "destroy " + str(self.obj) + " (" + str(self.number) + ") at position " + str(self.pos)
+        return s
 
 class Bid():
-    def __init__(self, bider, action, position, wage):
+    def __init__(self, bider, objective, wage):
         "Place a Bid"
         self.bider = bider
-        self.action = action
-        self.position = position
+        self.objective = objective
         self.wage = wage
     def accept(self, acceptor):
         "An acceptor has accepted the bid"
-        self.bider.accepted(self.action, self.position, self.wage)
-        acceptor.following(self.action, self.position, self.wage)
+        self.bider.accepted(self.action, self.wage)
+        acceptor.following(self.action, self.wage)
 
 class GamingHall():
     "Where all adventurers meets and gamble"
-    def __init__(self, world):
+    def __init__(self, world, api):
         "Create a new gaming hall"
         self.adventurers = []
+        self.api = api
         # Create initial objectives
         self._generate_objectives(world)
         self.objectives = [("human", (1,1), 100)] # List of action, position, wage
+        self.api.set_callback(self.turn_callback)
         
     def add_adventurer(self, adv):
         "Add an adventurer to the hall"
@@ -106,21 +153,25 @@ class GamingHall():
     def new_turn(self, new_world):
         "New turn"
         self._generate_objectives(new_world)
+        # Reset objectives for adventurers
+        for adv in self.adventurers:
+            adv.select_random_objective(self.objectives)
+    
         bids = []
         for i in range(TABLE_TURNS):
             # Find bidders
-            bids = [ adv.communicate()[1] for adv in self.adventurers if adv.communicate()[0] == True]
+            bids = [ adv.communicate()[1] for adv in self.adventurers if adv.communicate()[0] == 2]
             bids.sort(key=lambda bid : bid.wage, reverse = True) # Sort by best bider
             if len(bids) == 0: # No more bider, end of turn
                 break
             # Find acceptors
-            acceptors = [ (adv,adv.communicate()[1]) for adv in self.adventurers if adv.communicate()[0] == False]
-            if len(bider) == 0: # No more acceptors, end of turn
+            acceptors = [ (adv,adv.communicate()[1]) for adv in self.adventurers if adv.communicate()[0] == 1]
+            if len(acceptors) == 0: # No more acceptors, end of turn
                 break
-            random.shuffle(acceptors)
+            acceptor = random.choice(acceptors)
             # Accept bid
-            bid = acceptors[0][1]
-            bid.accept(acceptors[0][0])
+            bid = acceptor[1]
+            bid.accept(acceptor[0])
         # End of turn everyone has something to do, print it
         print "###################"
         print "### END OF TURN ###"
@@ -128,6 +179,7 @@ class GamingHall():
         for adv in self.adventurers:
             print adv
         print "###################"
+        return self.adventurers
 
     def _generate_objectives(self, world):
         "Generate a list of objectives on the map and store it"
@@ -136,14 +188,51 @@ class GamingHall():
             for y in range(world.get_size()[1]):
                 cell = world.get_cell(x, y)
                 if cell["human"] != 0:
-                    self.objectives.append(("human", (x, y), cell["human"]))
+                    #self.objectives.append(("human", (x, y), cell["human"]))
+                    obj = Objective("human", (x,y), cell["human"])
+                    self.objectives.append(obj)
                 if cell["ennemy"] != 0:
-                    self.objectives.append(("ennemy", (x, y), cell["ennemy"]))
-            
-
+                    #self.objectives.append(("ennemy", (x, y), cell["ennemy"]))
+                    obj = Objective("ennemy", (x,y), cell["ennemy"])
+                    self.objectives.append(obj)
+                    
+    def turn_callback(self, world):
+        # Call back when its our turn to play
+        print "Our time to play!"
+        adventurers = self.new_turn(world)
+        moves = []
+        poses = []
+        for adv in adventurers:
+            new_pos = world.find_path(adv.pos, adv.objective.pos)
+            if new_pos in poses:
+                print "Illegal move for adventurer:",adv
+                continue
+            else:
+                poses.append(adv.pos)
+                move = (adv.pos[0], adv.pos[1], 1, new_pos[0], new_pos[1])
+                adv.pos = new_pos
+                moves.append(move)
+        # Squash moves
+        mm = {}
+        for m in moves:
+            key = (m[0:2], m[3:5])
+            if mm.has_key(key):
+                mm[key] += 1
+            else:
+                mm[key] = 1
+        moves = []
+        for key in mm.keys():
+            moves.append((key[0][0],key[0][1], mm[key], key[1][0], key[1][1]))
+        #if len(moves) > 3: moves = moves[:3]
+        print "Moves:",moves
+        
+        self.api.move(moves)
+        
 ###################
 ### DEFINITIONS ###
 ###################
+
+
 
 ##################
 ###  __MAIN__  ###
@@ -158,14 +247,16 @@ if __name__ == "__main__":
     time.sleep(0.2)
     pos = find_starting(c.get_map())
     world = c.get_map()
-    hall = GamingHall(world)
+    hall = GamingHall(world, c)
     start = find_starting(world)
+    number = c.get_map().get_cell(start[0], start[1])["us"]
     # Create 4 adventurers
-    for i in range(4):
+    for i in range(number):
         adv = Adventurer(hall, start)
         hall.add_adventurer(adv)
     # Play one turn
-    hall.new_turn(world)
+    #while 1:
+        #hall.new_turn(world)
     wait = raw_input("...")
     
     

@@ -43,7 +43,7 @@ class ManualInput():
         if new_pos != self.pos:
             nb = find_starting(self.c.get_map())[2]
             # Send command
-            self.c.move((self.pos[0], self.pos[1], nb, new_pos[0], new_pos[1]))
+            self.c.move([(self.pos[0], self.pos[1], nb, new_pos[0], new_pos[1])])
             self.pos = (new_pos[0], new_pos[1], nb)
         
     def mainloop(self):

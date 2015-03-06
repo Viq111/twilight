@@ -73,6 +73,17 @@ class World():
         else:
             self.world[x][y] = {"us" : wolf, "ennemy" : vamp, "human" : human}
 
+    def find_path(self, start, stop):
+        "Find a path from start to stop"
+        # To Do: A* algorithm !
+        x = stop[0] - start[0]
+        y = stop[1] - start[1]
+        if x < 0: x = -1
+        if x > 0: x = +1
+        if y < 0: y = -1
+        if y > 0: y = +1
+        return (start[0]+x, start[1]+y)                
+        
     def __repr__(self):
         "Show the map"
         ret = []
@@ -133,6 +144,10 @@ class ClientAPI(threading.Thread):
     def close(self):
         "Close the client"
         self.running = False
+
+    def set_callback(self, callback):
+        "Set a new callback"
+        self.callback = callback
         
     def __enter__(self):
         "RAII Return the screen with the keyword with"
@@ -192,27 +207,13 @@ class ClientAPI(threading.Thread):
         "Get the Map Obejct"
         return self.world
 
-    def move(self, move1, move2 = None, move3 = None):
+    def move(self, moves):
         "Move your player move is (initial_x, initial_y, nb, dest_x, dest_y)"
         cmd = "MOV"
-        nb_moves = 1
-        if move2: nb_moves += 1
-        if move3: nb_moves += 1
-        cmd += chr(nb_moves)
-        if move1:
-            for i in range(len(move1)):
-                cmd += chr(move1[i])
-        if move2:
-            for i in range(len(mov2)):
-                cmd += chr(move1[i])
-        if move3:
-            for i in range(len(move3)):
-                cmd += chr(move1[i])
-        self.s.send(cmd)
-
-    def attack(self, x, y):
-        "Attack at coordinates (x, y)"
-        cmd = "ATK" + chr(x) + chr(y)
+        cmd += chr(len(moves))
+        for move in moves:
+            for i in range(len(move)):
+                cmd += chr(move[i])
         self.s.send(cmd)
     
 ###################

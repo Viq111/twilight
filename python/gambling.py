@@ -128,8 +128,8 @@ class Bid():
         self.wage = wage
     def accept(self, acceptor):
         "An acceptor has accepted the bid"
-        self.bider.accepted(self.action, self.wage)
-        acceptor.following(self.action, self.wage)
+        self.bider.accepted(self.objective, self.wage)
+        acceptor.following(self.objective, self.wage)
 
 class GamingHall():
     "Where all adventurers meets and gamble"
@@ -160,12 +160,14 @@ class GamingHall():
         bids = []
         for i in range(TABLE_TURNS):
             # Find bidders
-            bids = [ adv.communicate()[1] for adv in self.adventurers if adv.communicate()[0] == 2]
+            bids = [ adv.communicate() for adv in self.adventurers]
+            bids = [ a[1] for a in bids if a[0] == 2] # Filter only bids
             bids.sort(key=lambda bid : bid.wage, reverse = True) # Sort by best bider
             if len(bids) == 0: # No more bider, end of turn
                 break
             # Find acceptors
-            acceptors = [ (adv,adv.communicate()[1]) for adv in self.adventurers if adv.communicate()[0] == 1]
+            acceptors = [ (adv,adv.communicate(bids)) for adv in self.adventurers]
+            acceptors = [ (a[0], a[1][1]) for a in acceptors if a[1][0] == 1 ] # Filter only acceptors
             if len(acceptors) == 0: # No more acceptors, end of turn
                 break
             acceptor = random.choice(acceptors)

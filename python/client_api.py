@@ -51,7 +51,6 @@ class World():
     def init_map(self, my_pos, positions):
         "Initialize the map"
         # First know if we are vampire or wolf
-        print my_pos, positions
         for p in positions:
             if my_pos == (p[0], p[1]):
                 if p[3] != 0:
@@ -136,8 +135,17 @@ class ClientAPI(threading.Thread):
         "Init communication"
         self.s.send("NME" + chr(len(self.__name)) + self.__name)
         # First get the map size
-        data = self.s.recv(5)
+        try:
+            data = self.s.recv(5)
+        except socket.error:
+            print "End of game"
+            self.close()
+            return
         if data[0:3] != "SET":
+            if data[0:3] == "BYE":
+                print "End of game"
+                self.close()
+                return
             raise RuntimeError("First command was not SET: " + str(data))
         self.world = World(ord(data[3]), ord(data[4]))
 
@@ -182,13 +190,14 @@ class ClientAPI(threading.Thread):
                     self.world.init_map(temp_starting_pos, pos)
                 elif cmd == "UPD": # Update
                     length = ord(self.s.recv(1))*5
-                    data = self.s.recv(length)
-                    # Change str to int
-                    data = map(lambda a: ord(a), data)
-                    # Group by 5
-                    pos = [data[(i*5):(i*5)+5] for i in range(len(data)/5)]
-                    for p in pos:
-                        self.world.update(p[0], p[1], p[2], p[3], p[4])
+                    if length > 0:
+                        data = self.s.recv(length)
+                        # Change str to int
+                        data = map(lambda a: ord(a), data)
+                        # Group by 5
+                        pos = [data[(i*5):(i*5)+5] for i in range(len(data)/5)]
+                        for p in pos:
+                            self.world.update(p[0], p[1], p[2], p[3], p[4])
                     # Call callback
                     self.callback(self.world)
                 elif cmd == "END":

@@ -54,7 +54,12 @@ public:
 	// Size is static because it should not change during the game
     static int n;
 	static int m;
-    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolution(std::shared_ptr<Group> group);
+
+    // Compute all the possible evolution of a given group
+    // its a list of moves : for instance two guys go right, three go down
+    // [WARNING] THE "NO ONE MOVES" POSSIBILITY MUST NOT BE CONSIDERED
+    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolutions(std::shared_ptr<Group> group);
+
     // Multiplication factor used in all scoring operations
     static int opsFactor;
 
@@ -107,12 +112,6 @@ private:
     // Useful to avoid impossible moves
     std::vector<std::vector<bool>> departurePositions;
     std::vector<std::vector<bool>> arrivalPositions;
-
-    // Compute all the possible evolution of a given group
-    // its a list of moves : for instance two guys go right, three go down
-    // [WARNING] THE "NO ONE MOVES" POSSIBILITY MUST NOT BE CONSIDERED
-    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolutions(std::shared_ptr<Group> group);
-    
 
     // Apply a list of evolutions to a given copied GameState to create a new one
     GameState* applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);

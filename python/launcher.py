@@ -47,7 +47,7 @@ if __name__ == "__main__":
         p2 = sys.argv[2]
     print "BATTLE: " + str(p1) + " VS " + str(p2)
     # Launch server
-    server = subprocess.Popen(SERVER_PATH)
+    server = subprocess.Popen(SERVER_PATH, cwd=os.path.dirname(SERVER_PATH))
     time.sleep(3)
     # Launch both AI
     ai1 = subprocess.Popen(["python", p1], stdout=subprocess.PIPE)

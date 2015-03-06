@@ -193,6 +193,14 @@ class GamingHall():
                     
     def turn_callback(self, world):
         # Call back when its our turn to play
+        # First check if an adventure died
+        to_remove = []
+        for adv in self.adventurers:
+            if world.get_cell(adv.pos[0], adv.pos[1])["us"] == 0:
+                # Kill adventurer
+                to_remove.append(adv)
+        for adv in to_remove:
+            self.del_adventurer(adv)
         print "################"
         print "### NEW TURN ###"
         adventurers = self.new_turn(world)

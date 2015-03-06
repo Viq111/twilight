@@ -10,9 +10,9 @@ version = 1
 ##############
 ### IMPORT ###
 ##############
-import os, time, random, math
+import os, time, random, math, sys
 import names
-import client_api, gui
+import client_api
 
 ###############
 ### GLOBALS ###
@@ -244,7 +244,12 @@ if __name__ == "__main__":
     c = client_api.ClientAPI()
     name = names.get_first_name()
     print "You are playing as", name
-    c.connect(name)
+    try:
+        c.connect(name)
+    except:
+        print "Couldn't connect to server..."
+        wait = raw_input("Press return to exit...")
+        sys.exit()
     time.sleep(0.2)
     pos = find_starting(c.get_map())
     world = c.get_map()

@@ -81,7 +81,6 @@ if __name__ == "__main__":
     print "> Welcome to " + str(prog_name) + " (r" + str(version) + ")"
     print "> By Viq (under CC BY-SA 3.0 license)"
     print "> Loading program ..."
-    c = client_api.ClientAPI()
     name = raw_input("Enter your name:")
     manual = ManualInput(name)
     manual.mainloop()

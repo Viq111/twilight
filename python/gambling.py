@@ -172,13 +172,6 @@ class GamingHall():
             # Accept bid
             bid = acceptor[1]
             bid.accept(acceptor[0])
-        # End of turn everyone has something to do, print it
-        print "###################"
-        print "### END OF TURN ###"
-        print ""
-        for adv in self.adventurers:
-            print adv
-        print "###################"
         return self.adventurers
 
     def _generate_objectives(self, world):
@@ -198,7 +191,8 @@ class GamingHall():
                     
     def turn_callback(self, world):
         # Call back when its our turn to play
-        print "Our time to play!"
+        print "################"
+        print "### NEW TURN ###"
         adventurers = self.new_turn(world)
         moves = []
         poses = []
@@ -224,8 +218,13 @@ class GamingHall():
         for key in mm.keys():
             moves.append((key[0][0],key[0][1], mm[key], key[1][0], key[1][1]))
         #if len(moves) > 3: moves = moves[:3]
+        # End of turn everyone has something to do, print it
+        print "### END OF TURN ###"
+        for adv in self.adventurers:
+            print adv
         print "Moves:",moves
-        
+        print "###################"
+        time.sleep(0.5) # Wait cause our AI is way too fast :)
         self.api.move(moves)
         
 ###################
@@ -243,7 +242,9 @@ if __name__ == "__main__":
     print "> By Viq (under CC BY-SA 3.0 license)"
     print "> Loading program ..."
     c = client_api.ClientAPI()
-    c.connect("Gambler")
+    name = names.get_first_name()
+    print "You are playing as", name
+    c.connect(name)
     time.sleep(0.2)
     pos = find_starting(c.get_map())
     world = c.get_map()

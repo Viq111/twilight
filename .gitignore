@@ -1,3 +1,4 @@
 *.pyc
 src/src.*
 build/*
+python/names.py

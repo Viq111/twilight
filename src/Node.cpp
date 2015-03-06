@@ -39,11 +39,16 @@ bool comparaison(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //t
     return (first->getScore() < second->getScore());
 }
 
-std::vector<std::shared_ptr<Node>> Node::getChildren()
+std::vector<std::shared_ptr<Node>> Node::getChildren()      // To do : on récupère les enfants ici et on les ajoutent à children
 {
     if (childNotGet){
         childNotGet = false;
-        // To do : on récupère les enfants ici et on les ajoutent à children
+        /*
+        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState->getChildren();
+        for (int i = 0; i < gameStateChildren->size(); i++){
+            children.push_back(std::make_shared<Node>(gameStateChildren->at(i)));
+        }
+        */
     }
     return children;
 }

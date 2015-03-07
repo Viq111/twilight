@@ -72,40 +72,40 @@ int main(int argc, char* argv[])
 /*
 void testGameState()
 {
-GameState::n = 10;
-GameState::m = 10;
+    GameState::n = 10;
+    GameState::m = 10;
 
-auto allies = std::vector<Group>();
-auto humans = std::vector<Group>();
-auto enemies = std::vector<Group>();
+    auto allies = std::vector<Group>();
+    auto humans = std::vector<Group>();
+    auto enemies = std::vector<Group>();
 
-std::cout << "* Deux exemples en 1d (la 2d fonctionne), montrant ce qui marche et ce qui déconne. *" << std::endl;
+    std::cout << "* Deux exemples en 1d (la 2d fonctionne), montrant ce qui marche et ce qui déconne. *" << std::endl;
 
-std::cout << "* Premier exemple où cela fonctionne *" << std::endl;
+    std::cout << "* Premier exemple où cela fonctionne *" << std::endl;
 
-Group initialGroup1 = {3, 2, 10}; // {x, y, pop}
-Group initialGroup2 = {1, 9, 10}; // {x, y, pop}
-Group initialGroup3 = {3, 9, 10}; // {x, y, pop}
-allies.push_back(initialGroup1);
-allies.push_back(initialGroup2);
-allies.push_back(initialGroup3);
-GameState* initial = new GameState(allies, humans, enemies);
+    Group initialGroup1 = {3, 2, 10}; // {x, y, pop}
+    Group initialGroup2 = {1, 9, 10}; // {x, y, pop}
+    Group initialGroup3 = {3, 9, 10}; // {x, y, pop}
+    allies.push_back(initialGroup1);
+    allies.push_back(initialGroup2);
+    allies.push_back(initialGroup3);
+    GameState* initial = new GameState(allies, humans, enemies);
 
-std::cout << "Situation de départ : " << std::endl;
-initial->print();
+    std::cout << "Situation de départ : " << std::endl;
+    initial->print();
 
 
-std::cout << "Enfants : " << std::endl;
+    std::cout << "Enfants : " << std::endl;
 
-clock_t t;
-t = clock();
-auto children = initial->getChildren();
-t = clock() - t;
-//    for (GameState* child : *children) {
-//        child->print();
-//    }
-std::cout << "nb d'enfants : " << children->size() << std::endl;
-std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;
+    clock_t t;
+    t = clock();
+    auto children = initial->getChildren();
+    t = clock() - t;
+    //    for (GameState* child : *children) {
+    //        child->print();
+    //    }
+    std::cout << "nb d'enfants : " << children->size() << std::endl;
+    std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;
 }
 */
 
@@ -116,6 +116,26 @@ int testGameStatePossibleEvolution(){
     g->x = 5;
     g->y = 5;
     g->hasAlreadyMoved = false;
+    std::vector<Group> humans;
+    for (int i = 1; i < 5; i++){        //min = 5
+        Group h;
+        h.x = 5;
+        h.y = 5;
+        h.hasAlreadyMoved = false;
+        h.count = (2 * i) + 1;
+        humans.push_back(h);
+    }
+    std::vector<Group> ennemies;
+    for (int i = 2; i < 5; i++){        //min = 5, ceil(1.5*min) = 8
+        Group e;
+        e.x = 5;
+        e.y = 5;
+        e.hasAlreadyMoved = false;
+        e.count = (2 * i) + 1;
+        ennemies.push_back(e);
+    }
+    test->enemies = ennemies;
+    test->humans = humans;
 
     std::cout << "before" << std::endl;
     for (int i = 2; i < 10; i++){

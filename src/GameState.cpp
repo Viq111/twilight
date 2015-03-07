@@ -1,5 +1,6 @@
 #include "GameState.h"
 #include "standardFunctions.h"
+#include <math.h>
 
 // Default board size
 int GameState::n = 10;
@@ -131,7 +132,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
         }
     }
 
-    //implementation 1 : a group should not split in more than two sub-groups
+    /*//implementation 1 : a group should not split in more than two sub-groups
         //all the group moves
     for (int i = 0; i < availableDirections.size(); i++){
         std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
@@ -143,7 +144,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
     }
 
         //all the moves with a split in two different sized moving groups
-    for (int i = 0; i < ((group->count - 1) / 2); i++){
+    for (int i = 1; i <= ((group->count - 1) / 2); i++){
         for (int j = 0; j < availableDirections.size(); j++){
             for (int k = 0; k < availableDirections.size(); k++){
 
@@ -163,7 +164,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
         }
     }
         //add possibility no moves for one of the two groups
-    for (int i = 0; i < group->count; i++){
+    for (int i = 1; i < group->count; i++){
         for (int j = 0; j < availableDirections.size(); j++){
 
             std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
@@ -174,7 +175,7 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
             possibleMoves->push_back(currentMove);
         }
     }
-        //all the split equally moves if there is an even number of people in the group (if done in the general case, it will be done two times, because of the case symmetry)
+        //all the split equally moves if there is an even number of people in the group
     if (((group->count % 2) == 0) && (group->count > 1)){
         int subGroupCount = (group->count) / 2;
         for (int i = 0; i < availableDirections.size() - 1; i++){
@@ -194,8 +195,90 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
             }
         }
     }
-    //end of implementation 1
+    *///end of implementation 1
+    
+    //implementation 2 : a group should not split in more than two sub-groups
+        //determine the minimum interresting group size
+    int minGroupSize;
+    if (this->enemies.size() > 0){
+        minGroupSize = ceil(1.5*(this->enemies[0].count));
+        //std::cout << "minGroupSize : " << minGroupSize << std::endl;
+        for (int i = 1; i < this->enemies.size(); i++){
+            if (minGroupSize > ceil(1.5*(this->enemies[i].count))){
+                minGroupSize = ceil(1.5*(this->enemies[i].count));
+            }
+        }
+    }
+    //std::cout << "minGroupSize : " << minGroupSize << std::endl;
+    for (int i = 0; i < this->humans.size(); i++){
+        if (minGroupSize > this->humans[i].count){
+            minGroupSize = this->humans[i].count;
+        }
+    }
+    //std::cout << "minGroupSize : " << minGroupSize << std::endl;
+        //all the group moves : same as implementation 1
+    for (int i = 0; i < availableDirections.size(); i++){
+        std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+        std::shared_ptr<Move> theMove = std::make_shared<Move>();
+        theMove->count = group->count;
+        theMove->dir = availableDirections[i];
+        currentMove->push_back(theMove);
+        possibleMoves->push_back(currentMove);
+    }
 
+        //all the moves with a split in two different sized big enough moving groups
+    for (int i = minGroupSize; i <= ((group->count - 1) / 2); i++){
+        for (int j = 0; j < availableDirections.size(); j++){
+            for (int k = 0; k < availableDirections.size(); k++){
+                if (j != k){
+                    std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMoves = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+                    std::shared_ptr<Move> firstMove = std::make_shared<Move>();
+                    firstMove->count = i;
+                    firstMove->dir = availableDirections[j];
+                    currentMoves->push_back(firstMove);
+                    std::shared_ptr<Move> secondMove = std::make_shared<Move>();
+                    secondMove->count = (group->count - i);
+                    secondMove->dir = availableDirections[k];
+                    currentMoves->push_back(secondMove);
+                    possibleMoves->push_back(currentMoves);
+                }
+            }
+        }
+    }
+        //add possibility no moves for one of the two groups if big enough
+    for (int i = minGroupSize; i <= (group->count - minGroupSize); i++){
+        for (int j = 0; j < availableDirections.size(); j++){
+
+            std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+            std::shared_ptr<Move> theMove = std::make_shared<Move>();
+            theMove->count = i;
+            theMove->dir = availableDirections[j];
+            currentMove->push_back(theMove);
+            possibleMoves->push_back(currentMove);
+        }
+    }
+        //all the split equally moves if there is an even number of people in the group and if the subgroups would be big enough
+    if (((group->count % 2) == 0) && (group->count >= (2 * minGroupSize))){
+        int subGroupCount = (group->count) / 2;
+        for (int i = 0; i < availableDirections.size() - 1; i++){
+            for (int j = i; j < availableDirections.size(); j++){
+                if (i != j){
+                    std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMoves = std::make_shared<std::vector<std::shared_ptr<Move>>>();
+                    std::shared_ptr<Move> firstMove = std::make_shared<Move>();
+                    firstMove->count = subGroupCount;
+                    firstMove->dir = availableDirections[i];
+                    currentMoves->push_back(firstMove);
+                    std::shared_ptr<Move> secondMove = std::make_shared<Move>();
+                    secondMove->count = subGroupCount;
+                    secondMove->dir = availableDirections[j];
+                    currentMoves->push_back(secondMove);
+                    possibleMoves->push_back(currentMoves);
+                }
+            }
+        }
+    }
+    //end of implementation 2
+    
     return possibleMoves;
 }
 

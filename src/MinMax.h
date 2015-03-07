@@ -16,6 +16,7 @@ class MinMax
 public:
 	MinMax(); //to test MinMax on random trees
     static int testNodePointersDesalocation(int nbIterations);
+    static int proceedMinMax(std::shared_ptr<Node> current, int depth, bool beginWithMin);
     static int minValue(std::shared_ptr<Node> current, int alpha, int beta, int depth);
     static int maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth);
 protected:

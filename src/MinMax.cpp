@@ -40,6 +40,17 @@ std::shared_ptr<Node> MinMax::testTree(int depth, int nbChildMin, int nbChildRan
     return root;
 }
 
+int MinMax::proceedMinMax(std::shared_ptr<Node> current, int depth, bool beginWithMin){
+    int result = 0;
+    if (beginWithMin){
+        result = minValue(current, -1000000, 1000000, depth);
+    }
+    else{
+        result = maxValue(current, -1000000, 1000000, depth);
+    }
+    return result;
+}
+
 //fonction alpha-beta recursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
 int MinMax::maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth){
     if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring

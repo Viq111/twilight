@@ -115,6 +115,9 @@ private:
     // Apply a list of evolutions to a given copied GameState to create a new one
     GameState* applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);
 
+    // Perform battle/reunion between groups on the same cell
+    void resolve(GameState* state);
+
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);
 };

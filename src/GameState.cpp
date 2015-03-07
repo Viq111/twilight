@@ -356,40 +356,17 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
 
             int newX = group.x + deltaX;
             int newY = group.y + deltaY;
-            std::shared_ptr<Group> targetGroup;
 
-            for (Group g : humans){
-                if (g.x == newX && g.y == newY) {
-                    targetGroup = std::make_shared<Group>(g);
-                    // TODO implement eating
-                    break;
-                }
-            }
-
-            if (!targetGroup){
-                for (Group g : allies){
-                    if (g.x == newX && g.y == newY) {
-                        targetGroup = std::make_shared<Group>(g);
-                        // TODO implement regroupment
-                        break;
-                    }
-                }
-                if (!targetGroup){
-                    for (Group g : enemies){
-                        if (g.x == newX && g.y == newY) {
-                            targetGroup = std::make_shared<Group>(g);
-                            // TODO implement fight
-                            break;
-                        }
-                    }
-                    if (!targetGroup){
-                        // TODO implement displacement
-                    }
-                }
-            }
-        }
-        
+            group.x = newX;
+            group.y = newY;
+        }   
     }
+    resolve(updatedState);
     return updatedState;
+}
+
+void GameState::resolve(GameState* state)
+{
+    //TODO
 }
 

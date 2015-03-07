@@ -35,7 +35,7 @@ GameState::GameState(
 
 // TODO: add coefficients (by machine learning or manual benchmarking)
 int GameState::getScore() {
-	int score = 0;
+    int score = -(opsFactor * allies.size());
 
 	// Number of allies and enemies
     score += (opsFactor * populationCountsWeight * (alliesCount - enemiesCount)) / (alliesCount + enemiesCount);
@@ -200,19 +200,19 @@ std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>
     //implementation 2 : a group should not split in more than two sub-groups
         //determine the minimum interresting group size
     int minGroupSize;
-    if (this->enemies.size() > 0){
-        minGroupSize = ceil(1.5*(this->enemies[0].count));
+    if (enemies.size() > 0){
+        minGroupSize = ceil(1.5*(enemies[0].count));
         //std::cout << "minGroupSize : " << minGroupSize << std::endl;
-        for (int i = 1; i < this->enemies.size(); i++){
-            if (minGroupSize > ceil(1.5*(this->enemies[i].count))){
-                minGroupSize = ceil(1.5*(this->enemies[i].count));
+        for (int i = 1; i < enemies.size(); i++){
+            if (minGroupSize > ceil(1.5*(enemies[i].count))){
+                minGroupSize = ceil(1.5*(enemies[i].count));
             }
         }
     }
     //std::cout << "minGroupSize : " << minGroupSize << std::endl;
-    for (int i = 0; i < this->humans.size(); i++){
-        if (minGroupSize > this->humans[i].count){
-            minGroupSize = this->humans[i].count;
+    for (int i = 0; i < humans.size(); i++){
+        if (minGroupSize > humans[i].count){
+            minGroupSize = humans[i].count;
         }
     }
     //std::cout << "minGroupSize : " << minGroupSize << std::endl;

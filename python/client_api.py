@@ -11,6 +11,7 @@ version = 1
 ### IMPORT ###
 ##############
 import os, time, socket, threading
+import heapq # For A* search
 
 ###############
 ### GLOBALS ###
@@ -22,6 +23,22 @@ DEFAULT_PORT = 5555
 ###############
 ### CLASSES ###
 ###############
+
+# PriorityQueue for A* algorithm
+# From http://www.redblobgames.com/pathfinding/a-star/implementation.html#sec-1-4
+
+class PriorityQueue:
+    def __init__(self):
+        self.elements = []
+    
+    def empty(self):
+        return len(self.elements) == 0
+    
+    def put(self, item, priority):
+        heapq.heappush(self.elements, (priority, item))
+    
+    def get(self):
+        return heapq.heappop(self.elements)[1]
 
 class World():
     "Create an object to keep the world"
@@ -72,16 +89,72 @@ class World():
         else:
             self.world[x][y] = {"us" : wolf, "ennemy" : vamp, "human" : human}
 
+    def _get_neighboors(self, pos, goal = None):
+        "Get possible neigboor moves, set the goal if you want to consider it as free"
+        neightboors = []
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                x = pos[0] + i
+                y = pos[1] + j
+                if (i != 0 or j != 0) and x >= 0 and y >= 0 and x < len(self.world) and y < len(self.world[0]): # Cell inside the grid
+                    cell = self.get_cell(x, y)
+                    if cell["ennemy"] == 0 and cell["human"] == 0:
+                        neightboors.append((x, y))
+                    elif goal != None:
+                        if x == goal[0] and y == goal[1]:
+                            neightboors.append((x, y))
+        return neightboors
+
+    def _get_flight_distance(self, start, stop):
+        "Get a flight distance from start to stop"
+        return max(abs(stop[0] - start[0]), abs(stop[1] - start[1]))
+
+    def _a_star(self, start, stop):
+        "Do A* algorithm from start to stop, return the path"
+        # A* from http://www.redblobgames.com/pathfinding/a-star/implementation.html#sec-1-4
+        if start == stop: # No path, we already are there
+            return []
+        frontier = PriorityQueue()
+        frontier.put(start, 0)
+        came_from = {start : None}
+        cost_so_far = {start : 0}
+        while not frontier.empty():
+            current = frontier.get()
+            if current == stop:
+                break
+            for next in self._get_neighboors(current, stop):
+                new_cost = cost_so_far[current] + 1
+                if next not in cost_so_far or new_cost < cost_so_far[next]:
+                    cost_so_far[next] = new_cost
+                    priority = new_cost + self._get_flight_distance(stop, next)
+                    frontier.put(next, priority)
+                    came_from[next] = current
+        # Check if we found a path
+        if not came_from.has_key(stop): # Cannot find a path
+            return []
+        else:
+            path = [stop]
+            while came_from[path[0]] != start: # We are not at the start
+                path.insert(0, came_from[path[0]])
+            return path  
+            
     def find_path(self, start, stop):
-        "Find a path from start to stop"
-        # To Do: A* algorithm !
-        x = stop[0] - start[0]
-        y = stop[1] - start[1]
-        if x < 0: x = -1
-        if x > 0: x = +1
-        if y < 0: y = -1
-        if y > 0: y = +1
-        return (start[0]+x, start[1]+y)                
+        "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
+        res = self._a_star(start, stop)
+        if len(res) == 0:
+            return start
+        else:
+            return res[0]
+
+    def find_path_time(self, start, stop):
+        "Find the time to move from start to stop"
+        res = self._a_star(start, stop)
+        if start == stop:
+            return 0
+        if len(res) == 0:
+            return 99999999999 # There is no path
+        else:
+            return len(res)
         
     def __repr__(self):
         "Show the map"

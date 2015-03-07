@@ -205,14 +205,13 @@ class GamingHall():
         print "### NEW TURN ###"
         adventurers = self.new_turn(world)
         moves = []
-        poses = []
+        poses = [adv.pos for adv in adventurers] # Get all current positions of adventurers
         for adv in adventurers:
             new_pos = world.find_path(adv.pos, adv.objective.pos)
             if new_pos in poses:
                 print "Illegal move for adventurer:",adv
                 continue
             else:
-                poses.append(adv.pos)
                 move = (adv.pos[0], adv.pos[1], 1, new_pos[0], new_pos[1])
                 adv.pos = new_pos
                 moves.append(move)

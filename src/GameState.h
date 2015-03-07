@@ -90,7 +90,7 @@ public:
 
     // Listes of groups of each race
     std::vector<Group> allies;
-    const std::vector<Group> humans;
+    std::vector<Group> humans;
     std::vector<Group> enemies;
 
     // Utility method to sum the populations of groups
@@ -107,7 +107,6 @@ public:
 
     // For visualisation/debug purpose
     void print();
-
 private:
     // Useful to avoid impossible moves
     std::vector<std::vector<bool>> departurePositions;

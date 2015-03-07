@@ -8,9 +8,15 @@ Node::Node(){
     scoreNotGet = true;
 }
 
+Node::Node(GameState game){
+    gameState = GameState(game);
+    childNotGet = true;
+    scoreNotGet = true;
+}
+
 Node::Node(std::shared_ptr<GameState> game)
 {
-    gameState = game;
+    gameState = GameState(*game);
 	childNotGet = true;
 	scoreNotGet = true;
 }
@@ -18,7 +24,7 @@ Node::Node(std::shared_ptr<GameState> game)
 int Node::getScore(){
     if (scoreNotGet){
         scoreNotGet = false;
-        gameState->getScore();
+        gameState.getScore();
     }
     return score; 
 }

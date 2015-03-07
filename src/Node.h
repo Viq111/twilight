@@ -13,10 +13,11 @@ class Node
     int beta;
     bool childNotGet;                   //true tant que l'on a pas récupéré ses enfants
     bool scoreNotGet;                   //true tant que l'on a pas récupéré son score
-    std::shared_ptr<GameState> gameState;
+    GameState gameState;
 public:
     Node();                             //only for benchmark
-    Node(std::shared_ptr<GameState>);
+    Node(GameState game);
+    Node(std::shared_ptr<GameState> game);
     int addChild(std::shared_ptr<Node> child);
     std::vector<std::shared_ptr<Node>> getChildren();
     std::vector<std::shared_ptr<Node>> getSortedChildren();
@@ -24,7 +25,7 @@ public:
     int getScore();
     int getAlpha() { return alpha; };
     int getBeta(){ return beta; };
-    std::shared_ptr<GameState> getGameState(){ return gameState; };
+    GameState getGameState(){ return gameState; };
 };
 
 #endif

@@ -315,6 +315,17 @@ void GameState::print(){
                         break;
                     }
                 }
+
+                if (!empty){
+                    for (Group group : humans) {
+                        if (group.x == x && group.y == y) {
+                            std::cout << "H ";
+                            std::cout << std::to_string(group.count) << " ";
+                            empty = false;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (empty) {

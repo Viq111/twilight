@@ -71,29 +71,68 @@ int GameState::getScore() {
 	return score;
 }
 
-/*std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(){
-    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> results;
+std::shared_ptr<std::vector<GameState*>> GameState::getChildren(bool itsAlliesTurn)
+{
+    std::shared_ptr<std::vector<GameState*>> children;
 
-    for (int i = 0; i < allies.size(); i++){
-        const int resultSize = results->size();
-        std::vector<Move> possibleMoves = possibleEvolutions(std::make_shared<Group>(allies[i]));
+    std::vector<Group> currentRace = itsAlliesTurn ? allies : enemies;
+    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> pEvol = possibleEvolutions(currentRace);
+    for (std::vector<std::shared_ptr<GroupEvolution>> raceEvol : pEvol)
+    {
+        children->push_back(applyGroupEvolutions(raceEvol, this));
+    }
+    return children;
+}
+
+
+std::vector<std::shared_ptr<GroupEvolution>> convert(Group group, std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> thing)
+{
+    auto result = std::vector<std::shared_ptr<GroupEvolution>>();
+
+    for (std::shared_ptr<std::vector<std::shared_ptr<Move>>> movesThing : *thing)
+    {
+        std::shared_ptr<GroupEvolution> cur = std::make_shared<GroupEvolution>(GroupEvolution());
+        cur->group = group;
+        std::vector<Move> moves;
+        for (std::shared_ptr<Move> move : *movesThing)
+        {
+            moves.push_back(*move);
+        }
+        cur->moves = moves;
+        result.push_back(cur);
+    }
+
+    return result;
+}
+
+std::vector<std::vector<std::shared_ptr<GroupEvolution>>> GameState::possibleEvolutions(std::vector<Group> race)
+{
+    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> results;
+
+    for (int i = 0; i < race.size(); i++){
+        const int resultSize = results.size();
+        auto pEvolutions = possibleEvolutions(std::make_shared<Group>(race[i]));
 
         // particular case "no one moved yet" (so we have to move). "this" is the root of it.
-        for (int k = 0; k < possibleMoves.size(); k++){
-            results->push_back(applyEvolution(*this, possibleMoves[k]));
+        for (int k = 0; k < pEvolutions->size(); k++){
+            //results->push_back(applyEvolutions(*this, (*pEvolutions)[k])));
+            std::vector<std::shared_ptr<GroupEvolution>> newOne = {convert(race[i],pEvolutions)[k]};
+            results.push_back(newOne);
         }
 
         // general case
         for (int j = 0; j < resultSize; j++){
-            std::shared_ptr<GameState> currentState = results->at(j);
-            for (int k = 0; k < possibleMoves.size(); k++){
-                results->push_back(applyEvolution(*currentState, possibleMoves[k]));
+            std::vector<std::shared_ptr<GroupEvolution>> root = results.at(j);
+            for (int k = 0; k < pEvolutions->size(); k++){
+                //results->push_back(applyEvolutions(*currentState, (*pEvolutions)[k])));
+                root.push_back(convert(race[i],pEvolutions)[k]);
+                results.push_back(root);
             }
         }
     }
 
     return results;
-}*/
+}
 
 std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> GameState::possibleEvolutions(std::shared_ptr<Group> group){
     std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleMoves = std::make_shared<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>>();

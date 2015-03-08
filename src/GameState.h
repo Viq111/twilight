@@ -54,10 +54,11 @@ public:
     static int n;
 	static int m;
 
-    // Compute all the possible evolution of a given group
-    // its a list of moves : for instance two guys go right, three go down
-    // [WARNING] THE "NO ONE MOVES" POSSIBILITY MUST NOT BE CONSIDERED
+    // Compute all the possible evolutions of a given group or race
+    // [WARNING] To conform servor rules, the "no one moves" possibilty must be avoided.
     std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolutions(std::shared_ptr<Group> group);
+
+    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> possibleEvolutions(std::vector<Group> race);
 
     // Multiplication factor used in all scoring operations
     static int opsFactor;
@@ -94,7 +95,7 @@ public:
     static int racePopulation(std::vector<Group> groupsOfRace);
 
     // Generate children for alpha_beta algo
-    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> getChildren();
+    std::shared_ptr<std::vector<GameState*>> getChildren(bool itsAlliesTurn);
 
     // Calculate score
     int getScore();

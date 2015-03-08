@@ -346,23 +346,18 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
     for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
         for (Move move : gEvol->moves) {
             Group group = gEvol->group;
-            switch (move.dir) {
-                case Right : group.x++; break;
-                case Left: group.x--; break;
-                case Up: group.y++; break;
-                case Down: group.y--; break;
-                case UpRight: group.x++; group.y++; break;
-                case UpLeft: group.x--; group.y++; break;
-                case DownRight: group.x++; group.y--; break;
-                case DownLeft: group.x--; group.y--; break;
-            }
-
             // la groupEvolution n'est appliquée que si le depart n'est pas une arrivée
-            if (!arrivalPositions[gEvol->group.x + n*gEvol->group.y])
-            {
-                gEvol->group.x = gEvol->group.x + deltaX;
-                gEvol->group.y = gEvol->group.y + deltaY;
-
+            if (!arrivalPositions[gEvol->group.x + n*gEvol->group.y]){
+                switch (move.dir) {
+                    case Right : group.x++; break;
+                    case Left: group.x--; break;
+                    case Up: group.y++; break;
+                    case Down: group.y--; break;
+                    case UpRight: group.x++; group.y++; break;
+                    case UpLeft: group.x--; group.y++; break;
+                    case DownRight: group.x++; group.y--; break;
+                    case DownLeft: group.x--; group.y--; break;
+                }
                 arrivalPositions[gEvol->group.x + n*gEvol->group.y] = true;
             }
         }   

@@ -368,35 +368,117 @@ std::vector<std::shared_ptr<GroupEvolution>> GameState::getOperationOfGeneration
 
 void GameState::resolve(GameState* state)
 {
-    /*
-    for (Group group : allies)
+    //allies fusion   
+    for (int i = 0; i < allies.size(); i++)
     {
-        int x = group.x;
-        int y = group.y;
-
-        for (Group ally : allies)
+        for (int j = (i + 1); j < allies.size(); j++)
         {
-            if (ally.x == x && ally.y == y)
+            if (allies[i].x == allies[j].x && allies[i].y == allies[j].y)
             {
-                // TODO regroupement
-            }
-        }
-        for (Group enemy : enemies)
-        {
-            if (enemy.x == x && enemy.y == y)
-            {
-                // TODO battle
-            }
-        }
-        for (Group human : humans)
-        {
-            if (human.x == x && human.y == y)
-            {
-                // TODO meal
+                allies[i].count += allies[j].count;
+                allies.erase(allies.begin() + j);
+                j--;
             }
         }
     }
-    */
+    //enemies fusion
+    for (int i = 0; i < enemies.size(); i++)
+    {
+        for (int j = (i + 1); j < enemies.size(); j++){
+            if (enemies[i].x == enemies[j].x && enemies[i].y == enemies[j].y){
+                enemies[i].count += enemies[j].count;
+                enemies.erase(enemies.begin() + j);
+                j--;
+            }
+        }
+    }
+    //allies-enemies battles
+    for (int i = 0; i < allies.size(); i++){
+        for (int j = 0; j < enemies.size(); j++){
+            if (allies[i].x == enemies[j].x && allies[i].y == enemies[j].y){
+                if (allies[i].count == enemies[j].count){
+                    //the two groups disapear
+                    allies.erase(allies.begin() + i);
+                    i--;
+                    enemies.erase(enemies.begin() + j);
+                    j--;
+                }
+                else if (allies[i].count >= (1.5 * enemies[j].count)){
+                    //allies automaticly wined :) !!
+                    enemies.erase(enemies.begin() + j);
+                    j--;
+                }
+                else if (enemies[j].count >= (1.5 * allies[i].count)){
+                    //enemy automaticly wined :( ...
+                    allies.erase(allies.begin() + i);
+                    i--;
+                }
+                else {
+                    //the allies are more likely to win
+                    int averageSurvivorsMultByTot = ((allies[i].count + 1) * allies[i].count) - ((enemies[j].count + 1) * enemies[j].count);
+                    if (averageSurvivorsMultByTot > 0){
+                        //allies wined :) !!
+                        allies[i].count = (averageSurvivorsMultByTot / (allies[i].count + enemies[j].count));
+                        enemies.erase(enemies.begin() + j);
+                        j--;
+                    }
+                    else if (averageSurvivorsMultByTot < 0){
+                        //enemy wined :( ... That is only an hypothetic case, anyway...
+                        enemies[j].count = -(averageSurvivorsMultByTot / (allies[i].count + enemies[j].count));
+                        allies.erase(allies.begin() + i);
+                        i--;
+                    }
+                    else{
+                        //it shouldn't happend
+                        //the two groups disapear, as if they had the same number of people
+                        allies.erase(allies.begin() + i);
+                        i--;
+                        enemies.erase(enemies.begin() + j);
+                        j--;
+                    }
+                }
+            }
+        }
+    }
+    //humans battles...
+    for (int i = 0; i < humans.size(); i++){
+        //...against allies
+        for (int j = 0; j < allies.size(); j++){
+            if (humans[i].x == allies[j].x && humans[i].y == allies[j].y){
+                if (allies[j].count >= humans[i].count){
+                    allies[j].count += humans[i].count;
+                    humans.erase(humans.begin() + i);
+                    i--;
+                }
+                else{
+                    int averageSurvivorsMultByTot = ((humans[i].count + 1) * humans[i].count) - ((allies[j].count + 1) * allies[j].count);
+                    humans[i].count = averageSurvivorsMultByTot / (humans[i].count + allies[j].count);
+                    allies.erase(allies.begin() + j);
+                    j--;
+                }
+            }
+        }
+        //... and against enemies
+        for (int j = 0; j < enemies.size(); j++){
+            if (humans[i].x == enemies[j].x && humans[i].y == enemies[j].y){
+                if (enemies[j].count >= humans[i].count){
+                    enemies[j].count += humans[i].count;
+                    humans.erase(humans.begin() + i);
+                    i--;
+                }
+                else{
+                    int averageSurvivorsMultByTot = ((humans[i].count + 1) * humans[i].count) - ((enemies[j].count + 1) * enemies[j].count);
+                    humans[i].count = averageSurvivorsMultByTot / (humans[i].count + enemies[j].count);
+                    enemies.erase(enemies.begin() + j);
+                    j--;
+                }
+            }
+        }
+    }
+
+    //A more efficient, but more complex code for the beginning of this function.
+    //It may be used later to enhance this function
+    /*
     std::vector<std::vector<std::pair<int, Group *>>> allGroups(n*m);
     std::vector<int> globalConflictualPositions;
 
@@ -405,29 +487,29 @@ void GameState::resolve(GameState* state)
     std::vector<int> alliesConflictualPositions;
     std::vector<std::vector<std::pair<int, Group *>>> alliesGroups(n*m);
     for (int i = 0; i < allies.size(); i++){
-        int vectorPosistion = allies[i].x + n*allies[i].y;
-        if (alliesGroups[vectorPosistion].size() == 1){
-            //there is already someone there and this is the first time we see it => this is a NEW conflict
-            alliesConflictualPositions.push_back(vectorPosistion);
-        }
-        alliesGroups[vectorPosistion].push_back(std::make_pair(i, &(allies[i])));
+    int vectorPosistion = allies[i].x + n*allies[i].y;
+    if (alliesGroups[vectorPosistion].size() == 1){
+    //there is already someone there and this is the first time we see it => this is a NEW conflict
+    alliesConflictualPositions.push_back(vectorPosistion);
+    }
+    alliesGroups[vectorPosistion].push_back(std::make_pair(i, &(allies[i])));
     }
     //resolve allies conflicts
     for (int i = 0; i < alliesConflictualPositions.size(); i++){
-        std::vector<std::pair<int, Group *>> toMerge = alliesGroups[alliesConflictualPositions[i]];
-        Group* newGroup = toMerge[0].second;
-        for (int j = 1; j < toMerge.size(); j++){
-            newGroup->count += toMerge[j].second->count;
-        }
-        newAllies.push_back(newGroup);
-        allGroups[toMerge[0].first].push_back(toMerge[0]);
+    std::vector<std::pair<int, Group *>> toMerge = alliesGroups[alliesConflictualPositions[i]];
+    Group* newGroup = toMerge[0].second;
+    for (int j = 1; j < toMerge.size(); j++){
+    newGroup->count += toMerge[j].second->count;
+    }
+    newAllies.push_back(newGroup);
+    allGroups[toMerge[0].first].push_back(toMerge[0]);
     }
     //add those whithout conflict
     for (int i = 0; i < allies.size(); i++){
-        if (alliesGroups[allies[i].x + n*allies[i].y].size() == 1){
-            newAllies.push_back(alliesGroups[allies[i].x + n*allies[i].y][0].second);
-            allGroups[allies[i].x + n*allies[i].y].push_back(std::make_pair(allies[i].x + n*allies[i].y, &(allies[i])));
-        }
+    if (alliesGroups[allies[i].x + n*allies[i].y].size() == 1){
+    newAllies.push_back(alliesGroups[allies[i].x + n*allies[i].y][0].second);
+    allGroups[allies[i].x + n*allies[i].y].push_back(std::make_pair(allies[i].x + n*allies[i].y, &(allies[i])));
+    }
     }
 
     //record enemis conflicts
@@ -435,39 +517,39 @@ void GameState::resolve(GameState* state)
     std::vector<int> enemisConflictualPositions;
     std::vector<std::vector<std::pair<int, Group *>>> enemisGroups(n*m);
     for (int i = 0; i < enemies.size(); i++){
-        int vectorPosistion = enemies[i].x + n*enemies[i].y;
-        if (enemisGroups[vectorPosistion].size() == 1){
-            //there is already someone there and this is the first time we see it => this is a NEW conflict
-            enemisConflictualPositions.push_back(vectorPosistion);
-        }
-        enemisGroups[vectorPosistion].push_back(std::make_pair(i, &(enemies[i])));
+    int vectorPosistion = enemies[i].x + n*enemies[i].y;
+    if (enemisGroups[vectorPosistion].size() == 1){
+    //there is already someone there and this is the first time we see it => this is a NEW conflict
+    enemisConflictualPositions.push_back(vectorPosistion);
+    }
+    enemisGroups[vectorPosistion].push_back(std::make_pair(i, &(enemies[i])));
     }
     //resolve enemis conflicts and record some globalConflicts
     for (int i = 0; i < enemisConflictualPositions.size(); i++){
-        std::vector<std::pair<int, Group *>> toMerge = enemisGroups[enemisConflictualPositions[i]];
-        Group* newGroup = toMerge[0].second;
-        for (int j = 1; j < toMerge.size(); j++){
-            newGroup->count += toMerge[j].second->count;
-        }
-        newEnemis.push_back(newGroup);
-        if (allGroups[toMerge[0].first].size() == 1){
-            globalConflictualPositions.push_back(toMerge[0].first);
-        }
-        allGroups[toMerge[0].first].push_back(toMerge[0]);
+    std::vector<std::pair<int, Group *>> toMerge = enemisGroups[enemisConflictualPositions[i]];
+    Group* newGroup = toMerge[0].second;
+    for (int j = 1; j < toMerge.size(); j++){
+    newGroup->count += toMerge[j].second->count;
+    }
+    newEnemis.push_back(newGroup);
+    if (allGroups[toMerge[0].first].size() == 1){
+    globalConflictualPositions.push_back(toMerge[0].first);
+    }
+    allGroups[toMerge[0].first].push_back(toMerge[0]);
     }
     //add those whithout conflict and record the other allied-enemis globalConflicts, only conflicts with humans will remain
     for (int i = 0; i < enemies.size(); i++){
-        if (enemisGroups[enemies[i].x + n*enemies[i].y].size() == 1){
-            newEnemis.push_back(enemisGroups[enemies[i].x + n*enemies[i].y][0].second);
-            if (allGroups[enemies[i].x + n*enemies[i].y].size() == 1){
-                globalConflictualPositions.push_back(enemies[i].x + n*enemies[i].y);
-            }
-            allGroups[enemies[i].x + n*enemies[i].y].push_back(std::make_pair(enemies[i].x + n*enemies[i].y, &(enemies[i])));
-        }
+    if (enemisGroups[enemies[i].x + n*enemies[i].y].size() == 1){
+    newEnemis.push_back(enemisGroups[enemies[i].x + n*enemies[i].y][0].second);
+    if (allGroups[enemies[i].x + n*enemies[i].y].size() == 1){
+    globalConflictualPositions.push_back(enemies[i].x + n*enemies[i].y);
+    }
+    allGroups[enemies[i].x + n*enemies[i].y].push_back(std::make_pair(enemies[i].x + n*enemies[i].y, &(enemies[i])));
+    }
     }
 
     //resolve conflicts between allies and enemis
-    /*
+
     for (int i = 0; i < globalConflictualPositions.size(); i++){
     std::vector<std::pair<int, Group *>> toMerge = allGroups[globalConflictualPositions[i]];
     Group* newGroup = toMerge[0].second;
@@ -478,7 +560,5 @@ void GameState::resolve(GameState* state)
     allGroups[toMerge[0].first].push_back(toMerge[0]);
     }
     */
-
-    //resolve conflicts with humans
 }
 

@@ -64,10 +64,12 @@ int main(int argc, char* argv[])
 	socket->connect(ip, port, "Edward");
 
 	// Create the MoveManager with the root node
-	MoveManager mm(nbCores);
-	mm.setSocket(std::move(socket));
+    MoveManager mm;
+    mm.mainloop(std::move(socket));
+	//MoveManager mm(nbCores);
+	//mm.setSocket(std::move(socket));
 
-	mm.mainloop();
+	//mm.mainloop();
 	return 0;
 }
 

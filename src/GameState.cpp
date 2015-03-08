@@ -374,6 +374,32 @@ std::vector<std::shared_ptr<GroupEvolution>> GameState::getOperationOfGeneration
 
 void GameState::resolve(GameState* state)
 {
-    //TODO
+    for (Group group : allies)
+    {
+        int x = group.x;
+        int y = group.y;
+
+        for (Group ally : allies)
+        {
+            if (ally.x == x && ally.y == y)
+            {
+                // TODO regroupement
+            }
+        }
+        for (Group enemy : enemies)
+        {
+            if (enemy.x == x && enemy.y == y)
+            {
+                // TODO battle
+            }
+        }
+        for (Group human : humans)
+        {
+            if (human.x == x && human.y == y)
+            {
+                // TODO meal
+            }
+        }
+    }
 }
 

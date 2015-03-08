@@ -23,7 +23,6 @@ struct Group {
     int x;
     int y;
     int count;
-    bool hasAlreadyMoved;
 };
 
 enum Direction {
@@ -93,14 +92,15 @@ public:
     std::vector<Group> humans;
     std::vector<Group> enemies;
 
+    // How to access this state from his parents in alpha-beta tree
+    std::vector<std::shared_ptr<GroupEvolution>> getOperationOfGeneration();
+
+
     // Utility method to sum the populations of groups
     static int racePopulation(std::vector<Group> groupsOfRace);
 
     // Generate children for alpha_beta algo
     std::shared_ptr<std::vector<std::shared_ptr<GameState>>> getChildren();
-
-    // How to access this state from his parents in alpha-beta tree
-    std::vector<Move> accessiblesViaMoves;
 
     // Calculate score
     int getScore();
@@ -111,6 +111,10 @@ private:
     // Useful to avoid impossible moves
     std::vector<std::vector<bool>> departurePositions;
     std::vector<std::vector<bool>> arrivalPositions;
+
+    // How to access this state from his parents in alpha-beta tree
+    std::vector<std::shared_ptr<GroupEvolution>> operationOfGeneration;
+
 
     // Apply a list of evolutions to a given copied GameState to create a new one
     GameState* applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);

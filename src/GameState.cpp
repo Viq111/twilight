@@ -74,7 +74,7 @@ int GameState::getScore() {
 
     for (int i = 0; i < allies.size(); i++){
         const int resultSize = results->size();
-        std::vector<Move> possibleMoves = possibleEvolution(std::make_shared<Group>(allies[i]));
+        std::vector<Move> possibleMoves = possibleEvolutions(std::make_shared<Group>(allies[i]));
 
         // particular case "no one moved yet" (so we have to move). "this" is the root of it.
         for (int k = 0; k < possibleMoves.size(); k++){
@@ -338,6 +338,8 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
 {
     GameState* updatedState = new GameState(*intial);
 
+    updatedState->operationOfGeneration = evolutions;
+
     for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
         for (Move move : gEvol->moves) {
             int deltaX, deltaY;
@@ -364,6 +366,11 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
     resolve(updatedState);
     return updatedState;
 }
+
+std::vector<std::shared_ptr<GroupEvolution>> GameState::getOperationOfGeneration()
+{
+    return operationOfGeneration;
+};
 
 void GameState::resolve(GameState* state)
 {

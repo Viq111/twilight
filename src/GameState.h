@@ -108,9 +108,8 @@ public:
     // For visualisation/debug purpose
     void print();
 private:
-    // Useful to avoid impossible moves
-    std::vector<std::vector<bool>> departurePositions;
-    std::vector<std::vector<bool>> arrivalPositions;
+    // Useful to avoid impossible moves, indexation = x + n*y
+    std::vector<bool> arrivalPositions;
 
     // How to access this state from his parents in alpha-beta tree
     std::vector<std::shared_ptr<GroupEvolution>> operationOfGeneration;

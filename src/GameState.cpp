@@ -341,6 +341,7 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
     GameState* updatedState = new GameState(*intial);
 
     updatedState->operationOfGeneration = evolutions;
+    updatedState->arrivalPositions = std::vector<bool>(n*(m+1),false); 
 
     for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
         for (Move move : gEvol->moves) {
@@ -356,13 +357,14 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
                 case DownLeft : deltaX = -1; deltaY = -1; break;
             }
 
-            Group group = gEvol->group;
+            // la groupEvolution n'est appliquée que si le depart n'est pas une arrivée
+            if (!arrivalPositions[gEvol->group.x + n*gEvol->group.y])
+            {
+                gEvol->group.x = gEvol->group.x + deltaX;
+                gEvol->group.y = gEvol->group.y + deltaY;
 
-            int newX = group.x + deltaX;
-            int newY = group.y + deltaY;
-
-            group.x = newX;
-            group.y = newY;
+                arrivalPositions[gEvol->group.x + n*gEvol->group.y] = true;
+            }
         }   
     }
     resolve(updatedState);
@@ -404,7 +406,7 @@ void GameState::resolve(GameState* state)
             }
         }
     }
-    */
+    */ 
     std::vector<std::vector<std::pair<int, Group *>>> allGroups(n*m);
     std::vector<int> globalConflictualPositions;
 

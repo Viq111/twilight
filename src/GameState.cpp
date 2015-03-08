@@ -349,14 +349,14 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
             // la groupEvolution n'est appliquée que si le depart n'est pas une arrivée
             if (!arrivalPositions[gEvol->group.x + n*gEvol->group.y]){
                 switch (move.dir) {
-                    case Right : group.x++; break;
-                    case Left: group.x--; break;
-                    case Up: group.y++; break;
-                    case Down: group.y--; break;
-                    case UpRight: group.x++; group.y++; break;
-                    case UpLeft: group.x--; group.y++; break;
-                    case DownRight: group.x++; group.y--; break;
-                    case DownLeft: group.x--; group.y--; break;
+                    case Right : gEvol->group.x++; break;
+                    case Left: gEvol->group.x--; break;
+                    case Up: gEvol->group.y++; break;
+                    case Down: gEvol->group.y--; break;
+                    case UpRight: gEvol->group.x++; gEvol->group.y++; break;
+                    case UpLeft: gEvol->group.x--; gEvol->group.y++; break;
+                    case DownRight: gEvol->group.x++; gEvol->group.y--; break;
+                    case DownLeft: gEvol->group.x--; gEvol->group.y--; break;
                 }
                 arrivalPositions[gEvol->group.x + n*gEvol->group.y] = true;
             }

@@ -71,9 +71,6 @@ public:
 
 	// Constructor
 	GameState(); // Create an empty game for Benchmarking
-	GameState(	std::vector<Group> allies,
-				std::vector<Group> humans,
-				std::vector<Group> enemies);
 
     GameState(std::vector<Group> allies,
         std::vector<Group> humans,

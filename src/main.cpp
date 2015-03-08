@@ -115,13 +115,11 @@ int testGameStatePossibleEvolution(){
     std::shared_ptr<Group> g = std::make_shared<Group>();
     g->x = 5;
     g->y = 5;
-    g->hasAlreadyMoved = false;
     std::vector<Group> humans;
     for (int i = 1; i < 5; i++){        //min = 5
         Group h;
         h.x = 5;
         h.y = 5;
-        h.hasAlreadyMoved = false;
         h.count = (2 * i) + 1;
         humans.push_back(h);
     }
@@ -130,7 +128,6 @@ int testGameStatePossibleEvolution(){
         Group e;
         e.x = 5;
         e.y = 5;
-        e.hasAlreadyMoved = false;
         e.count = (2 * i) + 1;
         ennemies.push_back(e);
     }

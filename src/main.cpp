@@ -27,7 +27,6 @@ int testGameStateWorkflow();
 
 int main(int argc, char* argv[])
 {
-    testGameStateWorkflow();
 
 	// Parse the arguments
 	std::vector<std::string> params(argv, argv + argc);

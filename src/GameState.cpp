@@ -344,25 +344,17 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
 
     for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
         for (Move move : gEvol->moves) {
-            int deltaX, deltaY;
-            switch (move.dir) {
-                case Right : deltaX = +1; deltaY = 0; break;
-                case Left : deltaX = -1; deltaY = 0; break;
-                case Up : deltaX = 0; deltaY = +1; break;
-                case Down : deltaX = 0; deltaY = -1; break;
-                case UpRight : deltaX = +1; deltaY = +1; break;
-                case UpLeft : deltaX = -1; deltaY = +1; break;
-                case DownRight : deltaX = +1; deltaY = -1; break;
-                case DownLeft : deltaX = -1; deltaY = -1; break;
-            }
-
             Group group = gEvol->group;
-
-            int newX = group.x + deltaX;
-            int newY = group.y + deltaY;
-
-            group.x = newX;
-            group.y = newY;
+            switch (move.dir) {
+                case Right : group.x++; break;
+                case Left: group.x--; break;
+                case Up: group.y++; break;
+                case Down: group.y--; break;
+                case UpRight: group.x++; group.y++; break;
+                case UpLeft: group.x--; group.y++; break;
+                case DownRight: group.x++; group.y--; break;
+                case DownLeft: group.x--; group.y--; break;
+            }
         }   
     }
     resolve(updatedState);

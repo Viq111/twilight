@@ -18,17 +18,15 @@ void GameState::setBoardSize(int n_, int m_)
 	m = m_;
 }
 
-GameState::GameState() : alliesCount(0), humansCount(0), enemiesCount(0) {}
+GameState::GameState(){} // for benchmarking purpose
+
 GameState::GameState(
 	std::vector<Group> allies,
 	std::vector<Group> humans,
 	std::vector<Group> enemies)
 	: allies(allies),
 	  humans(humans),
-	  enemies(enemies),
-	  alliesCount(racePopulation(allies)),
-      humansCount(racePopulation(humans)),
-      enemiesCount(racePopulation(enemies))
+	  enemies(enemies)
 {
     if (!GameState::n || !GameState::m) {
         throw "GameState_board_size_not_initialized";
@@ -37,6 +35,10 @@ GameState::GameState(
 
 // TODO: add coefficients (by machine learning or manual benchmarking)
 int GameState::getScore() {
+
+    int alliesCount = racePopulation(allies);
+    int enemiesCount = racePopulation(enemies);
+
     int score = -(opsFactor * allies.size());
 
 	// Number of allies and enemies

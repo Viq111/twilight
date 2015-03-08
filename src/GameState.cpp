@@ -306,7 +306,7 @@ void GameState::print(){
                 }
             }
 
-            if (!empty){
+            if (empty){
                 for (Group group : enemies) {
                     if (group.x == x && group.y == y) {
                         std::cout << "E ";
@@ -316,7 +316,7 @@ void GameState::print(){
                     }
                 }
 
-                if (!empty){
+                if (empty){
                     for (Group group : humans) {
                         if (group.x == x && group.y == y) {
                             std::cout << "H ";

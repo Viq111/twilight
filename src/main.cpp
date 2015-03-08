@@ -23,9 +23,12 @@ int getNbCores()
 // tests for GameState
 void testGameState();
 int testGameStatePossibleEvolution();
+int testGameStateWorkflow();
 
 int main(int argc, char* argv[])
 {
+    testGameStateWorkflow();
+
 	// Parse the arguments
 	std::vector<std::string> params(argv, argv + argc);
 
@@ -141,6 +144,49 @@ int testGameStatePossibleEvolution(){
     }
     std::cout << "after" << std::endl;
     system("PAUSE");
+
+    return 0;
+}
+
+int testGameStateWorkflow(){
+
+    GameState::n = 5;
+    GameState::m = 2;
+
+    std::vector<Group> humans, enemies, allies;
+    Group e, a1, a2, h;
+
+    /*
+    **  after initialization:
+    **  |..|..|A2|..|..|
+    **  |..|E1|A1|H |..|
+    */
+
+    e.x = 1;
+    e.y = 0;
+    e.count = 1;
+    enemies.push_back(e);
+
+    a1.x = 2;
+    a1.y = 0;
+    a1.count = 1;
+    allies.push_back(a1);
+
+    a2.x = 2;
+    a2.y = 1;
+    a2.count = 2;
+    allies.push_back(a2);
+
+    h.x = 3;
+    h.y = 0;
+    h.count = 1;
+    humans.push_back(h);
+
+
+
+    GameState* gState = new GameState(allies, humans, enemies);
+    std::cout << gState->humans[0].count << std::endl;
+    gState->print();
 
     return 0;
 }

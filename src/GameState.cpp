@@ -1,6 +1,8 @@
 #include "GameState.h"
 #include "standardFunctions.h"
 #include <math.h>
+#include <map>
+#include <utility>
 
 // Default board size
 int GameState::n = 10;
@@ -367,6 +369,89 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
 
 void GameState::resolve(GameState* state)
 {
-    //TODO
+    std::vector<std::vector<std::pair<int, Group *>>> allGroups(n*m);
+    std::vector<int> globalConflictualPositions;
+
+    //record allied conflicts
+    std::vector<Group *> newAllies;
+    std::vector<int> alliesConflictualPositions;
+    std::vector<std::vector<std::pair<int, Group *>>> alliesGroups(n*m);
+    for (int i = 0; i < allies.size(); i++){
+        int vectorPosistion = allies[i].x + n*allies[i].y;
+        if (alliesGroups[vectorPosistion].size() == 1){
+            //there is already someone there and this is the first time we see it => this is a NEW conflict
+            alliesConflictualPositions.push_back(vectorPosistion);
+        }
+        alliesGroups[vectorPosistion].push_back(std::make_pair(i, &(allies[i])));
+    }
+
+    //resolve allies conflicts
+    for (int i = 0; i < alliesConflictualPositions.size(); i++){
+        std::vector<std::pair<int, Group *>> toMerge = alliesGroups[alliesConflictualPositions[i]];
+        Group* newGroup = toMerge[0].second;
+        for (int j = 1; j < toMerge.size(); j++){
+            newGroup->count += toMerge[j].second->count;
+        }
+        newAllies.push_back(newGroup);
+        allGroups[toMerge[0].first].push_back(toMerge[0]);
+    }
+    //add those whithout conflict
+    for (int i = 0; i < allies.size(); i++){
+        if (alliesGroups[allies[i].x + n*allies[i].y].size() == 1){
+            newAllies.push_back(alliesGroups[allies[i].x + n*allies[i].y][0].second);
+            allGroups[allies[i].x + n*allies[i].y].push_back(std::make_pair(allies[i].x + n*allies[i].y, &(allies[i])));
+        }
+    }
+    
+    //record enemis conflicts
+    std::vector<Group *> newEnemis;
+    std::vector<int> enemisConflictualPositions;
+    std::vector<std::vector<std::pair<int, Group *>>> enemisGroups(n*m);
+    for (int i = 0; i < enemies.size(); i++){
+        int vectorPosistion = enemies[i].x + n*enemies[i].y;
+        if (enemisGroups[vectorPosistion].size() == 1){
+            //there is already someone there and this is the first time we see it => this is a NEW conflict
+            enemisConflictualPositions.push_back(vectorPosistion);
+        }
+        enemisGroups[vectorPosistion].push_back(std::make_pair(i, &(enemies[i])));
+    }
+    //resolve enemis conflicts and record some globalConflicts
+    for (int i = 0; i < enemisConflictualPositions.size(); i++){
+        std::vector<std::pair<int, Group *>> toMerge = enemisGroups[enemisConflictualPositions[i]];
+        Group* newGroup = toMerge[0].second;
+        for (int j = 1; j < toMerge.size(); j++){
+            newGroup->count += toMerge[j].second->count;
+        }
+        newEnemis.push_back(newGroup);
+        if (allGroups[toMerge[0].first].size() == 1){
+            globalConflictualPositions.push_back(toMerge[0].first);
+        }
+        allGroups[toMerge[0].first].push_back(toMerge[0]);
+    }
+    //add those whithout conflict and record the other allied-enemis globalConflicts, only conflicts with humans will remain
+    for (int i = 0; i < enemies.size(); i++){
+        if (enemisGroups[enemies[i].x + n*enemies[i].y].size() == 1){
+            newEnemis.push_back(enemisGroups[enemies[i].x + n*enemies[i].y][0].second);
+            if (allGroups[enemies[i].x + n*enemies[i].y].size() == 1){
+                globalConflictualPositions.push_back(enemies[i].x + n*enemies[i].y);
+            }
+            allGroups[enemies[i].x + n*enemies[i].y].push_back(std::make_pair(enemies[i].x + n*enemies[i].y, &(enemies[i])));
+        }
+    }
+    
+    //resolve conflicts between allies and enemis
+    /*
+    for (int i = 0; i < globalConflictualPositions.size(); i++){
+        std::vector<std::pair<int, Group *>> toMerge = allGroups[globalConflictualPositions[i]];
+        Group* newGroup = toMerge[0].second;
+        for (int j = 1; j < toMerge.size(); j++){
+            newGroup->count += toMerge[j].second->count;
+        }
+        newAllies.push_back(newGroup);
+        allGroups[toMerge[0].first].push_back(toMerge[0]);
+    }
+    */
+
+    //resolve conflicts with humans
 }
 

@@ -186,6 +186,6 @@ int testGameStateWorkflow(){
     GameState* gState = new GameState(allies, humans, enemies);
     std::cout << gState->humans[0].count << std::endl;
     gState->print();
-
+    system("PAUSE");
     return 0;
 }

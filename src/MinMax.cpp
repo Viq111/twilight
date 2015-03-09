@@ -68,12 +68,18 @@ int MinMax::proceedMinMax(std::shared_ptr<Node> current, int depth, int alpha, i
 
 //fonction alpha-beta recursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
 int MinMax::maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth){
-    if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring
+    if (depth <= 0){
+        //on est arrive au bout du parcours => scoring
+        //more complex scoring ?
         return current->getScore();
     }
-    std::vector<std::shared_ptr<Node>> children = current->getChildren();  //getReverseSortedChildren()
-    for (int i = 0; i < children.size(); i++){
-        alpha = std::max(alpha, minValue(children[i], alpha, beta, depth - 1));
+    else if (current->getChildren(true).size() <= 0){
+        //on est arrive sur un noeud sans fils (probablement victoire ou défaite) => scoring
+        return current->getScore();
+    }
+    std::vector<std::shared_ptr<Node>> children = current->getReverseSortedChildren(true);  //getChildren()
+    for (std::shared_ptr<Node> child : children){
+        alpha = std::max(alpha, minValue(child, alpha, beta, depth - 1));
         if (alpha >= beta){
             return beta;
         }
@@ -83,12 +89,19 @@ int MinMax::maxValue(std::shared_ptr<Node> current, int alpha, int beta, int dep
 
 //fonction alpha-beta recursive simple : minValue (cf. Chapitre 4 : Jeux, slide 66)
 int MinMax::minValue(std::shared_ptr<Node> current, int alpha, int beta, int depth){
-    if ((depth <= 0) || (current->getChildren().size() == 0)){ //on est arrive au bas de l'arbre, sur "une feuille" => scoring
+    if (depth <= 0){
+        //on est arrive au bout du parcours => scoring
+        //more complex scoring ?
         return current->getScore();
     }
-    std::vector<std::shared_ptr<Node>> children = current->getChildren();  //getSortedChildren()
-    for (int i = 0; i < children.size(); i++){
-        beta = std::min(beta, maxValue(children[i], alpha, beta, depth - 1));
+    else if (current->getChildren(false).size() <= 0){
+        //on est arrive sur un noeud sans fils (probablement victoire ou défaite) => scoring
+        return current->getScore();
+    }
+
+    std::vector<std::shared_ptr<Node>> children = current->getSortedChildren(false);  //getChildren()
+    for (std::shared_ptr<Node> child : children){
+        beta = std::min(beta, maxValue(child, alpha, beta, depth - 1));
         if (alpha >= beta){
             return alpha;
         }
@@ -100,7 +113,7 @@ int MinMax::testNodePointersDesalocation(int nbIterations){
     std::shared_ptr<Node> rootNode = std::make_shared<Node>();
     for (int i = 0; i < nbIterations; i++){
         rootNode = testTree(2, 150, 2, rootNode);
-        rootNode = rootNode->getChildren().at(0);
+        rootNode = rootNode->getChildren(true).at(0);
         std::cout << i << std::endl;
     }
     system("PAUSE");

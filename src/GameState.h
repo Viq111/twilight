@@ -103,7 +103,7 @@ private:
 
     // Compute all the possible evolutions of a given group or race
     // [WARNING] To conform servor rules, the "no one moves" possibilty must be avoided.
-    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolutions(std::shared_ptr<Group> group);
+    std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>> possibleEvolutions(Group& group);
 
     std::vector<std::vector<std::shared_ptr<GroupEvolution>>> possibleEvolutions(std::vector<Group> race);
 

@@ -114,9 +114,9 @@ void testGameState()
 int testGameStatePossibleEvolution(){
 
     GameState* test = new GameState();
-    std::shared_ptr<Group> g = std::make_shared<Group>();
-    g->x = 5;
-    g->y = 5;
+    Group g = Group();
+    g.x = 5;
+    g.y = 5;
     std::vector<Group> humans;
     for (int i = 1; i < 5; i++){        //min = 5
         Group h;
@@ -138,8 +138,8 @@ int testGameStatePossibleEvolution(){
 
     std::cout << "before" << std::endl;
     for (int i = 2; i < 10; i++){
-        g->count = i;
-        std::cout << "for " << g->count << " persons in the group, there are " << (test->possibleEvolutions(g))->size() << " possible moves." << std::endl;
+        g.count = i;
+        //std::cout << "for " << g.count << " persons in the group, there are " << (test->possibleEvolutions(g))->size() << " possible moves." << std::endl;
     }
     std::cout << "after" << std::endl;
     system("PAUSE");

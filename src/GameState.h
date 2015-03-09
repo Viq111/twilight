@@ -1,11 +1,3 @@
-//
-//  GameState.h
-//  dataStructures
-//
-//  Created by Damien VIELPEAU on 06/02/2015.
-//  Copyright (c) 2015 Damien VIELPEAU. All rights reserved.
-//
-
 #ifndef INCLUDE_GAMESTATE
 #define INCLUDE_GAMESTATE
 

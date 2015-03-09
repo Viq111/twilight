@@ -35,37 +35,41 @@ int Node::getScore(){
     return score; 
 }
 
-int Node::addChild(std::shared_ptr<Node> child)
+int Node::addChild(std::shared_ptr<Node> child, std::vector<Move> moves)
 {
-    children.push_back(child);
+    children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(child, moves));
     childNotSorted = true;
     return 0;
 }
 
-bool comparaison(std::shared_ptr<Node> first, std::shared_ptr<Node> second)
+bool comparaison(std::pair<std::shared_ptr<Node>, std::vector<Move>> child1, std::pair<std::shared_ptr<Node>, std::vector<Move>> child2)
 {
-    return (first->getScore() < second->getScore());
+    return (child1.first->getScore() < child2.first->getScore());
 }
 
-std::vector<std::shared_ptr<Node>> Node::getChildren(bool itsAlliesTurn)
+std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>>& Node::getChildren(bool itsAlliesTurn)
 {
     if (childNotGet){
         childNotGet = false;
-        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
-        for (int i = 0; i < gameStateChildren->size(); i++){
-            children.push_back(std::make_shared<Node>(gameStateChildren->at(i)));
+        std::vector<std::shared_ptr<GameState>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
+        for (int i = 0; i < gameStateChildren.size(); i++){
+            std::shared_ptr<Node> childNode = std::make_shared<Node>(gameStateChildren[i]);
+            std::vector<Move> childMoves = std::vector<Move>();
+            children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(childNode, childMoves));
         }
     }
     return children;
 }
 
-std::vector<std::shared_ptr<Node>> Node::getSortedChildren(bool itsAlliesTurn)
+std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>>& Node::getSortedChildren(bool itsAlliesTurn)
 {
     if (childNotGet){
         childNotGet = false;
-        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
-        for (int i = 0; i < gameStateChildren->size(); i++){
-            children.push_back(std::make_shared<Node>(gameStateChildren->at(i)));
+        std::vector<std::shared_ptr<GameState>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
+        for (int i = 0; i < gameStateChildren.size(); i++){
+            std::shared_ptr<Node> childNode = std::make_shared<Node>(gameStateChildren[i]);
+            std::vector<Move> childMoves = std::vector<Move>();
+            children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(childNode, childMoves));
         }
     }
     if (childNotSorted){

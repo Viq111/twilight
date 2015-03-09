@@ -28,7 +28,7 @@ std::shared_ptr<Node> MinMax::testTree(int depth, int nbChildMin, int nbChildRan
             int nbChild = nbChildMin + rand() % nbChildRange;
             for (int k = 0; k < nbChild; k++){
                 std::shared_ptr<Node> newLeaf = std::make_shared<Node>();
-                leaves[j]->addChild(newLeaf);
+                leaves[j]->addChild(newLeaf, std::vector<Move>());
                 newLeaves.push_back(newLeaf);
                 nbNodes++;
             }
@@ -77,9 +77,9 @@ int MinMax::maxValue(std::shared_ptr<Node> current, int alpha, int beta, int dep
         //on est arrive sur un noeud sans fils (probablement victoire ou défaite) => scoring
         return current->getScore();
     }
-    std::vector<std::shared_ptr<Node>> children = current->getSortedChildren(true);  //getChildren()
+    std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>> children = current->getSortedChildren(true);  //getChildren()
     for (int i = children.size(); i > 0; i--){
-        alpha = std::max(alpha, minValue(children[i - 1], alpha, beta, depth - 1));
+        alpha = std::max(alpha, minValue(children[i - 1].first, alpha, beta, depth - 1));
         if (alpha >= beta){
             return beta;
         }
@@ -99,9 +99,9 @@ int MinMax::minValue(std::shared_ptr<Node> current, int alpha, int beta, int dep
         return current->getScore();
     }
 
-    std::vector<std::shared_ptr<Node>> children = current->getSortedChildren(false);  //getChildren()
-    for (std::shared_ptr<Node> child : children){
-        beta = std::min(beta, maxValue(child, alpha, beta, depth - 1));
+    std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>> children = current->getSortedChildren(false);  //getChildren()
+    for (std::pair<std::shared_ptr<Node>, std::vector<Move>> child : children){
+        beta = std::min(beta, maxValue(child.first, alpha, beta, depth - 1));
         if (alpha >= beta){
             return alpha;
         }
@@ -113,7 +113,7 @@ int MinMax::testNodePointersDesalocation(int nbIterations){
     std::shared_ptr<Node> rootNode = std::make_shared<Node>();
     for (int i = 0; i < nbIterations; i++){
         rootNode = testTree(2, 150, 2, rootNode);
-        rootNode = rootNode->getChildren(true).at(0);
+        rootNode = rootNode->getChildren(true).at(0).first;
         std::cout << i << std::endl;
     }
     system("PAUSE");

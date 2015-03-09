@@ -10,6 +10,7 @@
 #include <time.h>
 #include "Node.h"
 #include <memory>
+#include <climits>
 
 class MinMax
 {
@@ -17,9 +18,10 @@ public:
 	MinMax(); //to test MinMax on random trees
     static int testNodePointersDesalocation(int nbIterations);
     static int proceedMinMax(std::shared_ptr<Node> current, int depth, bool beginWithMin);
+    static int proceedMinMax(std::shared_ptr<Node> current, int depth, int alpha, int beta, bool beginWithMin);
+private:
     static int minValue(std::shared_ptr<Node> current, int alpha, int beta, int depth);
     static int maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth);
-protected:
     static std::shared_ptr<Node> testTree(int depth, int nbChildMin, int nbChildRange, std::shared_ptr<Node> rootNode);
 };
 

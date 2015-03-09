@@ -1,6 +1,5 @@
 #include "MinMax.h"
 
-
 MinMax::MinMax()
 {
     srand(time(NULL));
@@ -43,10 +42,26 @@ std::shared_ptr<Node> MinMax::testTree(int depth, int nbChildMin, int nbChildRan
 int MinMax::proceedMinMax(std::shared_ptr<Node> current, int depth, bool beginWithMin){
     int result = 0;
     if (beginWithMin){
-        result = minValue(current, -1000000, 1000000, depth);
+        result = minValue(current, -INT_MAX, INT_MAX, depth);
     }
     else{
-        result = maxValue(current, -1000000, 1000000, depth);
+        result = maxValue(current, -INT_MAX, INT_MAX, depth);
+    }
+    return result;
+}
+
+int MinMax::proceedMinMax(std::shared_ptr<Node> current, int depth, int alpha, int beta, bool beginWithMin){
+    int result = 0;
+    if (alpha < beta){
+        if (beginWithMin){
+            result = minValue(current, alpha, beta, depth);
+        }
+        else{
+            result = maxValue(current, -INT_MAX, INT_MAX, depth);
+        }
+    }
+    else{
+        result = proceedMinMax(current, depth, beginWithMin);
     }
     return result;
 }

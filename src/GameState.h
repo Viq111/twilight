@@ -50,9 +50,9 @@ struct GroupEvolution {
 class GameState {
 
 public:
-	// Size is static because it should not change during the game
+    // Size is static because it should not change during the game
     static int n;
-	static int m;
+    static int m;
 
     // Compute all the possible evolutions of a given group or race
     // [WARNING] To conform servor rules, the "no one moves" possibilty must be avoided.
@@ -70,17 +70,17 @@ public:
 
     static void setBoardSize(int n, int m);
 
-	// Constructor
-	GameState(); // Create an empty game for Benchmarking
+    // Constructor
+    GameState(); // Create an empty game for Benchmarking
 
-	GameState(	std::vector<Group> allies,
-				std::vector<Group> humans,
-				std::vector<Group> enemies);
+    GameState(std::vector<Group> allies,
+        std::vector<Group> humans,
+        std::vector<Group> enemies);
 
     // Number of _groups_ for each race
-	int alliesCount;
-	int humansCount;
-	int enemiesCount;
+    int alliesCount;
+    int humansCount;
+    int enemiesCount;
 
     // Listes of groups of each race
     std::vector<Group> allies;
@@ -95,7 +95,7 @@ public:
     static int racePopulation(std::vector<Group> groupsOfRace);
 
     // Generate children for alpha_beta algo
-    std::shared_ptr<std::vector<GameState*>> getChildren(bool itsAlliesTurn);
+    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> getChildren(bool itsAlliesTurn);
 
     // Calculate score
     int getScore();
@@ -111,10 +111,11 @@ private:
 
 
     // Apply a list of evolutions to a given copied GameState to create a new one
-    GameState* applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);
+    std::shared_ptr<GameState> applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);
 
     // Perform battle/reunion between groups on the same cell
-    void resolve(GameState* state);
+
+    void resolve();
 
     // Utility method for the distance between 2 groups 
     int distance(const Group& group1, const Group& group2);

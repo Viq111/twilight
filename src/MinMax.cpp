@@ -77,9 +77,9 @@ int MinMax::maxValue(std::shared_ptr<Node> current, int alpha, int beta, int dep
         //on est arrive sur un noeud sans fils (probablement victoire ou défaite) => scoring
         return current->getScore();
     }
-    std::vector<std::shared_ptr<Node>> children = current->getReverseSortedChildren(true);  //getChildren()
-    for (std::shared_ptr<Node> child : children){
-        alpha = std::max(alpha, minValue(child, alpha, beta, depth - 1));
+    std::vector<std::shared_ptr<Node>> children = current->getSortedChildren(true);  //getChildren()
+    for (int i = children.size(); i > 0; i--){
+        alpha = std::max(alpha, minValue(children[i - 1], alpha, beta, depth - 1));
         if (alpha >= beta){
             return beta;
         }

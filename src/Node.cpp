@@ -5,12 +5,14 @@
 Node::Node(){
     childNotGet = true;
     scoreNotGet = true;
+    childNotSorted = true;
 }
 
-Node::Node(GameState game){
+Node::Node(GameState& game){
     gameState = GameState(game);
     childNotGet = true;
     scoreNotGet = true;
+    childNotSorted = true;
 }
 
 Node::Node(std::shared_ptr<GameState> game)
@@ -18,14 +20,7 @@ Node::Node(std::shared_ptr<GameState> game)
     gameState = GameState(*game);
 	childNotGet = true;
 	scoreNotGet = true;
-}
-
-int Node::getAlpha(){
-    return alpha;
-}
-
-int Node::getBeta(){
-    return beta;
+    childNotSorted = true;
 }
 
 GameState& Node::getGameState(){
@@ -35,7 +30,7 @@ GameState& Node::getGameState(){
 int Node::getScore(){
     if (scoreNotGet){
         scoreNotGet = false;
-        gameState.getScore();
+        score = gameState.getScore();
     }
     return score; 
 }
@@ -43,41 +38,38 @@ int Node::getScore(){
 int Node::addChild(std::shared_ptr<Node> child)
 {
     children.push_back(child);
+    childNotSorted = true;
     return 0;
 }
 
-bool comparaisonInverse(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
-{
-    return (first->getScore() > second->getScore());
-}
-
-bool comparaison(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
+bool comparaison(std::shared_ptr<Node> first, std::shared_ptr<Node> second)
 {
     return (first->getScore() < second->getScore());
 }
 
-std::vector<std::shared_ptr<Node>> Node::getChildren()      // To do : on récupère les enfants ici et on les ajoutent à children
+std::vector<std::shared_ptr<Node>> Node::getChildren(bool itsAlliesTurn)
 {
     if (childNotGet){
         childNotGet = false;
-        /*
-        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState->getChildren();
+        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
         for (int i = 0; i < gameStateChildren->size(); i++){
             children.push_back(std::make_shared<Node>(gameStateChildren->at(i)));
         }
-        */
     }
     return children;
 }
 
-std::vector<std::shared_ptr<Node>> Node::getSortedChildren()  //temp
+std::vector<std::shared_ptr<Node>> Node::getSortedChildren(bool itsAlliesTurn)
 {
-    std::sort(children.begin(), children.end(), comparaison);
-    return children;
-}
-
-std::vector<std::shared_ptr<Node>> Node::getReverseSortedChildren()  //temp
-{
-    std::sort(children.begin(), children.end(), comparaisonInverse);
+    if (childNotGet){
+        childNotGet = false;
+        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
+        for (int i = 0; i < gameStateChildren->size(); i++){
+            children.push_back(std::make_shared<Node>(gameStateChildren->at(i)));
+        }
+    }
+    if (childNotSorted){
+        std::sort(children.begin(), children.end(), comparaison);
+    }
     return children;
 }

@@ -20,7 +20,7 @@ protected:
     void setup();
     void receive();
     void sendName();
-    void sendMovement();
+    void sendMovement(std::vector<GroupEvolution>& moves);
     void handler_receive_code(const boost::system::error_code& error);
     void handler_receive_size(const boost::system::error_code& error, const std::string& code);
     void handler_receive_data(const boost::system::error_code& error, const std::string& code, const int size);

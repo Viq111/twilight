@@ -43,14 +43,36 @@ void GameSocket::sendName()
     socket->send(boost::asio::buffer(sendBuffer, name.size() + 4));
 }
 
-void GameSocket::sendMovement()
+void GameSocket::sendMovement(std::vector<GroupEvolution>& moves)
 {
     std::cout << "MOV" << std::endl;
     std::cout << std::endl;
 
     strncpy(sendBuffer, "MOV", 3);
-    sendBuffer[3] = 0;
-
+    int pos = 0;
+    for (int i = 0; i < moves.size(); i++)
+    {
+        for (int j = 0; j < moves[i].moves.size(); j++)
+        {
+            sendBuffer[4 + (5 * pos)] = (unsigned char)moves[i].group.x;
+            sendBuffer[5 + (5 * pos)] = (unsigned char)moves[i].group.y;
+            sendBuffer[6 + (5 * pos)] = (unsigned char)moves[i].moves[j].count;
+            sendBuffer[7 + (5 * pos)] = (unsigned char)moves[i].group.x;
+            sendBuffer[8 + (5 * pos)] = (unsigned char)moves[i].group.y;
+            switch (moves[i].moves[j].dir) {
+                case Right: sendBuffer[7 + (5 * pos)]++; break;
+                case Left: sendBuffer[7 + (5 * pos)]--; break;
+                case Up: sendBuffer[8 + (5 * pos)]++; break;
+                case Down: sendBuffer[8 + (5 * pos)]--; break;
+                case UpRight: sendBuffer[7 + (5 * pos)]++; sendBuffer[8 + (5 * pos)]++; break;
+                case UpLeft: sendBuffer[7 + (5 * pos)]--; sendBuffer[8 + (5 * pos)]++; break;
+                case DownRight: sendBuffer[7 + (5 * pos)]++; sendBuffer[8 + (5 * pos)]--; break;
+                case DownLeft: sendBuffer[7 + (5 * pos)]--; sendBuffer[8 + (5 * pos)]--; break;
+            }
+            pos++;
+        }
+    }
+    sendBuffer[3] = (unsigned char)pos;
     socket->send(boost::asio::buffer(sendBuffer, 4));
 }
 
@@ -109,7 +131,7 @@ void GameSocket::handler_receive_size(const boost::system::error_code& error, co
         {
             timer = make_unique<boost::asio::deadline_timer>(io_service, boost::posix_time::milliseconds(1000));
             socket->async_receive(boost::asio::buffer(receiveBuffer + 4, 5 * size), boost::bind(&GameSocket::handler_receive_data, this, boost::asio::placeholders::error, code, size));
-            timer->async_wait(boost::bind(&GameSocket::sendMovement, this));
+            timer->async_wait(boost::bind(&GameSocket::sendMovement, this, std::vector<GroupEvolution>()));
 
         }
         else if (code == "MAP")

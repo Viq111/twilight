@@ -10,13 +10,14 @@
 #include <string>
 #include <queue>
 
-// Represent a group of creatures
+// Represents a group of creatures
 struct Group {
     int x;
     int y;
     int count;
 };
 
+// Represents a direction for a move
 enum Direction {
     Right,
     Left,
@@ -28,17 +29,15 @@ enum Direction {
     DownLeft
 };
 
+// Represents a move of some creatures
 struct Move {
+    int x;
+    int y;
     Direction dir;
     int count;
 };
 
-struct GroupEvolution {
-    Group group;
-    std::vector<Move> moves;
-};
-
-// Represent a current board
+// Represents a current board
 class GameState {
 
 public:
@@ -68,9 +67,6 @@ public:
     std::vector<Group> humans;
     std::vector<Group> enemies;
 
-    // How to access this state from his parents in alpha-beta tree
-    std::vector<std::shared_ptr<GroupEvolution>> getOperationOfGeneration(); //A VIRER
-
     // Generate children for alpha_beta algo
     std::vector<std::shared_ptr<GameState>> getChildren(bool itsAlliesTurn);
 
@@ -81,10 +77,6 @@ public:
     void print();
 private:
     // Useful to avoid impossible moves, indexation = x + n*y
-
-    // How to access this state from his parents in alpha-beta tree
-    std::vector<std::shared_ptr<GroupEvolution>> operationOfGeneration; // A VIRER
-
 
     // Apply a list of evolutions to a given copied GameState to create a new one
     std::shared_ptr<GameState> applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);

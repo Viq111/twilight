@@ -394,8 +394,6 @@ std::shared_ptr<GameState> GameState::applyGroupEvolutions(std::vector<std::shar
     std::vector<bool> departurePositions = std::vector<bool>(n*m, false);
     std::vector<bool> arrivalPositions = std::vector<bool>(n*m, false);
 
-    updatedState->operationOfGeneration = evolutions;
-
     for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
         for (Move move : gEvol->moves) {
             Group group = gEvol->group;

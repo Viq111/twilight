@@ -165,6 +165,17 @@ class Quest():
         "The quest is abandoned by an adventurer"
         self.adventurers.remove(adventurer)
         del self.moves[adventurer]
+
+    def get_meeting_point(self):
+        "If all adventurers would not arrive at the same time, create a meeting point next to the goal, else return the goal position"
+        if len(set(self.moves.values())) <= 1: # All adventurers are going to arrive at the same time
+            return self.objective.pos
+        else: # Compute the nearest meeting point for the slowest member
+            slow = [ (self.moves[adv], adv) for adv in self.moves.keys() ]
+            slow.sort(reverse=True)
+            slowest = slow[0][1] # Slowest adventurer
+            path = self.world._a_star(slowest.pos, self.objective.pos) # His path to get there
+            return path[-2] # Return the move just before arriving to the goal
         
 
 class GamingHall():
@@ -248,7 +259,8 @@ class GamingHall():
         moves = []
         poses = [adv.pos for adv in adventurers] # Get all current positions of adventurers
         for adv in adventurers:
-            new_pos = world.find_path(adv.pos, adv.quest.objective.pos)
+            #new_pos = world.find_path(adv.pos, adv.quest.objective.pos)
+            new_pos = world.find_path(adv.pos, adv.quest.get_meeting_point())
             if new_pos in poses:
                 print "Illegal move for adventurer:",adv
                 continue

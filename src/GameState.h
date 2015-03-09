@@ -41,57 +41,36 @@ struct Move {
 class GameState {
 
 public:
-    // Size is static because it should not change during the game
+    // Size of game board
     static int n;
     static int m;
+    static void setBoardSize(int n, int m);
 
-    // Multiplication factor used in all scoring operations
+    // Scoring factors
     static int opsFactor;
-
-    // Weights of the different parts of the score
     static int populationCountsWeight;
     static int humanProximityWeight;
     static int enemyProximityWeight;
 
-    static void setBoardSize(int n, int m);
+    // Constructors
+    GameState();
+    GameState(std::vector<Group> allies, std::vector<Group> humans, std::vector<Group> enemies);
 
-    // Constructor
-    GameState(); // Create an empty game for Benchmarking
+    std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> getChildren(bool itsAlliesTurn);
+    int getScore();
+    void print();   // Print object for debug purpose
 
-    GameState(std::vector<Group> allies,
-        std::vector<Group> humans,
-        std::vector<Group> enemies);
-
-    // Listes of groups of each race
+protected:
+    // Lists of groups of each race
     std::vector<Group> allies;
     std::vector<Group> humans;
     std::vector<Group> enemies;
 
-    // Generate children for alpha_beta algo
-    std::vector<std::shared_ptr<GameState>> getChildren(bool itsAlliesTurn);
-
-    // Calculate score
-    int getScore();
-
-    // For visualisation/debug purpose
-    void print();
-private:
-    // Useful to avoid impossible moves, indexation = x + n*y
-
-    // Apply a list of evolutions to a given copied GameState to create a new one
-    std::shared_ptr<GameState> applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial);
-
-    // Perform battle/reunion between groups on the same cell
-
+    std::vector<std::vector<Move>> possibleEvolutions(Group& group);
+    std::vector<std::vector<Move>> possibleEvolutions(std::vector<Group> race);
+    std::shared_ptr<GameState> applyGroupEvolutions(std::vector<Move> evolutions, GameState* intial);
     void resolve();
 
-    // Compute all the possible evolutions of a given group or race
-    // [WARNING] To conform servor rules, the "no one moves" possibilty must be avoided.
-    std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>> possibleEvolutions(Group& group);
-
-    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> possibleEvolutions(std::vector<Group> race);
-
-    // Utility method for the distance between 2 groups 
     static int distance(const Group& group1, const Group& group2);
 };
 

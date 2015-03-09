@@ -19,7 +19,7 @@ public:
     Node(GameState game);
     Node(std::shared_ptr<GameState> game);
     int addChild(std::shared_ptr<Node> child);
-    std::vector<std::shared_ptr<Node>> getChildren();
+    std::vector<std::shared_ptr<Node>> getChildren(bool itsAlliesTurn);
     std::vector<std::shared_ptr<Node>> getSortedChildren();
     std::vector<std::shared_ptr<Node>> getReverseSortedChildren();
     int getScore();

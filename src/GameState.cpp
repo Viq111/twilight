@@ -73,9 +73,9 @@ int GameState::getScore() {
 	return score;
 }
 
-std::shared_ptr<std::vector<GameState*>> GameState::getChildren(bool itsAlliesTurn)
+std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(bool itsAlliesTurn)
 {
-    std::shared_ptr<std::vector<GameState*>> children;
+    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> children;
 
     std::vector<Group> currentRace = itsAlliesTurn ? allies : enemies;
     std::vector<std::vector<std::shared_ptr<GroupEvolution>>> pEvol = possibleEvolutions(currentRace);
@@ -388,9 +388,9 @@ int GameState::racePopulation(std::vector<Group> race)
     return count;
 }
 
-GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial)
+std::shared_ptr<GameState> GameState::applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial)
 {
-    GameState* updatedState = new GameState(*intial);
+    std::shared_ptr<GameState> updatedState = std::make_shared<GameState>(*intial);//create a shared_ptr to a copy of inital GameState
 
     updatedState->operationOfGeneration = evolutions;
     updatedState->arrivalPositions = std::vector<bool>(n*(m+1),false); 
@@ -414,7 +414,7 @@ GameState* GameState::applyGroupEvolutions (std::vector<std::shared_ptr<GroupEvo
             }
         }   
     }
-    resolve(updatedState);
+    updatedState->resolve();
     return updatedState;
 }
 
@@ -423,7 +423,7 @@ std::vector<std::shared_ptr<GroupEvolution>> GameState::getOperationOfGeneration
     return operationOfGeneration;
 };
 
-void GameState::resolve(GameState* state)
+void GameState::resolve()
 {
     //allies fusion   
     for (int i = 0; i < allies.size(); i++)

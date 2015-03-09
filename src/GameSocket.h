@@ -7,7 +7,7 @@
 #include <boost/bind.hpp>
 #include "Node.h"
 
-typedef std::shared_ptr<Node>(*PlayCallback)(std::shared_ptr<Node>); // Define a callback which take the new GameState and return the played moved (GameState)
+typedef std::shared_ptr<Move>(*PlayCallback)(std::shared_ptr<Node>, boost::asio::deadline_timer); // Define a callback which take the new GameState and return the played moved (GameState)
 
 class GameSocket
 {
@@ -33,9 +33,14 @@ protected:
     boost::asio::io_service io_service;
     std::unique_ptr<boost::asio::ip::tcp::socket> socket = nullptr;
     std::unique_ptr<boost::asio::deadline_timer> timer = nullptr;
-    std::string myName;
-	std::shared_ptr<Node> currentNode;
+
+    std::string name;
+	GameState currentGameState;
 	PlayCallback callback;
+
+    bool imVampire = true;
+    char homeX = 0;
+    char homeY = 0;
 };
 
 #endif

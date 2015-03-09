@@ -2,7 +2,6 @@
 src/src.*
 build/*
 *.DS_Store
-
 *.sublime-project
-
 *.sublime-workspace
+

@@ -36,8 +36,14 @@ GameState::GameState(
 // TODO: add coefficients (by machine learning or manual benchmarking)
 int GameState::getScore() {
 
-    int alliesCount = racePopulation(allies);
-    int enemiesCount = racePopulation(enemies);
+    int alliesCount = 0;
+    int enemiesCount = 0;
+    for (Group allyGroup : allies){
+        alliesCount += allyGroup.count;
+    }
+    for (Group enemyGroup : enemies){
+        enemiesCount += enemyGroup.count;
+    }
 
     int score = -(opsFactor * allies.size());
 
@@ -81,7 +87,10 @@ std::vector<std::shared_ptr<GameState>> GameState::getChildren(bool itsAlliesTur
     std::vector<std::vector<std::shared_ptr<GroupEvolution>>> pEvol = possibleEvolutions(currentRace);
     for (std::vector<std::shared_ptr<GroupEvolution>> raceEvol : pEvol)
     {
-        children->push_back(applyGroupEvolutions(raceEvol, this));
+        std::shared_ptr<GameState> child = applyGroupEvolutions(raceEvol, this);
+        if (child != nullptr){
+            children.push_back(applyGroupEvolutions(raceEvol, this));
+        }
     }
     return children;
 }
@@ -378,40 +387,38 @@ void GameState::print(){
     }
 }
 
-int GameState::racePopulation(std::vector<Group> race) // A COPIER DANS LE getScore()
-{
-    int count = 0;
-    for (Group group : race)
-    {
-        count += group.count;
-    }
-    return count;
-}
-
 std::shared_ptr<GameState> GameState::applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial)
 {
     std::shared_ptr<GameState> updatedState = std::make_shared<GameState>(*intial);//create a shared_ptr to a copy of inital GameState
 
+    std::vector<bool> departurePositions = std::vector<bool>(n*m, false);
+    std::vector<bool> arrivalPositions = std::vector<bool>(n*m, false);
+
     updatedState->operationOfGeneration = evolutions;
-    updatedState->arrivalPositions = std::vector<bool>(n*(m + 1), false);
 
     for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
         for (Move move : gEvol->moves) {
             Group group = gEvol->group;
             // la groupEvolution n'est appliquée que si le depart n'est pas une arrivée
-            if (!arrivalPositions[gEvol->group.x + n*gEvol->group.y]){
-                switch (move.dir) {
-                case Right: gEvol->group.x++; break;
-                case Left: gEvol->group.x--; break;
-                case Up: gEvol->group.y++; break;
-                case Down: gEvol->group.y--; break;
-                case UpRight: gEvol->group.x++; gEvol->group.y++; break;
-                case UpLeft: gEvol->group.x--; gEvol->group.y++; break;
-                case DownRight: gEvol->group.x++; gEvol->group.y--; break;
-                case DownLeft: gEvol->group.x--; gEvol->group.y--; break;
-                }
-                arrivalPositions[gEvol->group.x + n*gEvol->group.y] = true;
+            if (arrivalPositions[gEvol->group.x + n*gEvol->group.y]){
+                return nullptr;
             }
+            departurePositions[gEvol->group.x + n*gEvol->group.y] = true;
+            switch (move.dir) {
+            case Right: gEvol->group.x++; break;
+            case Left: gEvol->group.x--; break;
+            case Up: gEvol->group.y++; break;
+            case Down: gEvol->group.y--; break;
+            case UpRight: gEvol->group.x++; gEvol->group.y++; break;
+            case UpLeft: gEvol->group.x--; gEvol->group.y++; break;
+            case DownRight: gEvol->group.x++; gEvol->group.y--; break;
+            case DownLeft: gEvol->group.x--; gEvol->group.y--; break;
+            }
+            if (departurePositions[gEvol->group.x + n*gEvol->group.y]){
+                return nullptr;
+            }
+            arrivalPositions[gEvol->group.x + n*gEvol->group.y] = true;
+            
         }
     }
     updatedState->resolve();

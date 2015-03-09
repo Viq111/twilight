@@ -79,10 +79,6 @@ public:
     // How to access this state from his parents in alpha-beta tree
     std::vector<std::shared_ptr<GroupEvolution>> getOperationOfGeneration(); //A VIRER
 
-
-    // Utility method to sum the populations of groups
-    static int racePopulation(std::vector<Group> groupsOfRace); // A VIRER
-
     // Generate children for alpha_beta algo
     std::vector<std::shared_ptr<GameState>> getChildren(bool itsAlliesTurn);
 
@@ -93,7 +89,6 @@ public:
     void print();
 private:
     // Useful to avoid impossible moves, indexation = x + n*y
-    std::vector<bool> arrivalPositions;  // PAS UN ATTRIBUT
 
     // How to access this state from his parents in alpha-beta tree
     std::vector<std::shared_ptr<GroupEvolution>> operationOfGeneration; // A VIRER

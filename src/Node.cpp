@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <algorithm>
 
-
 Node::Node(){
     childNotGet = true;
     scoreNotGet = true;
@@ -19,6 +18,18 @@ Node::Node(std::shared_ptr<GameState> game)
     gameState = GameState(*game);
 	childNotGet = true;
 	scoreNotGet = true;
+}
+
+int Node::getAlpha(){
+    return alpha;
+}
+
+int Node::getBeta(){
+    return beta;
+}
+
+GameState& Node::getGameState(){
+    return gameState;
 }
 
 int Node::getScore(){

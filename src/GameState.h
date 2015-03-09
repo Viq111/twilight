@@ -54,12 +54,6 @@ public:
     static int n;
     static int m;
 
-    // Compute all the possible evolutions of a given group or race
-    // [WARNING] To conform servor rules, the "no one moves" possibilty must be avoided.
-    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolutions(std::shared_ptr<Group> group);
-
-    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> possibleEvolutions(std::vector<Group> race);
-
     // Multiplication factor used in all scoring operations
     static int opsFactor;
 
@@ -77,25 +71,20 @@ public:
         std::vector<Group> humans,
         std::vector<Group> enemies);
 
-    // Number of _groups_ for each race
-    int alliesCount;
-    int humansCount;
-    int enemiesCount;
-
     // Listes of groups of each race
     std::vector<Group> allies;
     std::vector<Group> humans;
     std::vector<Group> enemies;
 
     // How to access this state from his parents in alpha-beta tree
-    std::vector<std::shared_ptr<GroupEvolution>> getOperationOfGeneration();
+    std::vector<std::shared_ptr<GroupEvolution>> getOperationOfGeneration(); //A VIRER
 
 
     // Utility method to sum the populations of groups
-    static int racePopulation(std::vector<Group> groupsOfRace);
+    static int racePopulation(std::vector<Group> groupsOfRace); // A VIRER
 
     // Generate children for alpha_beta algo
-    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> getChildren(bool itsAlliesTurn);
+    std::vector<std::shared_ptr<GameState>> getChildren(bool itsAlliesTurn);
 
     // Calculate score
     int getScore();
@@ -104,10 +93,10 @@ public:
     void print();
 private:
     // Useful to avoid impossible moves, indexation = x + n*y
-    std::vector<bool> arrivalPositions;
+    std::vector<bool> arrivalPositions;  // PAS UN ATTRIBUT
 
     // How to access this state from his parents in alpha-beta tree
-    std::vector<std::shared_ptr<GroupEvolution>> operationOfGeneration;
+    std::vector<std::shared_ptr<GroupEvolution>> operationOfGeneration; // A VIRER
 
 
     // Apply a list of evolutions to a given copied GameState to create a new one
@@ -117,8 +106,14 @@ private:
 
     void resolve();
 
+    // Compute all the possible evolutions of a given group or race
+    // [WARNING] To conform servor rules, the "no one moves" possibilty must be avoided.
+    std::shared_ptr<std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>> possibleEvolutions(std::shared_ptr<Group> group);
+
+    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> possibleEvolutions(std::vector<Group> race);
+
     // Utility method for the distance between 2 groups 
-    int distance(const Group& group1, const Group& group2);
+    static int distance(const Group& group1, const Group& group2);
 };
 
 #endif

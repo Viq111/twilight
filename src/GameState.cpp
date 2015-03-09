@@ -73,9 +73,9 @@ int GameState::getScore() {
     return score;
 }
 
-std::shared_ptr<std::vector<std::shared_ptr<GameState>>> GameState::getChildren(bool itsAlliesTurn)
+std::vector<std::shared_ptr<GameState>> GameState::getChildren(bool itsAlliesTurn)
 {
-    std::shared_ptr<std::vector<std::shared_ptr<GameState>>> children;
+    std::vector<std::shared_ptr<GameState>> children;
 
     std::vector<Group> currentRace = itsAlliesTurn ? allies : enemies;
     std::vector<std::vector<std::shared_ptr<GroupEvolution>>> pEvol = possibleEvolutions(currentRace);
@@ -378,7 +378,7 @@ void GameState::print(){
     }
 }
 
-int GameState::racePopulation(std::vector<Group> race)
+int GameState::racePopulation(std::vector<Group> race) // A COPIER DANS LE getScore()
 {
     int count = 0;
     for (Group group : race)

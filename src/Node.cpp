@@ -51,11 +51,9 @@ std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>>& Node::getChild
 {
     if (childNotGet){
         childNotGet = false;
-        std::vector<std::shared_ptr<GameState>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
-        for (int i = 0; i < gameStateChildren.size(); i++){
-            std::shared_ptr<Node> childNode = std::make_shared<Node>(gameStateChildren[i]);
-            std::vector<Move> childMoves = std::vector<Move>();
-            children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(childNode, childMoves));
+        std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> gameStateAndMovesChildren = gameState.getChildren(itsAlliesTurn);
+        for (int i = 0; i < gameStateAndMovesChildren.size(); i++){
+            children.push_back(gameStateAndMovesChildren[i]);
         }
     }
     return children;
@@ -65,11 +63,9 @@ std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>>& Node::getSorte
 {
     if (childNotGet){
         childNotGet = false;
-        std::vector<std::shared_ptr<GameState>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
-        for (int i = 0; i < gameStateChildren.size(); i++){
-            std::shared_ptr<Node> childNode = std::make_shared<Node>(gameStateChildren[i]);
-            std::vector<Move> childMoves = std::vector<Move>();
-            children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(childNode, childMoves));
+        std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> gameStateAndMovesChildren = gameState.getChildren(itsAlliesTurn);
+        for (int i = 0; i < gameStateAndMovesChildren.size(); i++){
+            children.push_back(gameStateAndMovesChildren[i]);
         }
     }
     if (childNotSorted){

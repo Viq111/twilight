@@ -10,7 +10,7 @@ version = 1
 ##############
 ### IMPORT ###
 ##############
-import os, time, socket, threading
+import os, time, socket, threading, sys
 import heapq # For A* search
 
 ###############
@@ -67,6 +67,7 @@ class World():
             return True
 
     # Useful for clients
+
     def get_starting_position(self):
         "Return (x, y, number) of the starting position"
         self.__wait_init()
@@ -84,6 +85,10 @@ class World():
         "Return the content of a cell"
         self.__wait_init()
         return self.world[x][y]
+
+    def get_world_as_matrix(self):
+        "Return the world as a matrix"
+        return self.world
 
     # Useful for network (client_api)
 
@@ -224,6 +229,8 @@ class ClientAPI(threading.Thread):
 
     def connect(self, my_name):
         "Connect to the server"
+        if self.callback == self.__default_callback:
+            sys.stderr.write("[WARNING] Client_api.connect() called before set_callback, you AI may not be called for the first turn")
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.ip, self.port))
         self.__name = my_name

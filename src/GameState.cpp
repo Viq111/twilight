@@ -277,8 +277,8 @@ std::vector<std::vector<Move>> GameState::possibleEvolutions(Group& group){
         for (Direction& direction1 : availableDirections){
             for (Direction& direction2 : availableDirections){
                 if (direction1 != direction2){
-                    Move firstMove(group.x, group.y, direction1, group.count);
-                    Move secondMove(group.x, group.y, direction2, group.count);
+                    Move firstMove(group.x, group.y, direction1, subGroupCount);
+                    Move secondMove(group.x, group.y, direction2, subGroupCount);
                     possibleMoves.push_back(std::vector<Move>{firstMove, secondMove});
                 }
             }

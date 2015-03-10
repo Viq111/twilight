@@ -44,7 +44,7 @@ int GameState::getScore() {
     for (Group enemyGroup : enemies){
         enemiesCount += enemyGroup.count;
     }
-
+    // We try to split the less if we have the choise
     int score = -(opsFactor * allies.size());
 
     // Number of allies and enemies
@@ -427,21 +427,22 @@ void GameState::resolve()
                 }
                 else {
                     //the allies are more likely to win
-                    int averageSurvivorsMultByTot = ((allies[i].count + 1) * allies[i].count) - ((enemies[j].count + 1) * enemies[j].count);
-                    if (averageSurvivorsMultByTot > 0){
+                    int averageSurvivors = (allies[i].count * allies[i].count * allies[i].count) - (enemies[j].count * enemies[j].count * enemies[j].count);
+                    averageSurvivors /= ((allies[i].count + enemies[i].count) * (allies[i].count + enemies[i].count));
+                    if (averageSurvivors > 0){
                         //allies wined :) !!
-                        allies[i].count = (averageSurvivorsMultByTot / (allies[i].count + enemies[j].count));
+                        allies[i].count = averageSurvivors;
                         enemies.erase(enemies.begin() + j);
                         j--;
                     }
-                    else if (averageSurvivorsMultByTot < 0){
+                    else if (averageSurvivors < 0){
                         //enemy wined :( ... That is only an hypothetic case, anyway...
-                        enemies[j].count = -(averageSurvivorsMultByTot / (allies[i].count + enemies[j].count));
+                        enemies[j].count = -averageSurvivors;
                         allies.erase(allies.begin() + i);
                         i--;
                     }
                     else{
-                        //it shouldn't happend
+                        //it may happend even if therer is not the same amount of enemies and allies, because averageSurvivors is an int and not a float
                         //the two groups disapear, as if they had the same number of people
                         allies.erase(allies.begin() + i);
                         i--;

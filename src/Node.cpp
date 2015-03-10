@@ -53,7 +53,7 @@ std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>>& Node::getChild
         childNotGet = false;
         std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> gameStateAndMovesChildren = gameState.getChildren(itsAlliesTurn);
         for (int i = 0; i < gameStateAndMovesChildren.size(); i++){
-            children.push_back(gameStateAndMovesChildren[i]);
+            children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(std::make_shared<Node>(gameStateAndMovesChildren[i].first), gameStateAndMovesChildren[i].second));
         }
     }
     return children;
@@ -65,7 +65,7 @@ std::vector<std::pair<std::shared_ptr<Node>, std::vector<Move>>>& Node::getSorte
         childNotGet = false;
         std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> gameStateAndMovesChildren = gameState.getChildren(itsAlliesTurn);
         for (int i = 0; i < gameStateAndMovesChildren.size(); i++){
-            children.push_back(gameStateAndMovesChildren[i]);
+            children.push_back(std::pair<std::shared_ptr<Node>, std::vector<Move>>(std::make_shared<Node>(gameStateAndMovesChildren[i].first), gameStateAndMovesChildren[i].second));
         }
     }
     if (childNotSorted){

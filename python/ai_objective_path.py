@@ -18,7 +18,7 @@ import client_api
 ### GLOBALS ###
 ###############
 
-MINMAX_LEVEL = 4
+MINMAX_LEVEL = 8
 PENALITY_COEFF = 2
 
 ###############
@@ -63,11 +63,14 @@ class BoardGame(easyAI.TwoPlayersGame):
             e = self.p1_obj[-1]
         moves = filter(lambda obj : obj.nb <= p[1], self.free_objectives) # Only where I can attack safely
         moves = filter(lambda obj : self.__flight_distance(p[0], obj.pos) <= self.__flight_distance(e[0], obj.pos), moves) # Only where I can be before the ennemy
-        moves = [ (False, move) for move in moves ] # First boolean is if we take a penality
+        moves = [ (0, move) for move in moves ] # First boolean is if we take a penality
         if len(moves) == 0:
             # We are farther from all objectives relating to the ennemy, take a penality
             moves = filter(lambda obj : obj.nb <= p[1], self.free_objectives) # Only where I can attack safely
-            moves = [ (True, move) for move in moves ] # First boolean is if we take a penality
+            moves = [ (1, move) for move in moves ] # First boolean is if we take a penality
+        if len(moves) == 0:
+            # We are not numerous enought, go random
+            moves = [ (10, move) for move in self.free_objectives ]
         return moves # Possible objective I can go for
 
     def make_move(self, move):
@@ -113,11 +116,14 @@ class BoardGame(easyAI.TwoPlayersGame):
             return 0
         # Score is nb / nb_moves of us minus ennemy
         p1_score = 1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]
-        p2_score = 1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]
+        p2_score = 1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]
         if self.nplayer == 1:
-            return p1_score - p2_score - (self.nb_penalities * PENALITY_COEFF)
+            score = p1_score - p2_score - (self.nb_penalities * PENALITY_COEFF)
+            return score
         else:
-            return p2_score - p1_score - (self.nb_penalities * PENALITY_COEFF)
+            score = p2_score - p1_score - (self.nb_penalities * PENALITY_COEFF)
+            return score
+            
     def show(self):
         return
 
@@ -150,9 +156,11 @@ class Objective_path():
         if len(objectives) > 0: # There is still humans on the map
             # Ask AI solver what he wants to play
             game = BoardGame([self.ai, self.ennemy], us, ennemy, objectives)
+            start = time.time()
             move = self.ai.ask_move(game)[1]
+            print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
             goal = world.find_path(us[0], move.pos)
-            print("[AI] Going for humans at " + str(move.pos) + " through " + str(goal))
+            print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
             self.c.move([(us[0][0], us[0][1], us[1], goal[0], goal[1])])
         else: # No more humans, attack the other player
             ennemies = []
@@ -163,8 +171,8 @@ class Objective_path():
             # Find best pray
             objectives.sort(key = lambda e : e[2])
             goal = world.find_path(us[0], (objectives[0][0], objectives[0][1]))
-            print("[AI] Going for ennemy at " + str(objectives[0]) + " through " + str(goal))
-            self.c.move([(us[0][0], us[0][1], us[0][1], goal[0], goal[1])])
+            print("[AI](" + str(us[1]) + ") Going for ennemy at " + str(objectives[0]) + " through " + str(goal))
+            self.c.move([(us[0][0], us[0][1], us[1], goal[0], goal[1])])
 
 
     def _get_ennemy_best_position(self, world):

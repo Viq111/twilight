@@ -35,7 +35,7 @@ class Nearest_possible():
     def callback(self, world):
         "Play nearest objective"
         # 0 - Update our number and position
-        start = self.c.get_map().get_starting_position()
+        start = world.get_starting_position()
         self.pos = (start[0], start[1])
         self.number = start[2]
         
@@ -55,7 +55,7 @@ class Nearest_possible():
             distance.sort(key = lambda d : d[2])
             # 5 - Go there
             goal = world.find_path(self.pos, (distance[0][0], distance[0][1]))
-            print("[AI] Going for humans at " + str(self.pos) + " through " + str(goal))
+            print("[AI](" + str(self.number) + ") Going for humans at " + str((distance[0][0], distance[0][1])) + " through " + str(goal))
             self.c.move([(self.pos[0], self.pos[1], self.number, goal[0], goal[1])])
         else: # No more humans, attack the other player
             ennemies = []
@@ -66,6 +66,7 @@ class Nearest_possible():
             # Find best pray
             objectives.sort(key = lambda e : e[2])
             goal = world.find_path(self.pos, (objectives[0][0], objectives[0][1]))
+            print("[AI](" + str(self.number) + ") Going for ennemy at " + str(objectives[0]) + " through " + str(goal))
             self.c.move([(self.pos[0], self.pos[1], self.number, goal[0], goal[1])])
         
         

@@ -104,6 +104,9 @@ void testGameState()
     t = clock() - t;
     for (auto pair : children) {
         pair.first->print();
+        for (auto move : pair.second) {
+            move.print();
+        }
     }
     std::cout << "nb d'enfants : " << children.size() << std::endl;
     std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;

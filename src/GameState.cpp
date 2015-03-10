@@ -3,6 +3,7 @@
 #include <math.h>
 #include <map>
 #include <utility>
+#include <string>
 
 // Default board size
 int GameState::n = 10;
@@ -112,7 +113,7 @@ std::vector<std::vector<Move>> GameState::possibleEvolutionsOfRace(std::vector<G
         for (int i = 0; i < resultSize; i++){
             for (auto pEvolution : pEvolutions){
                 std::vector<Move> root = results[i];
-                root.insert(root.begin(), pEvolution.begin(), pEvolution.end());
+                root.insert(root.end(), pEvolution.begin(), pEvolution.end());
                 results.push_back(root);
             }
         }
@@ -637,4 +638,20 @@ void GameState::setHumans(std::vector<Group>& _humans)
 void GameState::setEnemies(std::vector<Group>& _enemies)
 {
     allies = _enemies;
+}
+
+void Move::print() {
+    std::string dirStr;
+    switch (dir) {
+        case Right: dirStr = "R"; break;
+        case Left: dirStr = "L"; break;
+        case Up: dirStr = "U"; break;
+        case Down: dirStr = "D"; break;
+        case UpRight: dirStr = "UR"; break;
+        case UpLeft: dirStr = "UL"; break;
+        case DownRight: dirStr = "DR"; break;
+        case DownLeft: dirStr = "DL"; break;
+    }
+
+    std::cout << x << ", " << y << ", " << dirStr << ", " << count << std::endl;
 }

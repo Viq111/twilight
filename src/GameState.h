@@ -33,6 +33,7 @@ enum Direction {
 struct Move {
     Move() {};
     Move(int x, int y, Direction dir, int count):x(x), y(y), dir(dir), count(count) {};
+    void print(); // for debugging purposes only
     int x;
     int y;
     Direction dir;

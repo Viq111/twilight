@@ -87,7 +87,7 @@ std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> GameState:
     std::vector<std::vector<Move>> possibleEvolutions = possibleEvolutionsOfRace(currentRace);
     for (std::vector<Move> raceEvolution : possibleEvolutions)
     {
-        std::shared_ptr<GameState> child = applyGroupEvolutions(raceEvolution, this);
+        std::shared_ptr<GameState> child = applyEvolutions(raceEvolution);
         if (child != nullptr){
             children.push_back(std::pair<std::shared_ptr<GameState>, std::vector<Move>>(child, raceEvolution));
         }
@@ -342,9 +342,9 @@ void GameState::print(){
     }
 }
 
-std::shared_ptr<GameState> GameState::applyGroupEvolutions(std::vector<std::shared_ptr<GroupEvolution>> evolutions, GameState* intial)
+std::shared_ptr<GameState> GameState::applyEvolutions(std::vector<Move>& evolutions)
 {
-    std::shared_ptr<GameState> updatedState = std::make_shared<GameState>(*intial);//create a shared_ptr to a copy of inital GameState
+    std::shared_ptr<GameState> updatedState = std::make_shared<GameState>(*this);//create a shared_ptr to a copy of the current GameState
 
     std::vector<bool> departurePositions = std::vector<bool>(n*m, false);
     std::vector<bool> arrivalPositions = std::vector<bool>(n*m, false);

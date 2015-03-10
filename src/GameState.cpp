@@ -95,48 +95,24 @@ std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> GameState:
     return children;
 }
 
-
-std::vector<std::shared_ptr<GroupEvolution>> convert(Group group, std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>& thing)
+std::vector<std::vector<Move>> GameState::possibleEvolutionsOfRace(std::vector<Group> race)
 {
-    auto result = std::vector<std::shared_ptr<GroupEvolution>>();
+    std::vector<std::vector<Move>> results;
 
-    for (std::shared_ptr<std::vector<std::shared_ptr<Move>>> movesThing : thing)
-    {
-        std::shared_ptr<GroupEvolution> cur = std::make_shared<GroupEvolution>(GroupEvolution());
-        cur->group = group;
-        std::vector<Move> moves;
-        for (std::shared_ptr<Move> move : *movesThing)
-        {
-            moves.push_back(*move);
-        }
-        cur->moves = moves;
-        result.push_back(cur);
-    }
-
-    return result;
-}
-
-std::vector<std::vector<std::shared_ptr<GroupEvolution>>> GameState::possibleEvolutions(std::vector<Group> race)
-{
-    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> results;
-
-    for (int i = 0; i < race.size(); i++){
+    for (Group& raceGroup: race){
         const int resultSize = results.size();
-        auto pEvolutions = possibleEvolutions(race[i]);
+        std::vector<std::vector<Move>> pEvolutions = possibleEvolutions(raceGroup);
 
         // particular case "no one moved yet" (so we have to move). "this" is the root of it.
-        for (int k = 0; k < pEvolutions.size(); k++){
-            //results->push_back(applyEvolutions(*this, (*pEvolutions)[k])));
-            std::vector<std::shared_ptr<GroupEvolution>> newOne = { convert(race[i], pEvolutions)[k] };
-            results.push_back(newOne);
+        for (std::vector<Move> pEvolution : pEvolutions){
+            results.push_back(pEvolution);
         }
 
         // general case
-        for (int j = 0; j < resultSize; j++){
-            std::vector<std::shared_ptr<GroupEvolution>> root = results.at(j);
-            for (int k = 0; k < pEvolutions.size(); k++){
-                //results->push_back(applyEvolutions(*currentState, (*pEvolutions)[k])));
-                root.push_back(convert(race[i], pEvolutions)[k]);
+        for (int i = 0; i < resultSize; i++){
+            for (auto pEvolution : pEvolutions){
+                std::vector<Move> root = results[i];
+                root.insert(root.begin(), pEvolution.begin(), pEvolution.end());
                 results.push_back(root);
             }
         }
@@ -145,8 +121,8 @@ std::vector<std::vector<std::shared_ptr<GroupEvolution>>> GameState::possibleEvo
     return results;
 }
 
-std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>> GameState::possibleEvolutions(Group& group){
-    std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>> possibleMoves = std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>>();
+std::vector<std::vector<Move>> GameState::possibleEvolutions(Group& group){
+    std::vector<std::vector<Move>> possibleMoves;
 
     //find the available directions (not all directions are possible if the group is on a side of the map)
     std::vector<Direction> availableDirections;
@@ -269,62 +245,41 @@ std::vector<std::shared_ptr<std::vector<std::shared_ptr<Move>>>> GameState::poss
     }
     //std::cout << "minGroupSize : " << minGroupSize << std::endl;
     //all the group moves : same as implementation 1
-    for (int i = 0; i < availableDirections.size(); i++){
-        std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
-        std::shared_ptr<Move> theMove = std::make_shared<Move>();
-        theMove->count = group.count;
-        theMove->dir = availableDirections[i];
-        currentMove->push_back(theMove);
-        possibleMoves.push_back(currentMove);
+    for (Direction& availableDirection : availableDirections){
+        Move theMove(group.x, group.y, availableDirection, group.count);
+        possibleMoves.push_back(std::vector<Move>{theMove});
     }
 
     //all the moves with a split in two different sized big enough moving groups
     for (int i = minGroupSize; i <= ((group.count - 1) / 2); i++){
-        for (int j = 0; j < availableDirections.size(); j++){
-            for (int k = 0; k < availableDirections.size(); k++){
-                if (j != k){
-                    std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMoves = std::make_shared<std::vector<std::shared_ptr<Move>>>();
-                    std::shared_ptr<Move> firstMove = std::make_shared<Move>();
-                    firstMove->count = i;
-                    firstMove->dir = availableDirections[j];
-                    currentMoves->push_back(firstMove);
-                    std::shared_ptr<Move> secondMove = std::make_shared<Move>();
-                    secondMove->count = (group.count - i);
-                    secondMove->dir = availableDirections[k];
-                    currentMoves->push_back(secondMove);
-                    possibleMoves.push_back(currentMoves);
+        for (Direction& direction1 : availableDirections){
+            for (Direction& direction2 : availableDirections){
+                if (direction1 != direction2){
+                    Move firstMove(group.x, group.y, direction1, i);
+                    Move secondMove(group.x, group.y, direction2, group.count - i);
+                    possibleMoves.push_back(std::vector<Move>{firstMove, secondMove});
                 }
             }
         }
     }
+
     //add possibility no moves for one of the two groups if big enough
     for (int i = minGroupSize; i <= (group.count - minGroupSize); i++){
-        for (int j = 0; j < availableDirections.size(); j++){
-
-            std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMove = std::make_shared<std::vector<std::shared_ptr<Move>>>();
-            std::shared_ptr<Move> theMove = std::make_shared<Move>();
-            theMove->count = i;
-            theMove->dir = availableDirections[j];
-            currentMove->push_back(theMove);
-            possibleMoves.push_back(currentMove);
+        for (Direction& direction : availableDirections){
+            Move theMove(group.x, group.y, direction, group.count);
+            possibleMoves.push_back(std::vector<Move>{theMove});
         }
     }
+
     //all the split equally moves if there is an even number of people in the group and if the subgroups would be big enough
     if (((group.count % 2) == 0) && (group.count >= (2 * minGroupSize))){
         int subGroupCount = (group.count) / 2;
-        for (int i = 0; i < availableDirections.size() - 1; i++){
-            for (int j = i; j < availableDirections.size(); j++){
-                if (i != j){
-                    std::shared_ptr<std::vector<std::shared_ptr<Move>>> currentMoves = std::make_shared<std::vector<std::shared_ptr<Move>>>();
-                    std::shared_ptr<Move> firstMove = std::make_shared<Move>();
-                    firstMove->count = subGroupCount;
-                    firstMove->dir = availableDirections[i];
-                    currentMoves->push_back(firstMove);
-                    std::shared_ptr<Move> secondMove = std::make_shared<Move>();
-                    secondMove->count = subGroupCount;
-                    secondMove->dir = availableDirections[j];
-                    currentMoves->push_back(secondMove);
-                    possibleMoves.push_back(currentMoves);
+        for (Direction& direction1 : availableDirections){
+            for (Direction& direction2 : availableDirections){
+                if (direction1 != direction2){
+                    Move firstMove(group.x, group.y, direction1, group.count);
+                    Move secondMove(group.x, group.y, direction2, group.count);
+                    possibleMoves.push_back(std::vector<Move>{firstMove, secondMove});
                 }
             }
         }

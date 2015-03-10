@@ -31,6 +31,8 @@ enum Direction {
 
 // Represents a move of some creatures
 struct Move {
+    Move() {};
+    Move(int x, int y, Direction dir, int count):x(x), y(y), dir(dir), count(count) {};
     int x;
     int y;
     Direction dir;
@@ -74,7 +76,7 @@ protected:
     std::vector<Group> enemies;
 
     std::vector<std::vector<Move>> possibleEvolutions(Group& group);
-    std::vector<std::vector<Move>> possibleEvolutions(std::vector<Group> race);
+    std::vector<std::vector<Move>> possibleEvolutionsOfRace(std::vector<Group> race);
     std::shared_ptr<GameState> applyGroupEvolutions(std::vector<Move> evolutions, GameState* intial);
     void resolve();
 

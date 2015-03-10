@@ -266,7 +266,7 @@ std::vector<std::vector<Move>> GameState::possibleEvolutions(Group& group){
     //add possibility no moves for one of the two groups if big enough
     for (int i = minGroupSize; i <= (group.count - minGroupSize); i++){
         for (Direction& direction : availableDirections){
-            Move theMove(group.x, group.y, direction, group.count);
+            Move theMove(group.x, group.y, direction, i);
             possibleMoves.push_back(std::vector<Move>{theMove});
         }
     }

@@ -84,7 +84,7 @@ std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> GameState:
     std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> children;
     std::vector<Group> currentRace = itsAlliesTurn ? allies : enemies;
 
-    std::vector<std::vector<Move>> possibleEvolutions = possibleEvolutions(currentRace);
+    std::vector<std::vector<Move>> possibleEvolutions = possibleEvolutionsOfRace(currentRace);
     for (std::vector<Move> raceEvolution : possibleEvolutions)
     {
         std::shared_ptr<GameState> child = applyGroupEvolutions(raceEvolution, this);

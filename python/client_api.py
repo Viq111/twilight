@@ -46,41 +46,67 @@ class World():
         "Create a world NxM: M lines N columns"
         self.world = []
         self.im_vampire = True
+        self.inited = False
+        self.init_lock = threading.Condition()
         for i in range(m):
             line = []
             for j in range(n):
                 cell = {"us" : 0, "ennemy" : 0, "human" : 0}
                 line.append(cell)
             self.world.append(line)
-            
-    def get_world_as_matrix(self):
-        "Return the world as a matrix"
-        return self.world
+
+    def __wait_init(self):
+        "If the world has not been inited, wiat for it to be inited"
+        with self.init_lock:
+            if self.inited:
+                return True
+            else:
+                print("[API]> Waiting for init...")
+                self.init_lock.wait()
+            print("[API]> Map inited!") 
+            return True
+
+    # Useful for clients
+    def get_starting_position(self):
+        "Return (x, y, number) of the starting position"
+        self.__wait_init()
+        for col in range(len(self.world)):
+            for line in range(len(self.world[0])):
+                if self.get_cell(col, line)["us"] != 0:
+                    return (col, line, self.get_cell(col, line)["us"])
 
     def get_size(self):
         "Return the size"
+        self.__wait_init()
         return (len(self.world), len(self.world[0]))
 
     def get_cell(self, x, y):
         "Return the content of a cell"
+        self.__wait_init()
         return self.world[x][y]
+
+    # Useful for network (client_api)
 
     def init_map(self, my_pos, positions):
         "Initialize the map"
-        # First know if we are vampire or wolf
-        for p in positions:
-            if my_pos == (p[0], p[1]):
-                if p[3] != 0:
-                    print "You are a vampire"
-                    self.im_vampire = True
-                elif p[4] != 0:
-                    print "You are a wolf"
-                    self.im_vampire = False
-                else:
-                    raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))
-        # Then update map
-        for p in positions:
-            self.update(p[0], p[1], p[2], p[3], p[4])
+        with self.init_lock:
+            # First know if we are vampire or wolf
+            for p in positions:
+                if my_pos == (p[0], p[1]):
+                    if p[3] != 0:
+                        print "You are a vampire"
+                        self.im_vampire = True
+                    elif p[4] != 0:
+                        print "You are a wolf"
+                        self.im_vampire = False
+                    else:
+                        raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))
+            # Then update map
+            for p in positions:
+                self.update(p[0], p[1], p[2], p[3], p[4])
+            # Map inited
+            self.inited = True
+            self.init_lock.notify()
 
     def update(self, x, y, human, vamp, wolf):
         "Update the number of players"
@@ -140,6 +166,7 @@ class World():
             
     def find_path(self, start, stop):
         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
+        self.__wait_init()
         res = self._a_star(start, stop)
         if len(res) == 0:
             return start
@@ -148,6 +175,7 @@ class World():
 
     def find_path_time(self, start, stop):
         "Find the time to move from start to stop"
+        self.__wait_init()
         res = self._a_star(start, stop)
         if start == stop:
             return 0

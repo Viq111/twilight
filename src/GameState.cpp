@@ -625,3 +625,32 @@ void GameState::resolve()
     */
 }
 
+std::vector<Group>& GameState::getAllies()
+{
+    return allies;
+}
+
+std::vector<Group>& GameState::getHumans()
+{
+    return humans;
+}
+
+std::vector<Group>& GameState::getEnemies()
+{
+    return enemies;
+}
+
+void GameState::setAllies(std::vector<Group>& _allies)
+{
+    allies = _allies;
+}
+
+void GameState::setHumans(std::vector<Group>& _humans)
+{
+    allies = _humans;
+}
+
+void GameState::setEnemies(std::vector<Group>& _enemies)
+{
+    allies = _enemies;
+}

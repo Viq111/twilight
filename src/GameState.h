@@ -60,6 +60,13 @@ public:
     int getScore();
     void print();   // Print object for debug purpose
 
+    std::vector<Group>& getAllies();
+    std::vector<Group>& getHumans();
+    std::vector<Group>& getEnemies();
+    void setAllies(std::vector<Group>& allies);
+    void setHumans(std::vector<Group>& humans);
+    void setEnemies(std::vector<Group>& enemies);
+
 protected:
     // Lists of groups of each race
     std::vector<Group> allies;

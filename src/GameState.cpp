@@ -126,22 +126,22 @@ std::vector<std::vector<Move>> GameState::possibleEvolutions(Group& group){
 
     //find the available directions (not all directions are possible if the group is on a side of the map)
     std::vector<Direction> availableDirections;
-    if (group.x == 1){
-        if (group.y == 1){
+    if (group.x == 0){
+        if (group.y == 0){
             availableDirections = { Right, Up, UpRight };
         }
-        else if (group.y == n){
+        else if (group.y == m - 1){
             availableDirections = { Right, Down, DownRight };
         }
         else{
             availableDirections = { Right, Up, Down, UpRight, DownRight };
         }
     }
-    else if (group.x == m){
-        if (group.y == 1){
+    else if (group.x == n){
+        if (group.y == 0){
             availableDirections = { Left, Up, UpLeft };
         }
-        else if (group.y == m){
+        else if (group.y == m - 1){
             availableDirections = { Left, Down, DownLeft };
         }
         else{
@@ -149,10 +149,10 @@ std::vector<std::vector<Move>> GameState::possibleEvolutions(Group& group){
         }
     }
     else{
-        if (group.y == 1){
+        if (group.y == 0){
             availableDirections = { Right, Left, Up, UpRight, UpLeft };
         }
-        else if (group.y == m){
+        else if (group.y == m - 1){
             availableDirections = { Right, Left, Down, DownRight, DownLeft };
         }
         else{

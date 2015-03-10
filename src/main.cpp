@@ -44,11 +44,11 @@ int main(int argc, char* argv[])
 		mm.benchmark();
 		return 0;
 	}
-/*	if (((params.size() == 2) && params[1] == "testGameState"))
+	if (((params.size() == 2) && params[1] == "testGameState"))
 	{
 		testGameState();
 		return 0;
-	}*/
+	}
 	// Check number of arguments
 	if (params.size() != 3)
 	{
@@ -71,7 +71,6 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-/*
 void testGameState()
 {
     GameState::n = 10;
@@ -101,15 +100,14 @@ void testGameState()
 
     clock_t t;
     t = clock();
-    auto children = initial->getChildren();
+    auto children = initial->getChildren(true);
     t = clock() - t;
-    //    for (GameState* child : *children) {
-    //        child->print();
-    //    }
-    std::cout << "nb d'enfants : " << children->size() << std::endl;
+    for (auto pair : children) {
+        pair.first->print();
+    }
+    std::cout << "nb d'enfants : " << children.size() << std::endl;
     std::cout << "temps en ms : " << (((float)t)*1000)/CLOCKS_PER_SEC << std::endl;
 }
-*/
 
 int testGameStatePossibleEvolution(){
 
@@ -125,16 +123,16 @@ int testGameStatePossibleEvolution(){
         h.count = (2 * i) + 1;
         humans.push_back(h);
     }
-    std::vector<Group> ennemies;
+    std::vector<Group> enemies;
     for (int i = 2; i < 5; i++){        //min = 5, ceil(1.5*min) = 8
         Group e;
         e.x = 5;
         e.y = 5;
         e.count = (2 * i) + 1;
-        ennemies.push_back(e);
+        enemies.push_back(e);
     }
-    test->enemies = ennemies;
-    test->humans = humans;
+    test->setEnemies(enemies);
+    test->setHumans(humans);
 
     std::cout << "before" << std::endl;
     for (int i = 2; i < 10; i++){
@@ -184,7 +182,7 @@ int testGameStateWorkflow(){
 
 
     GameState* gState = new GameState(allies, humans, enemies);
-    std::cout << gState->humans[0].count << std::endl;
+    std::cout << gState->getHumans()[0].count << std::endl;
     gState->print();
     system("PAUSE");
     return 0;

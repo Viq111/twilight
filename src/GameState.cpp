@@ -87,7 +87,7 @@ std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> GameState:
     std::vector<std::vector<Move>> possibleEvolutions = possibleEvolutionsOfRace(currentRace);
     for (std::vector<Move> raceEvolution : possibleEvolutions)
     {
-        std::shared_ptr<GameState> child = applyEvolutions(raceEvolution);
+        std::shared_ptr<GameState> child = applyEvolutions(itsAlliesTurn, raceEvolution);
         if (child != nullptr){
             children.push_back(std::pair<std::shared_ptr<GameState>, std::vector<Move>>(child, raceEvolution));
         }
@@ -342,39 +342,72 @@ void GameState::print(){
     }
 }
 
-std::shared_ptr<GameState> GameState::applyEvolutions(std::vector<Move>& evolutions)
+std::shared_ptr<GameState> GameState::applyEvolutions(bool itsAlliesTurn, std::vector<Move> &evolutions)
 {
     std::shared_ptr<GameState> updatedState = std::make_shared<GameState>(*this);//create a shared_ptr to a copy of the current GameState
+    std::vector<Group> updatedGroups;
+    std::vector<Group> &currentRace = itsAlliesTurn ? allies : enemies;
 
     std::vector<bool> departurePositions = std::vector<bool>(n*m, false);
     std::vector<bool> arrivalPositions = std::vector<bool>(n*m, false);
 
-    for (std::shared_ptr<GroupEvolution> gEvol : evolutions) {
-        for (Move move : gEvol->moves) {
-            Group group = gEvol->group;
-            // la groupEvolution n'est appliquée que si le depart n'est pas une arrivée
-            if (arrivalPositions[gEvol->group.x + n*gEvol->group.y]){
-                return nullptr;
+    int i = 0;
+    bool groupMoved = false; // keeps track of whether the current group has been moved, i.e. doesn't need to be copied as-is if no move applies on it
+    for (Move &move : evolutions) {
+        // Iterate over the groups until we have found the group with the same coordinates as the move
+        while (i < currentRace.size() && (move.x != currentRace[i].x || move.y != currentRace[i].y)) {
+            if (!groupMoved) {
+                updatedGroups.push_back(currentRace[i]);
+                groupMoved = false;
             }
-            departurePositions[gEvol->group.x + n*gEvol->group.y] = true;
-            switch (move.dir) {
-            case Right: gEvol->group.x++; break;
-            case Left: gEvol->group.x--; break;
-            case Up: gEvol->group.y++; break;
-            case Down: gEvol->group.y--; break;
-            case UpRight: gEvol->group.x++; gEvol->group.y++; break;
-            case UpLeft: gEvol->group.x--; gEvol->group.y++; break;
-            case DownRight: gEvol->group.x++; gEvol->group.y--; break;
-            case DownLeft: gEvol->group.x--; gEvol->group.y--; break;
-            }
-            if (departurePositions[gEvol->group.x + n*gEvol->group.y]){
-                return nullptr;
-            }
-            arrivalPositions[gEvol->group.x + n*gEvol->group.y] = true;
-            
+            i++;
         }
+        if (i >= currentRace.size()) {
+            break;
+        }
+
+        groupMoved = true;
+        Group group = currentRace[i];
+
+        // invalid case : if the departure position of this group is an arrival position of an already handled group
+        if (arrivalPositions[group.x + n*group.y]) {
+            return nullptr;
+        }
+        departurePositions[group.x + n*group.y] = true;
+        switch (move.dir) {
+            case Right: group.x++; break;
+            case Left: group.x--; break;
+            case Up: group.y++; break;
+            case Down: group.y--; break;
+            case UpRight: group.x++; group.y++; break;
+            case UpLeft: group.x--; group.y++; break;
+            case DownRight: group.x++; group.y--; break;
+            case DownLeft: group.x--; group.y--; break;
+        }
+        // invalid case : if the arrival position of this group is a departure position of an already handled group
+        if (departurePositions[group.x + n*group.y]){
+            return nullptr;
+        }
+        arrivalPositions[group.x + n*group.y] = true;
+
+        group.count = move.count;
+        updatedGroups.push_back(group);
     }
+    // Add the remaining groups that weren't affected by the moves
+    i++;
+    while (i < currentRace.size()) {
+        updatedGroups.push_back(currentRace[i]);
+        i++;
+    }
+
+    if (itsAlliesTurn) {
+        updatedState->allies = updatedGroups;
+    } else {
+        updatedState->enemies = updatedGroups;
+    }
+
     updatedState->resolve();
+
     return updatedState;
 }
 

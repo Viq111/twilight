@@ -77,7 +77,9 @@ protected:
 
     std::vector<std::vector<Move>> possibleEvolutions(Group& group);
     std::vector<std::vector<Move>> possibleEvolutionsOfRace(std::vector<Group> race);
-    std::shared_ptr<GameState> applyEvolutions(std::vector<Move>& evolutions);
+
+    // Needs the evolutions to be ordered by groups, based on the order of the groups of the gameState
+    std::shared_ptr<GameState> applyEvolutions(bool itsAlliesTurn, std::vector<Move> &evolutions);
     void resolve();
 
     static int distance(const Group& group1, const Group& group2);

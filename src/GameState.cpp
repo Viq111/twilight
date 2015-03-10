@@ -79,17 +79,17 @@ int GameState::getScore() {
     return score;
 }
 
-std::vector<std::shared_ptr<GameState>> GameState::getChildren(bool itsAlliesTurn)
+std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> GameState::getChildren(bool itsAlliesTurn)
 {
-    std::vector<std::shared_ptr<GameState>> children;
-
+    std::vector<std::pair<std::shared_ptr<GameState>, std::vector<Move>>> children;
     std::vector<Group> currentRace = itsAlliesTurn ? allies : enemies;
-    std::vector<std::vector<std::shared_ptr<GroupEvolution>>> pEvol = possibleEvolutions(currentRace);
-    for (std::vector<std::shared_ptr<GroupEvolution>> raceEvol : pEvol)
+
+    std::vector<std::vector<Move>> possibleEvolutions = possibleEvolutions(currentRace);
+    for (std::vector<Move> raceEvolution : possibleEvolutions)
     {
-        std::shared_ptr<GameState> child = applyGroupEvolutions(raceEvol, this);
+        std::shared_ptr<GameState> child = applyGroupEvolutions(raceEvolution, this);
         if (child != nullptr){
-            children.push_back(applyGroupEvolutions(raceEvol, this));
+            children.push_back(std::pair<std::shared_ptr<GameState>, std::vector<Move>>(child, raceEvolution));
         }
     }
     return children;
@@ -422,11 +422,6 @@ std::shared_ptr<GameState> GameState::applyGroupEvolutions(std::vector<std::shar
     updatedState->resolve();
     return updatedState;
 }
-
-std::vector<std::shared_ptr<GroupEvolution>> GameState::getOperationOfGeneration()
-{
-    return operationOfGeneration;
-};
 
 void GameState::resolve()
 {

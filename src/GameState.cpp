@@ -275,13 +275,11 @@ std::vector<std::vector<Move>> GameState::possibleEvolutions(Group& group){
     //all the split equally moves if there is an even number of people in the group and if the subgroups would be big enough
     if (((group.count % 2) == 0) && (group.count >= (2 * minGroupSize))){
         int subGroupCount = (group.count) / 2;
-        for (Direction& direction1 : availableDirections){
-            for (Direction& direction2 : availableDirections){
-                if (direction1 != direction2){
-                    Move firstMove(group.x, group.y, direction1, subGroupCount);
-                    Move secondMove(group.x, group.y, direction2, subGroupCount);
-                    possibleMoves.push_back(std::vector<Move>{firstMove, secondMove});
-                }
+        for (int i = 0; i < availableDirections.size() - 1; i++) {
+            for (int j = i + 1; j < availableDirections.size(); j++) {
+                Move firstMove(group.x, group.y, availableDirections[i], subGroupCount);
+                Move secondMove(group.x, group.y, availableDirections[j], subGroupCount);
+                possibleMoves.push_back(std::vector<Move>{firstMove, secondMove});
             }
         }
     }

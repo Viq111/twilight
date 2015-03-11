@@ -1,7 +1,7 @@
 *.pyc
 src/src.*
 build/*
+python/names2.py
 *.DS_Store
 *.sublime-project
 *.sublime-workspace
-

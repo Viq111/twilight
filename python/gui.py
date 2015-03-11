@@ -60,7 +60,7 @@ class GUI(object):
         for col in range(len(matrix)):
             for line in range(len(matrix[col])):
                 if (col+line) % 2 == 0:
-                    self.scr.addstr(col, line, " ", curses.color_pair(4))
+                    self.scr.addstr(line, col, " ", curses.color_pair(4))
                 
 
     def show(self, world):

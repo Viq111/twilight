@@ -43,7 +43,7 @@ class ManualInput():
         if new_pos != self.pos:
             nb = find_starting(self.c.get_map())[2]
             # Send command
-            self.c.move((self.pos[0], self.pos[1], nb, new_pos[0], new_pos[1]))
+            self.c.move([(self.pos[0], self.pos[1], nb, new_pos[0], new_pos[1])])
             self.pos = (new_pos[0], new_pos[1], nb)
         
     def mainloop(self):
@@ -81,7 +81,6 @@ if __name__ == "__main__":
     print "> Welcome to " + str(prog_name) + " (r" + str(version) + ")"
     print "> By Viq (under CC BY-SA 3.0 license)"
     print "> Loading program ..."
-    c = client_api.ClientAPI()
     name = raw_input("Enter your name:")
     manual = ManualInput(name)
     manual.mainloop()

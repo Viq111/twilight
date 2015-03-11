@@ -2,29 +2,30 @@
 #define INCLUDE_NODE
 
 #include <vector>
+#include <memory>
 #include "GameState.h"
 
 class Node
 {
-    std::vector<Node*> children;
+    std::vector<std::shared_ptr<Node>> children;
     int score;
     int alpha;
     int beta;
     bool childNotGet;                   //true tant que l'on a pas récupéré ses enfants
     bool scoreNotGet;                   //true tant que l'on a pas récupéré son score
-    static int currentClassScore;       //provisoir pour des tests (tant qu'on a pas un implemente un calcul du score avec l'AS)
-    static int currentSyracusNumber;    //provisoir pour des tests (tant qu'on a pas un implemente un calcul du score avec l'AS)
+    GameState gameState;
 public:
-    Node();
-	Node(GameState);
-    ~Node();
-    int addChild(Node* child);
-    std::vector<Node*> getChildren();
-    std::vector<Node*> getSortedChildren();
-    std::vector<Node*> getReverseSortedChildren();
+    Node();                             //only for benchmark
+    Node(GameState game);
+    Node(std::shared_ptr<GameState> game);
+    int addChild(std::shared_ptr<Node> child);
+    std::vector<std::shared_ptr<Node>> getChildren(bool itsAlliesTurn);
+    std::vector<std::shared_ptr<Node>> getSortedChildren();
+    std::vector<std::shared_ptr<Node>> getReverseSortedChildren();
     int getScore();
     int getAlpha() { return alpha; };
     int getBeta(){ return beta; };
+    GameState getGameState(){ return gameState; };
 };
 
 #endif

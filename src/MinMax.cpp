@@ -1,51 +1,34 @@
-#include <vector>
-#include <stdlib.h>
-#include <iostream>
-#include <algorithm>
-#include <queue>
-#include <stdlib.h>
-#include <time.h>
 #include "MinMax.h"
+
 
 MinMax::MinMax()
 {
     srand(time(NULL));
     std::cout << "begin... " << std::endl;
-    Node* testNode = testTree(6, 10, 3);    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 a 12 fils
-    int* count = new int(0);
-    (*count) = 0;                           // compte le nombre de noeuds parcourus (interessant a comparer avec le nombre total de noeuds pour mesurer l'efficacite de alpha-beta)
-    std::cout << "max value sur profondeur 1 : " << maxValue(testNode, -100000000, 100000000, 1, count) << std::endl;
-    std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
-    (*count) = 0;
-    std::cout << "max value sur profondeur 2 : " << maxValue(testNode, -100000000, 100000000, 2, count) << std::endl;
-    std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
-    (*count) = 0;
-    std::cout << "max value sur profondeur 3 : " << maxValue(testNode, -100000000, 100000000, 3, count) << std::endl;
-    std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
-    (*count) = 0;
-    std::cout << "max value sur profondeur 4 : " << maxValue(testNode, -100000000, 100000000, 4, count) << std::endl;
-    std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
-    (*count) = 0;
-    std::cout << "max value sur profondeur 5 : " << maxValue(testNode, -100000000, 100000000, 5, count) << std::endl;
-    std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
-    (*count) = 0;
-    std::cout << "max value sur profondeur 6 : " << maxValue(testNode, -100000000, 100000000, 6, count) << std::endl;
-    std::cout << "Nombre de noeuds parcourus : " << *count << std::endl;
+    std::shared_ptr<Node> testNode = testTree(6, 10, 3, std::make_shared<Node>());    // cree un arbre de profondeur 6, chaque noeuds non-feuille ayant 10 a 12 fils
+
+    std::cout << "max value sur profondeur 1 : " << maxValue(testNode, -100000000, 100000000, 1) << std::endl;
+    std::cout << "max value sur profondeur 2 : " << maxValue(testNode, -100000000, 100000000, 2) << std::endl;
+    std::cout << "max value sur profondeur 3 : " << maxValue(testNode, -100000000, 100000000, 3) << std::endl;
+    std::cout << "max value sur profondeur 4 : " << maxValue(testNode, -100000000, 100000000, 4) << std::endl;
+    std::cout << "max value sur profondeur 5 : " << maxValue(testNode, -100000000, 100000000, 5) << std::endl;
+    std::cout << "max value sur profondeur 6 : " << maxValue(testNode, -100000000, 100000000, 6) << std::endl;
+
     system("PAUSE");
 }
 
 // cree un arbre de test
-Node* MinMax::testTree(int depth, int nbChildMin, int nbChildRange){
+std::shared_ptr<Node> MinMax::testTree(int depth, int nbChildMin, int nbChildRange, std::shared_ptr<Node> rootNode){
     int nbNodes = 1;
-    Node* root = new Node(); //new Node(0);
-    std::vector<Node*> leaves;
+    std::shared_ptr<Node> root = rootNode;
+    std::vector<std::shared_ptr<Node>> leaves;
     leaves.push_back(root);
     for (int i = 0; i < depth; i++){
-        std::vector<Node*> newLeaves;
+        std::vector<std::shared_ptr<Node>> newLeaves;
         for (int j = 0; j < leaves.size(); j++){
             int nbChild = nbChildMin + rand() % nbChildRange;
             for (int k = 0; k < nbChild; k++){
-                Node* newLeaf = new Node();  //new Node(leaves[j]->getScore());
+                std::shared_ptr<Node> newLeaf = std::make_shared<Node>();
                 leaves[j]->addChild(newLeaf);
                 newLeaves.push_back(newLeaf);
                 nbNodes++;
@@ -57,15 +40,25 @@ Node* MinMax::testTree(int depth, int nbChildMin, int nbChildRange){
     return root;
 }
 
+int MinMax::proceedMinMax(std::shared_ptr<Node> current, int depth, bool beginWithMin){
+    int result = 0;
+    if (beginWithMin){
+        result = minValue(current, -1000000, 1000000, depth);
+    }
+    else{
+        result = maxValue(current, -1000000, 1000000, depth);
+    }
+    return result;
+}
+
 //fonction alpha-beta recursive simple : maxValue (cf. Chapitre 4 : Jeux, slide 65)
-int MinMax::maxValue(Node* current, int alpha, int beta, int depth, int* count){
-    (*count)++;
-    if ((depth <= 0) || (current->getChildren().size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring
+int MinMax::maxValue(std::shared_ptr<Node> current, int alpha, int beta, int depth){
+    if ((depth <= 0) || (current->getChildren(true).size() == 0)){  //(current->getReverseSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
-    std::vector<Node*> children = current->getChildren();  //getReverseSortedChildren()
+    std::vector<std::shared_ptr<Node>> children = current->getChildren(true);  //getReverseSortedChildren()
     for (int i = 0; i < children.size(); i++){
-        alpha = std::max(alpha, minValue(children[i], alpha, beta, depth - 1, count));
+        alpha = std::max(alpha, minValue(children[i], alpha, beta, depth - 1));
         if (alpha >= beta){
             return beta;
         }
@@ -74,17 +67,27 @@ int MinMax::maxValue(Node* current, int alpha, int beta, int depth, int* count){
 }
 
 //fonction alpha-beta recursive simple : minValue (cf. Chapitre 4 : Jeux, slide 66)
-int MinMax::minValue(Node* current, int alpha, int beta, int depth, int* count){
-    (*count)++;
-    if ((depth <= 0) || (current->getChildren().size() == 0)){  //current->getSortedChildren().size()  //on est arrive au bas de l'arbre, sur "une feuille" => scoring
+int MinMax::minValue(std::shared_ptr<Node> current, int alpha, int beta, int depth){
+    if ((depth <= 0) || (current->getChildren(false).size() == 0)){ //on est arrive au bas de l'arbre, sur "une feuille" => scoring
         return current->getScore();
     }
-    std::vector<Node*> children = current->getChildren();  //getSortedChildren()
+    std::vector<std::shared_ptr<Node>> children = current->getChildren(false);  //getSortedChildren()
     for (int i = 0; i < children.size(); i++){
-        beta = std::min(beta, maxValue(children[i], alpha, beta, depth - 1, count));
+        beta = std::min(beta, maxValue(children[i], alpha, beta, depth - 1));
         if (alpha >= beta){
             return alpha;
         }
     }
     return beta;
+}
+
+int MinMax::testNodePointersDesalocation(int nbIterations){
+    std::shared_ptr<Node> rootNode = std::make_shared<Node>();
+    for (int i = 0; i < nbIterations; i++){
+        rootNode = testTree(2, 150, 2, rootNode);
+        rootNode = rootNode->getChildren(true).at(0);
+        std::cout << i << std::endl;
+    }
+    system("PAUSE");
+    return 0;
 }

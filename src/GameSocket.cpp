@@ -2,7 +2,7 @@
 #include <iostream>
 #include "standardFunctions.h"
 
-GameSocket::GameSocket(PlayCallback c) : myName("Edward"), callback(c) {}
+GameSocket::GameSocket(PlayCallback c) : name("Edward"), callback(c) {}
 
 void GameSocket::connect(std::string ip, int port, std::string name)
 {
@@ -33,24 +33,46 @@ void GameSocket::setup()
 void GameSocket::sendName()
 {
     std::cout << "NME" << std::endl;
-    std::cout << myName << std::endl;
+    std::cout << name << std::endl;
     std::cout << std::endl;
 
     strncpy(sendBuffer, "NME", 3);   // The code "NME" uses the first three bytes
-    sendBuffer[3] = (char)myName.size();   // The size of the name uses the 4th byte
-    strncpy(sendBuffer + 4, myName.c_str(), myName.size());   // We copy the name after the 4th byte in the buffer
+    sendBuffer[3] = (char)name.size();   // The size of the name uses the 4th byte
+    strncpy(sendBuffer + 4, name.c_str(), name.size());   // We copy the name after the 4th byte in the buffer
 
-    socket->send(boost::asio::buffer(sendBuffer, myName.size() + 4));
+    socket->send(boost::asio::buffer(sendBuffer, name.size() + 4));
 }
 
-void GameSocket::sendMovement()
+void GameSocket::sendMovement(std::vector<GroupEvolution>& moves)
 {
     std::cout << "MOV" << std::endl;
     std::cout << std::endl;
 
     strncpy(sendBuffer, "MOV", 3);
-    sendBuffer[3] = 0;
-
+    int pos = 0;
+    for (int i = 0; i < moves.size(); i++)
+    {
+        for (int j = 0; j < moves[i].moves.size(); j++)
+        {
+            sendBuffer[4 + (5 * pos)] = (unsigned char)moves[i].group.x;
+            sendBuffer[5 + (5 * pos)] = (unsigned char)moves[i].group.y;
+            sendBuffer[6 + (5 * pos)] = (unsigned char)moves[i].moves[j].count;
+            sendBuffer[7 + (5 * pos)] = (unsigned char)moves[i].group.x;
+            sendBuffer[8 + (5 * pos)] = (unsigned char)moves[i].group.y;
+            switch (moves[i].moves[j].dir) {
+                case Right: sendBuffer[7 + (5 * pos)]++; break;
+                case Left: sendBuffer[7 + (5 * pos)]--; break;
+                case Up: sendBuffer[8 + (5 * pos)]++; break;
+                case Down: sendBuffer[8 + (5 * pos)]--; break;
+                case UpRight: sendBuffer[7 + (5 * pos)]++; sendBuffer[8 + (5 * pos)]++; break;
+                case UpLeft: sendBuffer[7 + (5 * pos)]--; sendBuffer[8 + (5 * pos)]++; break;
+                case DownRight: sendBuffer[7 + (5 * pos)]++; sendBuffer[8 + (5 * pos)]--; break;
+                case DownLeft: sendBuffer[7 + (5 * pos)]--; sendBuffer[8 + (5 * pos)]--; break;
+            }
+            pos++;
+        }
+    }
+    sendBuffer[3] = (unsigned char)pos;
     socket->send(boost::asio::buffer(sendBuffer, 4));
 }
 
@@ -107,9 +129,10 @@ void GameSocket::handler_receive_size(const boost::system::error_code& error, co
         }
         else if (code == "UPD")
         {
-            timer = make_unique<boost::asio::deadline_timer>(io_service, boost::posix_time::milliseconds(2000));
+            timer = make_unique<boost::asio::deadline_timer>(io_service, boost::posix_time::milliseconds(1000));
             socket->async_receive(boost::asio::buffer(receiveBuffer + 4, 5 * size), boost::bind(&GameSocket::handler_receive_data, this, boost::asio::placeholders::error, code, size));
-            timer->async_wait(boost::bind(&GameSocket::sendMovement, this));
+            timer->async_wait(boost::bind(&GameSocket::sendMovement, this, std::vector<GroupEvolution>()));
+
         }
         else if (code == "MAP")
         {
@@ -143,56 +166,131 @@ void GameSocket::handler_receive_data(const boost::system::error_code& error, co
         }
         else if (code == "HME")
         {
-            char x = receiveBuffer[3];
-            char y = receiveBuffer[4];
-            std::cout << "Home : (" << (int)x << ", " << (int)y << ")" << std::endl;
+            homeX = receiveBuffer[3];
+            homeY = receiveBuffer[4];
+            std::cout << "Home : (" << (int)homeX << ", " << (int)homeY << ")" << std::endl;
         }
         else if (code == "UPD")
         {
-            // TODO Implement 
+            std::vector<Group> humansList;
+            std::vector<Group> vampiresList;
+            std::vector<Group> werewolvesList;
+            int humansCount = 0;
+            int vampiresCount = 0;
+            int werewolvesCount = 0;
             for (int i = 0; i < size; ++i)
             {
+                Group group;
                 char x = receiveBuffer[4 + (5 * i)];
                 char y = receiveBuffer[5 + (5 * i)];
                 char humans = receiveBuffer[6 + (5 * i)];
                 char vampires = receiveBuffer[7 + (5 * i)];
                 char werewolves = receiveBuffer[8 + (5 * i)];
+
+                group.x = (int)x;
+                group.y = (int)y;
                 if (humans > 0)
                 {
                     std::cout << "Humans : " << (int)humans << " on (" << (int)x << ", " << (int)y << ")" << std::endl;
+                    group.count = (int)humans;
+                    humansCount += (int)humans;
+                    humansList.push_back(group);
                 }
                 if (vampires > 0)
                 {
                     std::cout << "Vampires : " << (int)vampires << " on (" << (int)x << ", " << (int)y << ")" << std::endl;
+                    group.count = (int)vampires;
+                    vampiresCount += (int)vampires;
+                    vampiresList.push_back(group);
                 }
                 if (werewolves > 0)
                 {
                     std::cout << "Werewolves : " << (int)werewolves << " on (" << (int)x << ", " << (int)y << ")" << std::endl;
+                    group.count = (int)werewolves;
+                    werewolvesCount += (int)werewolves;
+                    werewolvesList.push_back(group);
                 }
+            }
+            if (imVampire)
+            {
+                currentGameState.allies = vampiresList;
+                currentGameState.enemies = werewolvesList;
+                currentGameState.humans = humansList;
+                currentGameState.alliesCount = vampiresCount;
+                currentGameState.enemiesCount = werewolvesCount;
+                currentGameState.humansCount = humansCount;
+            }
+            else
+            {
+                currentGameState.allies = werewolvesList;
+                currentGameState.enemies = vampiresList;
+                currentGameState.humans = humansList;
+                currentGameState.alliesCount = werewolvesCount;
+                currentGameState.enemiesCount = vampiresCount;
+                currentGameState.humansCount = humansCount;
             }
         }
         else if (code == "MAP")
         {
-            // TODO Implement 
+            std::vector<Group> humansList;
+            std::vector<Group> vampiresList;
+            std::vector<Group> werewolvesList;
+            int humansCount = 0;
+            int vampiresCount = 0;
+            int werewolvesCount = 0;
             for (int i = 0; i < size; ++i)
             {
+                Group group;
                 char x = receiveBuffer[4 + (5 * i)];
                 char y = receiveBuffer[5 + (5 * i)];
                 char humans = receiveBuffer[6 + (5 * i)];
                 char vampires = receiveBuffer[7 + (5 * i)];
                 char werewolves = receiveBuffer[8 + (5 * i)];
+
+                group.x = (int)x;
+                group.y = (int)y;
                 if (humans > 0)
                 {
                     std::cout << "Humans : " << (int)humans << " on (" << (int)x << ", " << (int)y << ")" << std::endl;
+                    group.count = (int)humans;
+                    humansCount += (int)humans;
+                    humansList.push_back(group);
                 }
                 if (vampires > 0)
                 {
                     std::cout << "Vampires : " << (int)vampires << " on (" << (int)x << ", " << (int)y << ")" << std::endl;
+                    group.count = (int)vampires;
+                    vampiresCount += (int)vampires;
+                    vampiresList.push_back(group);
                 }
                 if (werewolves > 0)
                 {
                     std::cout << "Werewolves : " << (int)werewolves << " on (" << (int)x << ", " << (int)y << ")" << std::endl;
+                    if (homeX == x && homeY == y){
+                        imVampire = false;
+                    }
+                    group.count = (int)werewolves;
+                    werewolvesCount += (int)werewolves;
+                    werewolvesList.push_back(group);
                 }
+            }
+            if (imVampire)
+            {
+                currentGameState.allies = vampiresList;
+                currentGameState.enemies = werewolvesList;
+                currentGameState.humans = humansList;
+                currentGameState.alliesCount = vampiresCount;
+                currentGameState.enemiesCount = werewolvesCount;
+                currentGameState.humansCount = humansCount;
+            }
+            else
+            {
+                currentGameState.allies = werewolvesList;
+                currentGameState.enemies = vampiresList;
+                currentGameState.humans = humansList;
+                currentGameState.alliesCount = werewolvesCount;
+                currentGameState.enemiesCount = vampiresCount;
+                currentGameState.humansCount = humansCount;
             }
         }
         std::cout << std::endl;

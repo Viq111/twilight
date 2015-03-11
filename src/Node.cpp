@@ -2,17 +2,21 @@
 #include <stdlib.h>
 #include <algorithm>
 
-int Node::currentSyracusNumber = 14;                 //temp
-int Node::currentClassScore = currentSyracusNumber;  //temp
 
 Node::Node(){
     childNotGet = true;
     scoreNotGet = true;
 }
 
-Node::Node(GameState game)
+Node::Node(GameState game){
+    gameState = GameState(game);
+    childNotGet = true;
+    scoreNotGet = true;
+}
+
+Node::Node(std::shared_ptr<GameState> game)
 {
-	// ToDo: Implement
+    gameState = GameState(*game);
 	childNotGet = true;
 	scoreNotGet = true;
 }
@@ -20,62 +24,46 @@ Node::Node(GameState game)
 int Node::getScore(){
     if (scoreNotGet){
         scoreNotGet = false;
-
-        //temp : création de score moins couteuse que rand(), mais un suffisament aléatoire pour nous (j'ai utilisé un truc basé sur la conjecture de Syracuse et commencant arbitrairement à 14 et qui passe au suivant avant de boucler...)
-        if (currentClassScore == 1){
-            currentClassScore = currentSyracusNumber;
-        }
-        else if (currentClassScore % 2 == 1){
-            currentClassScore = (3 * currentClassScore) + 1;
-        }
-        else{
-            currentClassScore = currentClassScore / 2;
-        }
+        gameState.getScore();
     }
     return score; 
 }
 
-int Node::addChild(Node* child)
+int Node::addChild(std::shared_ptr<Node> child)
 {
     children.push_back(child);
     return 0;
 }
 
-Node::~Node()
-{
-    if (children.size() > 0){
-        for (int i = 0; i < children.size(); i++){
-            delete(children[i]);
-        }
-    }
-}
-
-bool comparaisonInverse(Node* first, Node* second)  //temp
+bool comparaisonInverse(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
 {
     return (first->getScore() > second->getScore());
 }
 
-bool comparaison(Node* first, Node* second)  //temp
+bool comparaison(std::shared_ptr<Node> first, std::shared_ptr<Node> second)  //temp
 {
     return (first->getScore() < second->getScore());
 }
 
-std::vector<Node*> Node::getChildren()
+std::vector<std::shared_ptr<Node>> Node::getChildren(bool itsAlliesTurn)      // To do : on récupère les enfants ici et on les ajoutent à children
 {
     if (childNotGet){
         childNotGet = false;
-        // To add : on récupère les enfants ici et on les ajoutent à children
+        std::shared_ptr<std::vector<std::shared_ptr<GameState>>> gameStateChildren = gameState.getChildren(itsAlliesTurn);
+        for (int i = 0; i < gameStateChildren->size(); i++){
+            children.push_back(std::make_shared<Node>(gameStateChildren->at(i)));
+        }
     }
     return children;
 }
 
-std::vector<Node*> Node::getSortedChildren()  //temp
+std::vector<std::shared_ptr<Node>> Node::getSortedChildren()  //temp
 {
     std::sort(children.begin(), children.end(), comparaison);
     return children;
 }
 
-std::vector<Node*> Node::getReverseSortedChildren()  //temp
+std::vector<std::shared_ptr<Node>> Node::getReverseSortedChildren()  //temp
 {
     std::sort(children.begin(), children.end(), comparaisonInverse);
     return children;

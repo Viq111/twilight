@@ -77,7 +77,7 @@ class BoardGame(easyAI.TwoPlayersGame):
         "Make a move to the objective"
         obj = move[1]
         if move[0]: # We took a penality
-            self.nb_penalities += 1
+            self.nb_penalities += move[0]
         if self.nplayer == 1: # P1 playing
             p = self.p1_obj[-1]
         else:
@@ -94,10 +94,7 @@ class BoardGame(easyAI.TwoPlayersGame):
         "Unmake a move"
         obj = move[1]
         if move[0]: # We took a penality
-            self.nb_penalities -= 1
-        if obj == None: # Stuck move
-            self.stuck = False
-            return
+            self.nb_penalities -= move[0]
         if self.nplayer == 1:
             del self.p1_obj[-1]
         else:
@@ -114,7 +111,7 @@ class BoardGame(easyAI.TwoPlayersGame):
             return 0
         if self.nplayer == 2 and len(self.p2_obj) == 1:
             return 0
-        # Score is nb / nb_moves of us minus ennemy
+        # Score is (nb / nb_moves of us) minus ennemy's score
         p1_score = 1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]
         p2_score = 1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]
         if self.nplayer == 1:
@@ -163,7 +160,7 @@ class Objective_path():
             print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
             self.c.move([(us[0][0], us[0][1], us[1], goal[0], goal[1])])
         else: # No more humans, attack the other player
-            ennemies = []
+            objectives = []
             for x in range(size[0]):
                 for y in range(size[1]):
                     if world.get_cell(x, y)["ennemy"] != 0:

@@ -28,16 +28,14 @@ class Nearest_possible():
         client.set_callback(self.callback)
         client.connect("Near")
         self.c = client
-        start = self.c.get_map().get_starting_position()
-        self.pos = (start[0], start[1])
-        self.number = start[2]
+        self.pos = self.c.get_map().get_starting_position()
+        self.number = self.c.get_map().get_cell(self.pos[0], self.pos[1])["us"]
 
     def callback(self, world):
         "Play nearest objective"
         # 0 - Update our number and position
-        start = world.get_starting_position()
-        self.pos = (start[0], start[1])
-        self.number = start[2]
+        self.pos = world.get_starting_position()
+        self.number = world.get_cell(self.pos[0], self.pos[1])["us"]
         
         # 1 - Find objectives
         objectives = []
@@ -58,7 +56,7 @@ class Nearest_possible():
             print("[AI](" + str(self.number) + ") Going for humans at " + str((distance[0][0], distance[0][1])) + " through " + str(goal))
             self.c.move([(self.pos[0], self.pos[1], self.number, goal[0], goal[1])])
         else: # No more humans, attack the other player
-            ennemies = []
+            objectives = []
             for x in range(world.get_size()[0]):
                 for y in range(world.get_size()[1]):
                     if world.get_cell(x, y)["ennemy"] != 0:

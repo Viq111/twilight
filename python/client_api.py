@@ -74,7 +74,7 @@ class World():
         for col in range(len(self.world)):
             for line in range(len(self.world[0])):
                 if self.get_cell(col, line)["us"] != 0:
-                    return (col, line, self.get_cell(col, line)["us"])
+                    return (col, line)
 
     def get_size(self):
         "Return the size"

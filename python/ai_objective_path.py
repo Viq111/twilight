@@ -45,7 +45,8 @@ class BoardGame(easyAI.TwoPlayersGame):
         self.p1_obj = [player1] # P1 objectives he got, this is a list of ((current_x, current_y), total_nb, nb_moves)
         self.p2_obj = [player2] # P2 objectives he got, this is a list of ((current_x, current_y), total_nb, nb_moves)
         self.free_objectives = objectives
-        self.nb_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
+        self.p1_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
+        self.p2_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
 
     # Helper functions
     def __flight_distance(self, start, stop):
@@ -77,7 +78,11 @@ class BoardGame(easyAI.TwoPlayersGame):
         "Make a move to the objective"
         obj = move[1]
         if move[0]: # We took a penality
-            self.nb_penalities += move[0]
+            if self.nplayer == 1:
+                self.p1_penalities += move[0]
+            else:
+                self.p2_penalities += move[0]
+
         if self.nplayer == 1: # P1 playing
             p = self.p1_obj[-1]
         else:
@@ -94,7 +99,11 @@ class BoardGame(easyAI.TwoPlayersGame):
         "Unmake a move"
         obj = move[1]
         if move[0]: # We took a penality
-            self.nb_penalities -= move[0]
+            if self.nplayer == 1:
+                self.p1_penalities -= move[0]
+            else:
+                self.p2_penalities -= move[0]
+
         if self.nplayer == 1:
             del self.p1_obj[-1]
         else:
@@ -112,14 +121,15 @@ class BoardGame(easyAI.TwoPlayersGame):
         if self.nplayer == 2 and len(self.p2_obj) == 1:
             return 0
         # Score is (nb / nb_moves of us) minus ennemy's score
-        p1_score = 1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]
-        p2_score = 1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]
-        if self.nplayer == 1:
-            score = p1_score - p2_score - (self.nb_penalities * PENALITY_COEFF)
-            return score
-        else:
-            score = p2_score - p1_score - (self.nb_penalities * PENALITY_COEFF)
-            return score
+        p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]) - (self.p1_penalities * PENALITY_COEFF)
+        p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]) - (self.p2_penalities * PENALITY_COEFF)
+        #if self.nplayer == 1:
+        #    score = p1_score - p2_score
+        #    return score
+        #else:
+        #    score = p2_score - p1_score
+        #    return score
+        return p1_score - p2_score
             
     def show(self):
         return

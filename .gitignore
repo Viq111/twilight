@@ -5,3 +5,4 @@ python/names2.py
 *.DS_Store
 *.sublime-project
 *.sublime-workspace
+server/official/trace*

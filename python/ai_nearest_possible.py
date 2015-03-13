@@ -23,10 +23,11 @@ import client_api
 
 class Nearest_possible():
     "A simple AI which take the best nearest objective"
+    
+    name = "Nearest"
+    
     def __init__(self, client):
         "Connect to the client"
-        client.set_callback(self.callback)
-        client.connect("Near")
         self.c = client
         self.pos = self.c.get_map().get_starting_position()
         self.number = self.c.get_map().get_cell(self.pos[0], self.pos[1])["us"]
@@ -74,11 +75,6 @@ class Nearest_possible():
 ### DEFINITIONS ###
 ###################
 
-def main(client):
-    "Create an AI and play"
-    ai = Nearest_possible(client)
-    wait = raw_input("...")
-
 ##################
 ###  __MAIN__  ###
 ##################
@@ -88,4 +84,4 @@ if __name__ == "__main__":
     print "> By Viq (under CC BY-SA 3.0 license)"
     print "> Loading program ..."
     with client_api.ClientAPI() as client:
-        main(client)
+        client.mainloop(Nearest_possible)

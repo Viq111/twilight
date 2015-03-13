@@ -21,6 +21,12 @@ import termcolor
 DEFAULT_SERVER = "127.0.0.1"
 DEFAULT_PORT = 5555
 
+try:
+    import names
+    DEFAULT_NAME = names.get_first_name()
+except:
+    DEFAULT_NAME = "Edward"
+
 def color_print(*args):
     "Print thing with client_api color"
     COLOR = "yellow"
@@ -70,7 +76,7 @@ class World():
             if self.inited:
                 return True
             else:
-                color_print("> Waiting for init...")
+                color_print("> Waiting for init... (If it get stuck here, make sure you call connect before using other functions)")
                 self.init_lock.wait()
             color_print("> Map inited!") 
             return True
@@ -221,25 +227,33 @@ class ClientAPI(threading.Thread):
     "Create a simple connection to the vampire/wolves server"
     def __default_callback(self, world):
         "This is called when it's our turn to play"
-        print(str(self.__name) + ", your time to play!")
+        if self.callback == self.__default_callback:
+            time.sleep(0.1)
+        count = 0
+        while self.callback == self.__default_callback:
+            count += 1
+            sys.stderr.write("[WARNING] client_api default_callback has not been overrided!")
+            time.sleep(0.1)
+            if count >= 10:
+                break
+        if self.callback != self.__default_callback:
+            self.callback(world)
     
     def __init__(self, server = DEFAULT_SERVER, port = DEFAULT_PORT, turn_callback = None):
         "Connect to the server"
         self.ip = server
         self.port = port
         self.running = False
+        self.restarted = False
         self.__name = "Unknown"
         if turn_callback:
             self.callback = turn_callback
         else:
             self.callback = self.__default_callback
-
         threading.Thread.__init__(self)
 
     def connect(self, my_name):
         "Connect to the server"
-        if self.callback == self.__default_callback:
-            sys.stderr.write("[WARNING] Client_api.connect() called before set_callback, you AI may not be called for the first turn")
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.ip, self.port))
         self.__name = my_name
@@ -266,6 +280,11 @@ class ClientAPI(threading.Thread):
             raise RuntimeError("First command was not SET: " + str(data))
         self.world = World(ord(data[3]), ord(data[4]))
 
+    def _restart(self):
+        "Restart the game to the initial state"
+        self._init_com()
+        self.restarted = True
+
     def close(self):
         "Close the client"
         self.running = False
@@ -287,6 +306,8 @@ class ClientAPI(threading.Thread):
         self.running = True
         temp_starting_pos = (0,0)
         while self.running:
+            while self.restarted:
+                time.sleep(0.1) # Wait for AI to restart
             try:
                 cmd = self.s.recv(3) # Get command
                 if cmd == "HUM": # This is useless
@@ -319,7 +340,7 @@ class ClientAPI(threading.Thread):
                     self.callback(self.world)
                 elif cmd == "END":
                     # Restart game
-                    self._init_com()
+                    self._restart()
                 elif cmd == "BYE":
                     # End of server
                     self.close()
@@ -359,6 +380,28 @@ class ClientAPI(threading.Thread):
             for i in range(len(move)):
                 cmd += chr(move[i])
         self.s.send(cmd)
+
+    def mainloop(self, AI_class):
+        "Mainloop while the connection is open, recreate an AI "
+        # Get the initial of the AI
+        try:
+            name = AI_class.name
+            name = "[" + name[0].upper() + "] "
+        except:
+            name = ""
+        name += DEFAULT_NAME
+        self.connect(name)
+
+        # Create an AI
+        ai = AI_class(self) 
+        self.set_callback(ai.callback)
+
+        while self.running:
+            time.sleep(0.5)
+            if self.restarted: # Game restarted, recreate the AI
+                ai = AI_class(self) # Create an AI
+                self.set_callback(ai.callback)
+                self.restarted = False
     
 ###################
 ### DEFINITIONS ###

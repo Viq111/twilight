@@ -183,14 +183,13 @@ class Quest():
 
 class GamingHall():
     "Where all adventurers meets and gamble"
-    def __init__(self, world, api):
+    def __init__(self, api):
         "Create a new gaming hall"
         self.adventurers = []
         self.api = api
         # Create initial objectives
-        self._generate_objectives(world)
+        self._generate_objectives(api.get_map())
         self.objectives = [("human", (1,1), 100)] # List of action, position, wage
-        self.api.set_callback(self.turn_callback)
         
     def add_adventurer(self, adv):
         "Add an adventurer to the hall"
@@ -211,7 +210,7 @@ class GamingHall():
         random.shuffle(self.adventurers)
         for i in range(TABLE_TURNS):
             for adv in self.adventurers:
-                new_quest = adv.select_quest(world, quests)
+                new_quest = adv.select_quest(new_world, quests)
                 adv.change_quest(new_quest)
         return self.adventurers
 
@@ -290,6 +289,29 @@ class GamingHall():
         print "###################"
         time.sleep(0.5) # Wait cause our AI is way too fast :)
         self.api.move(moves)
+
+class GamblingAI():
+    "The only one gambling AI"
+
+    name = "Gambling"
+    
+    def __init__(self, api):
+        "Create the AI, the adventurers and the gaming hall"
+        pos = find_starting(api.get_map())
+        world = api.get_map()
+        self.hall = GamingHall(api)
+        start = find_starting(world)
+        number = api.get_map().get_cell(start[0], start[1])["us"]
+        # Create i adventurers
+        for i in range(number):
+            adv = Adventurer(self.hall, start)
+            self.hall.add_adventurer(adv)
+
+    def callback(self, world):
+        "Callback redirects to GamingHall callback"
+        self.hall.turn_callback(world)
+        
+        
         
 ###################
 ### DEFINITIONS ###
@@ -305,28 +327,7 @@ if __name__ == "__main__":
     print "> Welcome to " + str(prog_name) + " (r" + str(version) + ")"
     print "> By Viq (under CC BY-SA 3.0 license)"
     print "> Loading program ..."
-    c = client_api.ClientAPI()
-    name = names.get_first_name()
-    print "You are playing as", name
-    try:
-        c.connect(name)
-    except:
-        print "Couldn't connect to server..."
-        wait = raw_input("Press return to exit...")
-        sys.exit()
-    time.sleep(0.2)
-    pos = find_starting(c.get_map())
-    world = c.get_map()
-    hall = GamingHall(world, c)
-    start = find_starting(world)
-    number = c.get_map().get_cell(start[0], start[1])["us"]
-    # Create 4 adventurers
-    for i in range(number):
-        adv = Adventurer(hall, start)
-        hall.add_adventurer(adv)
-    # Play one turn
-    #while 1:
-        #hall.new_turn(world)
-    wait = raw_input("...")
+    with client_api.ClientAPI() as client:
+        client.mainloop(GamblingAI)
     
     

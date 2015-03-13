@@ -136,10 +136,11 @@ class BoardGame(easyAI.TwoPlayersGame):
 
 class Objective_path():
     "An AI which tries to find the best path between objectives"
+
+    name = "Objective"
+    
     def __init__(self, client):
         "Connect to the client"
-        client.set_callback(self.callback)
-        client.connect("Path")
         self.c = client
         self.ai = easyAI.AI_Player(easyAI.Negamax(MINMAX_LEVEL))
         self.ennemy = easyAI.AI_Player(easyAI.Negamax(MINMAX_LEVEL))
@@ -198,11 +199,6 @@ class Objective_path():
 ### DEFINITIONS ###
 ###################
 
-def main(client):
-    "Create an AI and play"
-    ai = Objective_path(client)
-    wait = raw_input("...")
-
 ##################
 ###  __MAIN__  ###
 ##################
@@ -212,4 +208,4 @@ if __name__ == "__main__":
     print "> By Viq (under CC BY-SA 3.0 license)"
     print "> Loading program ..."
     with client_api.ClientAPI() as client:
-        main(client)
+        client.mainloop(Objective_path)

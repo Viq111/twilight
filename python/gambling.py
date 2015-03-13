@@ -175,7 +175,10 @@ class Quest():
             slow.sort(reverse=True)
             slowest = slow[0][1] # Slowest adventurer
             path = self.world._a_star(slowest.pos, self.objective.pos) # His path to get there
-            return path[-2] # Return the move just before arriving to the goal
+            if len(path) >= 2:
+                return path[-2] # Return the move just before arriving to the goal
+            else: # This is the slowest, don't move
+                return slowest.pos
         
 
 class GamingHall():
@@ -261,9 +264,8 @@ class GamingHall():
         for adv in adventurers:
             #new_pos = world.find_path(adv.pos, adv.quest.objective.pos)
             new_pos = world.find_path(adv.pos, adv.quest.get_meeting_point())
-            if new_pos in poses:
-                print "Illegal move for adventurer:",adv
-                continue
+            if new_pos == adv.pos: # Not moving, don't do anything
+                pass
             else:
                 move = (adv.pos[0], adv.pos[1], 1, new_pos[0], new_pos[1])
                 adv.pos = new_pos

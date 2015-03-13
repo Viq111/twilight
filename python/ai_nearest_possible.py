@@ -43,10 +43,10 @@ class Nearest_possible():
             for y in range(world.get_size()[1]):
                 if world.get_cell(x, y)["human"] != 0:
                     objectives.append((x, y, world.get_cell(x, y)["human"]))
-        if len(objectives) > 0: # There is still humans on the map
-            # 2 - Filter only possible objectives
-            objectives = filter(lambda obj : obj[2] <= self.number, objectives)
-
+        # 2 - Filter only possible objectives
+        objectives = filter(lambda obj : obj[2] <= self.number, objectives)
+        
+        if len(objectives) > 0: # There is still humans on the map that we can take
             # 3 - Compute distance to each objective
             distance = [ (obj[0], obj[1], world.find_path_time(self.pos, (obj[0], obj[1]))) for obj in objectives]
             # 4 - Find nearest objective

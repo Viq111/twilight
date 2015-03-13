@@ -38,7 +38,7 @@ if __name__ == "__main__":
     print "> Loading program ..."
     if len(sys.argv) < 2 or len(sys.argv) >= 4:
         print "Usage: " + sys.argv[0] + " <AI python file1> (<AI python file2>)"
-        p1 = p2 = "gambling.py"
+        p1 = p2 = DEFAULT_AI
         print "Defaulting to: " + p1
     elif len(sys.argv) == 2:
         p1 = p2 = sys.argv[1]

@@ -16,7 +16,7 @@ import os, time, sys, subprocess
 ### GLOBALS ###
 ###############
 
-DEFAULT_AI = "gambling.py"
+DEFAULT_AI = "ai_nearest_possible.py"
 SERVER_PATH = os.path.join("..", "server", "official", "VampiresVSWerewolvesGameServer.exe")
 
 ###############

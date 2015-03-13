@@ -12,6 +12,7 @@ version = 1
 ##############
 import os, time, socket, threading, sys
 import heapq # For A* search
+import termcolor
 
 ###############
 ### GLOBALS ###
@@ -19,6 +20,14 @@ import heapq # For A* search
 
 DEFAULT_SERVER = "127.0.0.1"
 DEFAULT_PORT = 5555
+
+def color_print(*args):
+    "Print thing with client_api color"
+    COLOR = "yellow"
+    s = "[API] "
+    for a in args:
+        s += str(a)
+    termcolor.cprint(s, COLOR)
 
 ###############
 ### CLASSES ###
@@ -61,9 +70,9 @@ class World():
             if self.inited:
                 return True
             else:
-                print("[API]> Waiting for init...")
+                color_print("> Waiting for init...")
                 self.init_lock.wait()
-            print("[API]> Map inited!") 
+            color_print("> Map inited!") 
             return True
 
     # Useful for clients
@@ -99,10 +108,10 @@ class World():
             for p in positions:
                 if my_pos == (p[0], p[1]):
                     if p[3] != 0:
-                        print "You are a vampire"
+                        color_print("You are a vampire")
                         self.im_vampire = True
                     elif p[4] != 0:
-                        print "You are a wolf"
+                        color_print("You are a wolf")
                         self.im_vampire = False
                     else:
                         raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))
@@ -212,7 +221,7 @@ class ClientAPI(threading.Thread):
     "Create a simple connection to the vampire/wolves server"
     def __default_callback(self, world):
         "This is called when it's our turn to play"
-        print str(self.__name) + ", your time to play!"
+        print(str(self.__name) + ", your time to play!")
     
     def __init__(self, server = DEFAULT_SERVER, port = DEFAULT_PORT, turn_callback = None):
         "Connect to the server"
@@ -246,12 +255,12 @@ class ClientAPI(threading.Thread):
         try:
             data = self.s.recv(5)
         except socket.error:
-            print "End of game"
+            color_print("End of game (Socket Error)")
             self.close()
             return
         if data[0:3] != "SET":
             if data[0:3] == "BYE":
-                print "End of game"
+                color_print("End of game (BYE)")
                 self.close()
                 return
             raise RuntimeError("First command was not SET: " + str(data))
@@ -315,7 +324,7 @@ class ClientAPI(threading.Thread):
                     # End of server
                     self.close()
                 else:
-                    print "Unknown command: " + str([cmd])
+                    color_print("/!\\Unknown command: " + str([cmd]))
             except socket.timeout:
                 pass
         self.s.close()
@@ -324,8 +333,26 @@ class ClientAPI(threading.Thread):
         "Get the Map Obejct"
         return self.world
 
-    def move(self, moves):
-        "Move your player move is (initial_x, initial_y, nb, dest_x, dest_y)"
+    def move(self, moves, autoremove_forbiden_moves = True):
+        "Send multiple moves command, moves is a list of (initial_x, initial_y, nb, dest_x, dest_y). Autoremove removes fordien moves (same source and destination cell)."
+        if autoremove_forbiden_moves:
+            # Remove forbiden moves
+            while 1:
+                sources = {}
+                dest = {}
+                for move in moves:
+                    sources[(move[0], move[1])] = move
+                    dest[(move[3], move[4])] = move
+                removed = False
+                for d in dest.keys():
+                    if sources.has_key(d): # If we find a forbiden move, remove it
+                        removed = True
+                        color_print("Forbiden move: " + str(move))
+                        moves.remove(dest[d])
+                        break
+                if not removed: # We did not remove anything, there is no more something wrong
+                    break
+            
         cmd = "MOV"
         cmd += chr(len(moves))
         for move in moves:

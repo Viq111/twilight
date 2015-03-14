@@ -96,10 +96,13 @@ class World():
         self.__wait_init()
         return (len(self.world), len(self.world[0]))
 
-    def get_cell(self, x, y):
-        "Return the content of a cell"
+    def get_cell(self, x, y = None):
+        "Return the content of a cell. get_cell(pos) or get_cell(x, y)"
         self.__wait_init()
-        return self.world[x][y]
+        if y == None:
+            return self.world[x[0]][x[1]]
+        else:
+            return self.world[x][y]
 
     def get_world_as_matrix(self):
         "Return the world as a matrix"
@@ -248,7 +251,7 @@ class ClientAPI(threading.Thread):
         count = 0
         while self.callback == self.__default_callback:
             count += 1
-            sys.stderr.write("[WARNING] client_api default_callback has not been overrided!")
+            sys.stderr.write("[WARNING] client_api default_callback has not been overrided!\n")
             time.sleep(0.1)
             if count >= 10:
                 break
@@ -369,6 +372,9 @@ class ClientAPI(threading.Thread):
     def get_map(self):
         "Get the Map Obejct"
         return self.world
+    def get_world(self):
+        "Return the world"
+        return self.get_map()
 
     def move(self, moves, autoremove_forbiden_moves = True):
         "Send multiple moves command, moves is a list of (initial_x, initial_y, nb, dest_x, dest_y). Autoremove removes fordien moves (same source and destination cell)."

@@ -1,7 +1,18 @@
 import time
 
 def test () :
-	world = client_api.World(10, 12)
+	world = client_api.World(10, 10)
+	world.init_map( (5,5), 
+		( (5,5,0,9,0), 
+			(0,5,0,0,9), 
+			(5,0,5,0,0),
+			(3,2,5,0,0),
+			(3,6,5,0,0),
+			(5,7,5,0,0),
+			(7,7,5,0,0),
+			(2,2,5,0,0), ) )
+	print world
+
 
 def benchmark (fun) :
 	start = time.time()
@@ -22,4 +33,6 @@ def versus():
 	for i in range(1,4) :
 		print benchmark(test)
 
-versus()
+if __name__ == '__main__':
+	import client_api
+	test()

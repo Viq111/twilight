@@ -135,7 +135,7 @@ class World():
         else:
             self.world[x][y] = {"us" : wolf, "ennemy" : vamp, "human" : human}
 
-    def _get_neighboors(self, pos, goal = None):
+    def _get_neighboors(self, pos, goal = None, count = None):
         "Get possible neigboor moves, set the goal if you want to consider it as free"
         neightboors = []
         for i in range(-1, 2):
@@ -144,7 +144,16 @@ class World():
                 y = pos[1] + j
                 if (i != 0 or j != 0) and x >= 0 and y >= 0 and x < len(self.world) and y < len(self.world[0]): # Cell inside the grid
                     cell = self.get_cell(x, y)
-                    if cell["ennemy"] == 0 and cell["human"] == 0:
+                    sum = 0;
+                    for k in range(-1, 2):
+                        for l in range(-1, 2):
+                            a = x + k
+                            b = y + l
+                            if (k != 0 or l != 0) and a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
+                                sum += self.get_cell(a, b)["ennemy"]
+                    if cell["ennemy"] == 0 and sum == 0 and cell["human"] == 0:
+                        neightboors.append((x, y))
+                    elif count != None and (1.5 * cell["ennemy"] <= count) and sum == 0 and cell["human"] <= count:
                         neightboors.append((x, y))
                     elif goal != None:
                         if x == goal[0] and y == goal[1]:
@@ -155,7 +164,7 @@ class World():
         "Get a flight distance from start to stop"
         return max(abs(stop[0] - start[0]), abs(stop[1] - start[1]))
 
-    def _a_star(self, start, stop):
+    def _a_star(self, start, stop, count = None):
         "Do A* algorithm from start to stop, return the path"
         # A* from http://www.redblobgames.com/pathfinding/a-star/implementation.html#sec-1-4
         if start == stop: # No path, we already are there
@@ -168,7 +177,7 @@ class World():
             current = frontier.get()
             if current == stop:
                 break
-            for next in self._get_neighboors(current, stop):
+            for next in self._get_neighboors(current, stop, count):
                 new_cost = cost_so_far[current] + 1
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
@@ -184,12 +193,19 @@ class World():
                 path.insert(0, came_from[path[0]])
             return path  
             
-    def find_path(self, start, stop):
+    def find_path(self, start, stop, count = None):
         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
         self.__wait_init()
         res = self._a_star(start, stop)
         if len(res) == 0:
-            return start
+            current = start
+            distance = 99999999999
+            for next in self._get_neighboors(start, stop, count):
+                next_distance = self._get_flight_distance(stop, next)
+                if next_distance < distance:
+                    current = next
+                    distance = next_distance
+            return current
         else:
             return res[0]
 

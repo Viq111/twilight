@@ -114,10 +114,10 @@ class World():
             for p in positions:
                 if my_pos == (p[0], p[1]):
                     if p[3] != 0:
-                        color_print("You are a vampire")
+                        # color_print("--Cython version-- You are a vampire")
                         self.im_vampire = True
                     elif p[4] != 0:
-                        color_print("You are a wolf")
+                        # color_print("--Cython version-- You are a wolf")
                         self.im_vampire = False
                     else:
                         raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))

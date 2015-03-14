@@ -147,16 +147,18 @@ class World():
                 y = pos[1] + j
                 if (i != 0 or j != 0) and x >= 0 and y >= 0 and x < len(self.world) and y < len(self.world[0]): # Cell inside the grid
                     cell = self.get_cell(x, y)
-                    sum = 0;
-                    for k in range(-1, 2):
-                        for l in range(-1, 2):
-                            a = x + k
-                            b = y + l
-                            if (k != 0 or l != 0) and a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
-                                sum += self.get_cell(a, b)["ennemy"]
+                    sum = 0
+                    if count != None: # We have the number of our units, compute how many ennemy are arround the case
+                        for k in range(-1, 2):
+                            for l in range(-1, 2):
+                                a = x + k
+                                b = y + l
+                                if (k != 0 or l != 0) and a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
+                                    sum += self.get_cell(a, b)["ennemy"]
                     if cell["ennemy"] == 0 and sum == 0 and cell["human"] == 0:
                         neightboors.append((x, y))
-                    elif count != None and (1.5 * cell["ennemy"] <= count) and sum == 0 and cell["human"] <= count:
+                    #elif count != None and ((1.5 * sum) <= count) and cell["human"] <= count:
+                    elif count != None and (sum <= count) and cell["human"] <= count: # ToDo: Do not go near 1.5 ennemies
                         neightboors.append((x, y))
                     elif goal != None:
                         if x == goal[0] and y == goal[1]:
@@ -201,6 +203,7 @@ class World():
         self.__wait_init()
         res = self._a_star(start, stop)
         if len(res) == 0:
+            # If there is no path with A* still try to get closer
             current = start
             distance = 99999999999
             for next in self._get_neighboors(start, stop, count):

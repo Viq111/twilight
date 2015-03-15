@@ -101,8 +101,6 @@ class BoardGame():
         self.p1_obj = [player1] # P1 objectives he got, this is a list of ((current_x, current_y), total_nb, nb_moves)
         self.p2_obj = [player2] # P2 objectives he got, this is a list of ((current_x, current_y), total_nb, nb_moves)
         self.free_objectives = objectives
-        self.p1_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
-        self.p2_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
 
     # Helper functions
     
@@ -128,31 +126,27 @@ class BoardGame():
             e = self.p1_obj[-1]
         moves = filter(lambda obj : obj.nb <= p[1], self.free_objectives) # Only where I can attack safely
         moves = filter(lambda obj : self.__flight_distance(p[0], obj.pos) <= self.__flight_distance(e[0], obj.pos), moves) # Only where I can be before the ennemy
-        moves = [ (0, move) for move in moves ] # First boolean is if we take a penality
+        moves = [ (False, move) for move in moves ] # First boolean is if we take a penality
         if len(moves) == 0:
             # We are farther from all objectives relating to the ennemy, take a penality
             moves = filter(lambda obj : obj.nb <= p[1], self.free_objectives) # Only where I can attack safely
-            moves = [ (1, move) for move in moves ] # First boolean is if we take a penality
-        if len(moves) == 0:
-            # We are not numerous enought, go random
-            moves = [ (10, move) for move in self.free_objectives ]
+            moves = [ (True, move) for move in moves ] # First boolean is if we take a penality
         return moves # Possible objective I can go for
 
     def make_move(self, move):
         "Make a move to the objective"
         obj = move[1]
-        if move[0]: # We took a penality
-            if self.nplayer == 1:
-                self.p1_penalities += move[0]
-            else:
-                self.p2_penalities += move[0]
-
         if self.nplayer == 1: # P1 playing
             p = self.p1_obj[-1]
         else:
             p = self.p2_obj[-1]
         nb = p[1] + obj.nb
         nb_moves = p[2] + self.__flight_distance(p[0], obj.pos)
+        if move[0]: # We took a penality
+            nb_moves = p[2] + (self.__flight_distance(p[0], obj.pos) * PENALITY_COEFF)
+        else:
+            nb_moves = p[2] + self.__flight_distance(p[0], obj.pos)
+
         self.free_objectives.remove(obj)
         if self.nplayer == 1: # P1 playing
             self.p1_obj.append((obj.pos, nb, nb_moves))
@@ -162,12 +156,6 @@ class BoardGame():
     def unmake_move(self, move):
         "Unmake a move"
         obj = move[1]
-        if move[0]: # We took a penality
-            if self.nplayer == 1:
-                self.p1_penalities -= move[0]
-            else:
-                self.p2_penalities -= move[0]
-
         if self.nplayer == 1:
             del self.p1_obj[-1]
         else:
@@ -176,7 +164,12 @@ class BoardGame():
 
     def is_over(self):
         "Tell if game is over"
-        return len(self.free_objectives) == 0
+        if len(self.free_objectives) == 0:
+            return True # No more objectives, nothing to do
+        humans = min(h.nb for h in self.free_objectives) # Min number of humans
+        if humans > self.p1_obj[-1][1] or humans > self.p2_obj[-1][1]: # If we can't safely tank humans, end the MinMax search
+            return True
+        return False
 
     def scoring(self):
         "Return a score of current player"
@@ -184,12 +177,11 @@ class BoardGame():
         if self.p1_obj[-1][2] ==0: # No move, no gain
             p1_score = 0
         else:
-            p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]) - (self.p1_penalities * PENALITY_COEFF)
+            p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2])
         if self.p2_obj[-1][2] ==0:
             p2_score = 0  
         else:
-            p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]) - (self.p2_penalities * PENALITY_COEFF)
-
+            p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2])
         return p1_score - p2_score
             
     def show(self):

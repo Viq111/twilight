@@ -1,3 +1,2 @@
 names
-easyAI
 termcolor

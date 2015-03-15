@@ -12,13 +12,13 @@ version = 1
 ##############
 import os, time
 import client_api
-import easyAI # ToDo: Remove this
+import minmax
 
 ###############
 ### GLOBALS ###
 ###############
 
-MINMAX_LEVEL = 8
+MINMAX_LEVEL = 4
 PENALITY_COEFF = 2
 
 ###############
@@ -92,12 +92,10 @@ class Objective():
     def __repr__(self):
         return "<" + str(self.nb) + "units at " + str(self.pos) + ">"
 
-class BoardGame(easyAI.TwoPlayersGame):
+class BoardGame():
     "Create a simuation of the board game"
-    def __init__(self, players, player1, player2, objectives):
+    def __init__(self, player1, player2, objectives):
         "Store information about the player and objectives"
-        # easyAI initialization
-        self.players = players
         self.nplayer = 1
         # Store
         self.p1_obj = [player1] # P1 objectives he got, this is a list of ((current_x, current_y), total_nb, nb_moves)
@@ -107,6 +105,14 @@ class BoardGame(easyAI.TwoPlayersGame):
         self.p2_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
 
     # Helper functions
+    
+    def switch_player(self):
+        "Switch players"
+        if self.nplayer == 1:
+            self.nplayer = 2
+        else:
+            self.nplayer = 1
+
     def __flight_distance(self, start, stop):
         "Flight distance to go from start to stop"
         return max(abs(start[1] - stop[1]), abs(start[0] - stop[0]))
@@ -174,13 +180,16 @@ class BoardGame(easyAI.TwoPlayersGame):
 
     def scoring(self):
         "Return a score of current player"
-        if self.nplayer == 1 and len(self.p1_obj) == 1: # No move, no gain
-            return 0
-        if self.nplayer == 2 and len(self.p2_obj) == 1:
-            return 0
         # Score is (nb / nb_moves of us) minus ennemy's score
-        p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]) - (self.p1_penalities * PENALITY_COEFF)
-        p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]) - (self.p2_penalities * PENALITY_COEFF)
+        if self.p1_obj[-1][2] ==0: # No move, no gain
+            p1_score = 0
+        else:
+            p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]) - (self.p1_penalities * PENALITY_COEFF)
+        if self.p2_obj[-1][2] ==0:
+            p2_score = 0  
+        else:
+            p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]) - (self.p2_penalities * PENALITY_COEFF)
+
         return p1_score - p2_score
             
     def show(self):
@@ -192,9 +201,6 @@ class PylightParty():
         "Create a new party splitted from a previous one"
         self.grouping = False # Once we need to group with our parent, set that to true
         self.parent = parent
-        # ToDo: Remove when new MiniMax is available
-        self.ai = easyAI.AI_Player(easyAI.Negamax(MINMAX_LEVEL))
-        self.ennemy = easyAI.AI_Player(easyAI.Negamax(MINMAX_LEVEL))
         
     def select_moves(self, pos, nb, world):
         "Update current pos and nb. Select a list of best moves and return them (score, move). move is (pos, nb, goal)"
@@ -212,9 +218,10 @@ class PylightParty():
             objectives.append(Objective(h[0], h[1]))
         if len(objectives) > 0: # There is still humans on the map
             # Ask AI solver what he wants to play
-            game = BoardGame([self.ai, self.ennemy], us, ennemy, objectives)
+            game = BoardGame(us, ennemy, objectives)
             start = time.time()
-            move = self.ai.ask_move(game)[1]
+            mm = minmax.MinMax(game, MINMAX_LEVEL)
+            move = mm.ask_move()[1]
             print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
             goal = world.find_path(us[0], move.pos)
             print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))

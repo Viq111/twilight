@@ -208,7 +208,9 @@ class PylightParty():
     # Core
 
     def select_moves(self, pos, nb, world):
-        "Update current pos and nb. Select a list of best moves and return them (score, move, group division). move is (pos, nb, goal). Group division is (pos, nb)"
+        "Update current pos and nb. Select a list of best moves and return them (score, move, group division). move is (pos, nb, goal). Group division is (pos, nb). If want to group with parent, return parent"
+        if self.grouping: # We want to group with parent
+            return self.parent
         wh = WorldHelper(world)
         # Us
         us = (pos, nb, 0) # This is ((init_x, init_y), nb_units, nb_moves)
@@ -247,6 +249,10 @@ class PylightParty():
                     print("[FORK] Want to create groups: " + str(groups))
                 return [(1, (us[0], us[1], goal))] # Currently score is 1
         # Either there is no more objectives on the map or the objective are too high
+        if self.parent != None:
+            # We are a child, we are cowards, so let's group
+            self.grouping = True
+            return self.parent
         # Detect the best pray
         ennemies = wh.get_ennemies()
         ennemies.sort(key = lambda e : e[1])

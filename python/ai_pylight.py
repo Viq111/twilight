@@ -298,7 +298,6 @@ class PylightParty():
             to_remove = 0 # Nb to remove from curent party
             for group in other_groups:
                 to_remove += group[0]
-            print "REMOVE:", to_remove
             return [(remaining_units - to_remove, party)] + other_groups
 
 class PylightAI():

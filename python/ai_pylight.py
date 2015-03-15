@@ -290,6 +290,7 @@ class PylightParty():
         if self.parent != None:
             # We are a child, we are cowards, so let's group
             self.grouping = True
+            print_party("Wanting to regroup")
             return self.parent
         # Detect the best pray
         ennemies = wh.get_ennemies()
@@ -408,6 +409,64 @@ class PylightAI():
 
         self.tracking = dict(new_tracking)
 
+    def _select_best_moves(self, parties, wanted_moves, world):
+        "For each party, decided the move. wanted_moves is a dict party <-> moves. moves is a list of (score, move, groups) or parent if want to regroup. Returns new parties and moves"
+        # Voodoo magic
+        # Inputs: parties: list of party; wanted_moves: dict party <-> moves moves is list of (score, move, groups)
+        # Ouput: (new_parties, party_moves). party_moves is party <-> (start, nb, stop)
+        final_moves = {} # Final moves to be made. Party <-> move
+        fulfilled_obj = [] # Already taken objectives
+        temp_best = {} # Temporary best moves. Party <-> (move, groups)
+        new_parties = []
+        # First select best goal for each party
+        for party in parties:
+            score_moves = wanted_moves[party]
+            if type(score_moves) != list: # We want to regroup with parent
+                print_main(str(party) + " regrouping...")
+                temp_best[party] = score_moves
+            else: # score_moves is a list of (score, move, groups) with move = (pos, nb, goal) 
+                found = False
+                for ask in score_moves:
+                    if not ask[1][2] in fulfilled_obj: # The objective was not already fulfilled, do it!
+                        temp_best[party] = (ask[1], ask[2]) # (move, groups) with move = (pos, nb, goal) 
+                        fulfilled_obj.append(ask[1][2])
+                        found = True
+                        break
+                if not found: # Not found, regroup
+                    temp_best[party] = party.parent
+    
+        # Then create parties
+        for party in parties:
+            action = temp_best[party] # Action is either parent is want regrouping or tuple of (move, groups) with move = (pos, nb, goal) 
+            current_pos = action[0][0]
+            main_nb = action[0][1]
+            if type(action) == tuple: # Tuple, create parties
+                groups = action[1]
+                sum = 0 # To delete from main party
+                """
+                for group in groups: # Group is (nb, pylight party)
+                    print_main("[PARTY] Creating...")
+                    new_party = group[1]
+                    if DEBUG:
+                        assert type(new_party) == PylightParty
+                    moves = new_party.select_moves(current_pos, group[0], world, FAST_MINMAX_LEVEL)
+                    if type(move) == list:
+                        sum += group[0]
+                        goal = world.find_path(current_pos, moves[0][1][2])
+                        new_parties.append(new_party)
+                        print_party("New party (" + str(group[0]) + ") Going to " + str(moves[0][1][2]) + " throught " + str(goal))
+                        final_moves[new_party] = (current_pos, group[0], goal)
+                """
+                main_goal = world.find_path(current_pos, action[0][2])
+                if DEBUG:
+                    assert main_nb - sum > 0
+                print_party("(" + str(main_nb - sum) + ") Going to " + str(action[0][2]) + " throught " + str(main_goal))
+                final_moves[party] = (current_pos, main_nb - sum, main_goal)
+            else: # Regroup with parent
+                raise RuntimeError("ToDo")
+        return (new_parties, final_moves)
+            
+
     def callback(self, world):
         "Play best objective"
         # Update tracking with the new map
@@ -415,7 +474,6 @@ class PylightAI():
         
         # For each parties, ask its moves
         parties_moves = {}
-        new_parties = []
         for party in self.parties:
             pos = self.tracking[party][0]
             nb = self.tracking[party][1]
@@ -423,20 +481,17 @@ class PylightAI():
             parties_moves[party] = moves
 
         # Now select best moves
-        # ToDo: best moves
-        # ToDo: Create parties
-            
-        
-        # Only first one
-        move = parties_moves[self.parties[0]][0][1]
-        goal = world.find_path(move[0], move[2])
+        new_parties, moves = self._select_best_moves(self.parties, parties_moves, world)
+
+        end_moves = [] # To send to callback
+        for move in moves.values(): # Move is (old_pos, nb, new_pos)
+            end_moves.append((move[0][0], move[0][1], move[1], move[2][0], move[2][1]))
 
         # Update tracking with moves
-        # ToDo: Currently only one group
-        for party in self.parties:
-            print_party("(" + str(move[1]) + ") Going to " + str(move[2]) + " throught " + str(goal))
-            self.tracking[party] = (move[0], move[1], goal)
-        self.c.move([(move[0][0], move[0][1], move[1], goal[0], goal[1])])
+        self.tracking = dict(moves)
+
+        self.c.move(end_moves)
+
 
 ###################
 ### DEFINITIONS ###

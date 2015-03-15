@@ -247,7 +247,7 @@ class PylightParty():
 
     # Core
 
-    def select_moves(self, pos, nb, world):
+    def select_moves(self, pos, nb, world, level = MINMAX_LEVEL):
         "Update current pos and nb. Select a list of best moves and return them (score, move, group division). move is (pos, nb, goal). Group division is (pos, nb). If want to group with parent, return parent"
         if self.grouping: # We want to group with parent
             return self.parent
@@ -267,27 +267,26 @@ class PylightParty():
             # Ask AI solver what he wants to play
             game = BoardGame(us, ennemy, objectives)
             start = time.time()
-            mm = minmax.MinMax(game, MINMAX_LEVEL)
+            mm = minmax.MinMax(game, level)
             try:
-                move = mm.ask_move()
+                moves = mm.ask_moves()
             except: # If not on DEBUG, print bug but use dumbed down version
                 if DEBUG:
                     raise
                 else:
                     print traceback.format_exc()
-            if move: # If we can do a move
-                move = move[1]
-                print_perf("Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
-                goal = world.find_path(us[0], move.pos)
-                print_party("(" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
-                # Try to detect if we can fork
-                group_move = (us[0], us[1], move.pos)
-                group_objectives = copy.deepcopy(objectives)
-                group_objectives.remove(move)
-                groups = self.check_group(world, group_move, ennemy, group_objectives)
-                if groups:
-                    print_party("[FORK] Want to create groups: " + str(groups))
-                return [(1, (us[0], us[1], goal))] # Currently score is 1
+            print_perf("Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
+            if len(moves) > 0: # If we can do a move
+                result = []
+                for m in moves: # m is (score, move) and move is (penality, obj)
+                    goal = world.find_path(us[0], m[1][1].pos)
+                    # Try to detect if we can fork
+                    group_move = (us[0], us[1], m[1][1].pos)
+                    group_objectives = copy.deepcopy(objectives)
+                    group_objectives.remove(m[1][1])
+                    groups = self.check_group(world, group_move, ennemy, group_objectives)
+                    result.append((m[0], (us[0], us[1], goal), groups)) # (score, move, group division) with move = (pos, nb, goal) 
+                return result
         # Either there is no more objectives on the map or the objective are too high
         if self.parent != None:
             # We are a child, we are cowards, so let's group
@@ -312,7 +311,7 @@ class PylightParty():
         else:
             goal = world.find_path(us[0], humans[0][0])
             print_party("(" + str(us[1]) + ") Going for human at " + str(humans[0][0]) + " through " + str(goal))
-        return [(1, (us[0], us[1], goal))] # Currently score is 1
+        return [(0, (us[0], us[1], goal), None)] # Score of 0 means we either attack smth or wait for our children
 
     def check_group(self, world, move, ennemy, objectives, parent = None):
         "For a move check if we can create a group. Returns None is not possible or a tuple of units, list of (tuple of (nb, Pylight party)) (move is (pos, nb, objective_pos))"
@@ -419,20 +418,25 @@ class PylightAI():
         
         # For each parties, ask its moves
         parties_moves = {}
+        new_parties = []
         for party in self.parties:
             pos = self.tracking[party][0]
             nb = self.tracking[party][1]
             moves = party.select_moves(pos, nb, world)
             parties_moves[party] = moves
-            # ToDo: Create parties
-            
+
+        # Now select best moves
         # ToDo: best moves
+        # ToDo: Create parties
+            
+        
         # Only first one
         move = parties_moves[self.parties[0]][0][1]
 
         # Update tracking with moves
         # ToDo: Currently only one group
         for party in self.parties:
+            print_party("(" + str(move[1]) + ") Going to " + str(move[2]))
             self.tracking[party] = move
         self.c.move([(move[0][0], move[0][1], move[1], move[2][0], move[2][1])])
 

@@ -5786,7 +5786,7 @@ static PyObject *__pyx_pf_17client_api_cython_5World_20_a_star(CYTHON_UNUSED PyO
  *             path = [stop]
  *             while came_from[path[0]] != start: # We are not at the start             # <<<<<<<<<<<<<<
  *                 path.insert(0, came_from[path[0]])
- *             return path
+ *             return []
  */
     while (1) {
       __pyx_t_3 = __Pyx_GetItemInt_List(__pyx_v_path, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(__pyx_t_3 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
@@ -5804,7 +5804,7 @@ static PyObject *__pyx_pf_17client_api_cython_5World_20_a_star(CYTHON_UNUSED PyO
  *             path = [stop]
  *             while came_from[path[0]] != start: # We are not at the start
  *                 path.insert(0, came_from[path[0]])             # <<<<<<<<<<<<<<
- *             return path
+ *             return []
  * 
  */
       __pyx_t_3 = __Pyx_GetItemInt_List(__pyx_v_path, 0, long, 1, __Pyx_PyInt_From_long, 1, 0, 1); if (unlikely(__pyx_t_3 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 193; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
@@ -5819,13 +5819,15 @@ static PyObject *__pyx_pf_17client_api_cython_5World_20_a_star(CYTHON_UNUSED PyO
     /* "client_api_cython.pyx":194
  *             while came_from[path[0]] != start: # We are not at the start
  *                 path.insert(0, came_from[path[0]])
- *             return path             # <<<<<<<<<<<<<<
+ *             return []             # <<<<<<<<<<<<<<
  * 
  *     def find_path(self, start, stop, count = None):
  */
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_INCREF(__pyx_v_path);
-    __pyx_r = __pyx_v_path;
+    __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_r = __pyx_t_4;
+    __pyx_t_4 = 0;
     goto __pyx_L0;
   }
 
@@ -5861,7 +5863,7 @@ static PyObject *__pyx_pf_17client_api_cython_5World_20_a_star(CYTHON_UNUSED PyO
 }
 
 /* "client_api_cython.pyx":196
- *             return path
+ *             return []
  * 
  *     def find_path(self, start, stop, count = None):             # <<<<<<<<<<<<<<
  *         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
@@ -6267,7 +6269,7 @@ static PyObject *__pyx_pf_17client_api_cython_5World_22find_path(CYTHON_UNUSED P
   }
 
   /* "client_api_cython.pyx":196
- *             return path
+ *             return []
  * 
  *     def find_path(self, start, stop, count = None):             # <<<<<<<<<<<<<<
  *         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
@@ -11881,7 +11883,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__66);
 
   /* "client_api_cython.pyx":196
- *             return path
+ *             return []
  * 
  *     def find_path(self, start, stop, count = None):             # <<<<<<<<<<<<<<
  *         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
@@ -12669,7 +12671,7 @@ PyMODINIT_FUNC PyInit_client_api_cython(void)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
   /* "client_api_cython.pyx":196
- *             return path
+ *             return []
  * 
  *     def find_path(self, start, stop, count = None):             # <<<<<<<<<<<<<<
  *         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"

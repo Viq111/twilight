@@ -10,7 +10,7 @@ version = 1
 ##############
 ### IMPORT ###
 ##############
-import os, time
+import os, time, traceback
 import client_api
 import minmax
 
@@ -20,6 +20,7 @@ import minmax
 
 MINMAX_LEVEL = 4
 PENALITY_COEFF = 2
+DEBUG = True # In production, remove Debug so error are caught and a dumbed down version is used
 
 ###############
 ### CLASSES ###
@@ -213,7 +214,13 @@ class PylightParty():
             game = BoardGame(us, ennemy, objectives)
             start = time.time()
             mm = minmax.MinMax(game, MINMAX_LEVEL)
-            move = mm.ask_move()
+            try:
+                move = mm.ask_move()
+            except: # If not on DEBUG, print bug but use dumbed down version
+                if DEBUG:
+                    raise
+                else:
+                    print traceback.format_exc()
             if move: # If we can do a move
                 move = move[1]
                 print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")

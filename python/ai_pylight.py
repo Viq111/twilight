@@ -361,9 +361,8 @@ class PylightAI():
         self.tracking = {} # Associate a party to its old position (in case of) and size and current supposed position
         self.tracking[self.parties[0]] = (pos, nb, pos) # And set the start position of our group
 
-    def callback(self, world):
-        "Play best objective"
-        
+    def _update_tracking(self, world):
+        "Update traking of differents parties with the new world"
         # First try to detect all positions and number of each of our groups
         wh = WorldHelper(world)
         us = wh.get_us()
@@ -403,10 +402,22 @@ class PylightAI():
                         new_tracking[p] = (pos, new_tracking[p][1] + new_nb)
                         us[pos] = 0
                         break
-        assert sum(us.values()) == 0
+        if sum(us.values()) != 0:
+            print("Error decteting new group position")
+            print("Tracking before: " + (self.tracking))
+            print("Us: " + str(us))
+            print("Tracking after: " + str(new_tracking))
+            if DEBUG:
+                raise RuntimeError("Error detecting group positions")
+
         self.tracking = dict(new_tracking)
+
+    def callback(self, world):
+        "Play best objective"
+        # Update tracking with the new map
+        self._update_tracking(world)
         
-        # Then for each group ask moves
+        # For each parties, ask its moves
         parties_moves = {}
         for party in self.parties:
             pos = self.tracking[party][0]

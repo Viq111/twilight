@@ -279,13 +279,12 @@ class PylightParty():
             if len(moves) > 0: # If we can do a move
                 result = []
                 for m in moves: # m is (score, move) and move is (penality, obj)
-                    goal = world.find_path(us[0], m[1][1].pos)
                     # Try to detect if we can fork
                     group_move = (us[0], us[1], m[1][1].pos)
                     group_objectives = copy.deepcopy(objectives)
                     group_objectives.remove(m[1][1])
                     groups = self.check_group(world, group_move, ennemy, group_objectives)
-                    result.append((m[0], (us[0], us[1], goal), groups)) # (score, move, group division) with move = (pos, nb, goal) 
+                    result.append((m[0], (us[0], us[1], m[1][1].pos), groups)) # (score, move, group division) with move = (pos, nb, goal) 
                 return result
         # Either there is no more objectives on the map or the objective are too high
         if self.parent != None:
@@ -306,11 +305,9 @@ class PylightParty():
             else:
                 go_for_ennemy = False
         if go_for_ennemy:
-            goal = world.find_path(us[0], ennemy[0])
-            print_party("(" + str(us[1]) + ") Going for ennemy at " + str(ennemy[0]) + " through " + str(goal))
+            goal = ennemy[0]
         else:
-            goal = world.find_path(us[0], humans[0][0])
-            print_party("(" + str(us[1]) + ") Going for human at " + str(humans[0][0]) + " through " + str(goal))
+            goal = humans[0][0]
         return [(0, (us[0], us[1], goal), None)] # Score of 0 means we either attack smth or wait for our children
 
     def check_group(self, world, move, ennemy, objectives, parent = None):
@@ -403,7 +400,7 @@ class PylightAI():
                         break
         if sum(us.values()) != 0:
             print("Error decteting new group position")
-            print("Tracking before: " + (self.tracking))
+            print("Tracking before: " + str(self.tracking))
             print("Us: " + str(us))
             print("Tracking after: " + str(new_tracking))
             if DEBUG:
@@ -432,13 +429,14 @@ class PylightAI():
         
         # Only first one
         move = parties_moves[self.parties[0]][0][1]
+        goal = world.find_path(move[0], move[2])
 
         # Update tracking with moves
         # ToDo: Currently only one group
         for party in self.parties:
-            print_party("(" + str(move[1]) + ") Going to " + str(move[2]))
-            self.tracking[party] = move
-        self.c.move([(move[0][0], move[0][1], move[1], move[2][0], move[2][1])])
+            print_party("(" + str(move[1]) + ") Going to " + str(move[2]) + " throught " + str(goal))
+            self.tracking[party] = (move[0], move[1], goal)
+        self.c.move([(move[0][0], move[0][1], move[1], goal[0], goal[1])])
 
 ###################
 ### DEFINITIONS ###

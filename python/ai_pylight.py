@@ -10,7 +10,7 @@ version = 1
 ##############
 ### IMPORT ###
 ##############
-import os, time, traceback
+import os, time, traceback, copy
 import client_api
 import minmax
 
@@ -19,6 +19,7 @@ import minmax
 ###############
 
 MINMAX_LEVEL = 4
+FAST_MINMAX_LEVEL = 2
 PENALITY_COEFF = 2
 DEBUG = True # In production, remove Debug so error are caught and a dumbed down version is used
 
@@ -92,6 +93,10 @@ class Objective():
         self.nb = number
     def __repr__(self):
         return "<" + str(self.nb) + "units at " + str(self.pos) + ">"
+
+    def __eq__(self, other):
+        "Check if objectives are the same"
+        return (self.pos == other.pos) and (self.nb == other.nb)
 
 class BoardGame():
     "Create a simuation of the board game"
@@ -190,13 +195,20 @@ class BoardGame():
 
 class PylightParty():
     "A party of units"
-    def __init__(self, pos, nb, parent = None):
+    def __init__(self, parent = None):
         "Create a new party splitted from a previous one"
         self.grouping = False # Once we need to group with our parent, set that to true
         self.parent = parent
-        
+
+    # Internal
+    def get_id(self):
+        "This will be used if we use multiprocessing, return an id defining the object"
+        return self
+
+    # Core
+
     def select_moves(self, pos, nb, world):
-        "Update current pos and nb. Select a list of best moves and return them (score, move). move is (pos, nb, goal)"
+        "Update current pos and nb. Select a list of best moves and return them (score, move, group division). move is (pos, nb, goal). Group division is (pos, nb)"
         wh = WorldHelper(world)
         # Us
         us = (pos, nb, 0) # This is ((init_x, init_y), nb_units, nb_moves)
@@ -226,6 +238,13 @@ class PylightParty():
                 print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
                 goal = world.find_path(us[0], move.pos)
                 print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
+                # Try to detect if we can fork
+                group_move = (us[0], us[1], move.pos)
+                group_objectives = copy.deepcopy(objectives)
+                group_objectives.remove(move)
+                groups = self.check_group(world, group_move, ennemy, group_objectives)
+                if groups:
+                    print("[FORK] Want to create groups: " + str(groups))
                 return [(1, (us[0], us[1], goal))] # Currently score is 1
         # Either there is no more objectives on the map or the objective are too high
         # Detect the best pray
@@ -248,7 +267,39 @@ class PylightParty():
             goal = world.find_path(us[0], humans[0][0])
             print("[AI](" + str(us[1]) + ") Going for human at " + str(humans[0][0]) + " through " + str(goal))
         return [(1, (us[0], us[1], goal))] # Currently score is 1
-        
+
+    def check_group(self, world, move, ennemy, objectives, parent = None):
+        "For a move check if we can create a group. Returns None is not possible or a tuple of units, list of (tuple of (nb, Pylight party)) (move is (pos, nb, objective_pos))"
+        if parent == None: # If parent was not given, take it from the object
+            parent = self.parent
+        # Move is (pos, nb, objective_pos)
+        objective_size = world.get_cell(move[2])
+        objective_size = objective_size["human"] + objective_size["ennemy"] # The objective is either a human or an ennemy
+        remaining_units = move[1] - objective_size
+
+        # Ok now, try to find if there are sensible moves
+        us = (move[0], remaining_units, 0)
+        game = BoardGame(us, ennemy, objectives)
+        mm = minmax.MinMax(game, FAST_MINMAX_LEVEL)
+        obj = mm.ask_move()
+        if not obj: # Do not need to do anything
+            return None
+        obj = obj[1] # Only take objective not penality
+        # OK, this is good, let's create a party
+        party = PylightParty(parent)
+        # Find by recurrence if we can create another party
+        objectives2 = copy.deepcopy(objectives)
+        objectives2.remove(obj)
+        move2 = (move[0], remaining_units, obj.pos) # (pos, nb, objective_pos)
+        other_groups = self.check_group(world, move2, ennemy, objectives2, party.get_id())
+        if not other_groups: # No other groups, just return us
+            return [(remaining_units, party)]
+        else:
+            to_remove = 0 # Nb to remove from curent party
+            for group in other_groups:
+                to_remove += group[0]
+            print "REMOVE:", to_remove
+            return [(remaining_units - to_remove, party)] + other_groups
 
 class PylightAI():
     "An AI which tries to take the best world of all our AIs. One AI to rule them all."
@@ -258,11 +309,8 @@ class PylightAI():
     def __init__(self, client):
         "Store the client"
         self.c = client
-        world = self.c.get_world()
-        pos = world.get_starting_position()
-        nb = world.get_cell(pos)
         # Create one PyParty
-        self.master = PylightParty(pos, nb)
+        self.master = PylightParty()
 
     def callback(self, world):
         "Play best objective"

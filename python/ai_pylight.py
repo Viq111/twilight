@@ -14,6 +14,7 @@ import os, time, traceback, copy
 import termcolor
 import client_api
 import minmax
+from pprint import pprint
 
 ###############
 ### GLOBALS ###
@@ -245,6 +246,9 @@ class PylightParty():
         "This will be used if we use multiprocessing, return an id defining the object"
         return self
 
+    def __repr__(self):
+        return "<Party " + str(id(self)) + ">"
+
     # Core
 
     def select_moves(self, pos, nb, world, level = MINMAX_LEVEL):
@@ -378,6 +382,9 @@ class PylightAI():
                 us[pos] -= nb
         # Then try to find not found parties
         for p in not_found.keys():
+            nb = self.tracking[p][1]
+            pos = self.tracking[p][2]
+            old_pos = self.tracking[p][0]
             ## Can be because we lost some members
             if us.get(pos, 0) > 0:
                 new_tracking[p] = (pos, us.get(pos, 0))
@@ -401,9 +408,11 @@ class PylightAI():
                         break
         if sum(us.values()) != 0:
             print("Error decteting new group position")
-            print("Tracking before: " + str(self.tracking))
+            print("Tracking before: ")
+            pprint(self.tracking)
             print("Us: " + str(us))
-            print("Tracking after: " + str(new_tracking))
+            print("Tracking after: ")
+            pprint(new_tracking)
             if DEBUG:
                 raise RuntimeError("Error detecting group positions")
 
@@ -418,6 +427,8 @@ class PylightAI():
         fulfilled_obj = [] # Already taken objectives
         temp_best = {} # Temporary best moves. Party <-> (move, groups)
         new_parties = []
+        remove_parties = [] # Parties to remove at the end
+        regroup_parties = [] # Parties that wants to regroup
         # First select best goal for each party
         for party in parties:
             score_moves = wanted_moves[party]
@@ -438,33 +449,59 @@ class PylightAI():
         # Then create parties
         for party in parties:
             action = temp_best[party] # Action is either parent is want regrouping or tuple of (move, groups) with move = (pos, nb, goal) 
-            current_pos = action[0][0]
-            main_nb = action[0][1]
             if type(action) == tuple: # Tuple, create parties
+                current_pos = action[0][0]
+                main_nb = action[0][1]
                 groups = action[1]
                 sum = 0 # To delete from main party
-                """
+                if groups == None: # No group to create, turn it into an empty list list
+                    groups = []
                 for group in groups: # Group is (nb, pylight party)
-                    print_main("[PARTY] Creating...")
                     new_party = group[1]
+                    print_main("[PARTY] Creating..." + str(new_party))
                     if DEBUG:
-                        assert type(new_party) == PylightParty
+                        assert isinstance(new_party, PylightParty)
                     moves = new_party.select_moves(current_pos, group[0], world, FAST_MINMAX_LEVEL)
-                    if type(move) == list:
+                    if type(moves) == list:
                         sum += group[0]
                         goal = world.find_path(current_pos, moves[0][1][2])
                         new_parties.append(new_party)
                         print_party("New party (" + str(group[0]) + ") Going to " + str(moves[0][1][2]) + " throught " + str(goal))
                         final_moves[new_party] = (current_pos, group[0], goal)
-                """
+                
                 main_goal = world.find_path(current_pos, action[0][2])
                 if DEBUG:
                     assert main_nb - sum > 0
                 print_party("(" + str(main_nb - sum) + ") Going to " + str(action[0][2]) + " throught " + str(main_goal))
                 final_moves[party] = (current_pos, main_nb - sum, main_goal)
             else: # Regroup with parent
-                raise RuntimeError("ToDo")
-        return (new_parties, final_moves)
+                regroup_parties.append(party)
+
+        # Now regroup orphan parties
+        for party in regroup_parties:
+            sub_pos = self.tracking[party][0]
+            sub_nb = self.tracking[party][1]
+            if final_moves.has_key(party.parent):
+                parent = party.parent
+            else: # Orphan, go to master
+                #if DEBUG and party.parent in parties:
+                #    raise RuntimeError("No moves ?")
+                parent = parties[0]
+
+            parent_pos = final_moves[parent][0]
+            if sub_pos == parent_pos: # They already are on the same cell, group them
+                temp = final_moves[parent]
+                temp = (temp[0], temp[1] + sub_nb, temp[2])
+                final_moves[parent] = temp
+                remove_parties.append(party)
+            else: # Go to parent goal
+                parent_goal = final_moves[parent][2]
+                goal = world.find_path(sub_pos, parent_goal)
+                final_moves[party] = (sub_pos, sub_nb, goal)
+    
+
+    
+        return (new_parties, remove_parties, final_moves)
             
 
     def callback(self, world):
@@ -481,8 +518,11 @@ class PylightAI():
             parties_moves[party] = moves
 
         # Now select best moves
-        new_parties, moves = self._select_best_moves(self.parties, parties_moves, world)
-
+        new_parties, remove_parties, moves = self._select_best_moves(self.parties, parties_moves, world)
+        if new_parties or remove_parties:
+            self.parties += new_parties
+            for p in remove_parties:
+                self.parties.remove(p)
         end_moves = [] # To send to callback
         for move in moves.values(): # Move is (old_pos, nb, new_pos)
             end_moves.append((move[0][0], move[0][1], move[1], move[2][0], move[2][1]))

@@ -16,6 +16,8 @@ import os, time, sys
 ### GLOBALS ###
 ###############
 
+inf = float('infinity')
+
 ###############
 ### CLASSES ###
 ###############
@@ -50,26 +52,37 @@ class MinMax():
         scores.sort(reverse=True) # Sort by best score
         return scores
 
-    def _minmax(self, depth = 0):
-        "Do a minmax algorithm"
+    def _minmax(self, depth=0, alpha=-inf, beta=inf):
+        "Do a minmax algorithm with alpha-beta pruning"
         game = self.game
         game.switch_player() # It's the other player time to play
-        player = game.nplayer
         if game.is_over() or depth >= self.depth:
             game.switch_player()
             return game.scoring()
-        scores = []
         moves = game.possible_moves()
-        for move in moves:
-            game.make_move(move)
-            scores.append(self._minmax(depth + 1))
-            game.unmake_move(move)
+        if game.nplayer == 1:  # max player
+            score = alpha
+            for move in moves:
+                game.make_move(move)
+                alpha = max(alpha, self._minmax(depth + 1, alpha, beta))
+                score = alpha
+                game.unmake_move(move)
+                if alpha >= beta:
+                    score = beta
+                    break
+        else:  # min player
+            score = beta
+            for move in moves:
+                game.make_move(move)
+                beta = min(beta, self._minmax(depth + 1, alpha, beta))
+                score = beta
+                game.unmake_move(move)
+                if alpha >= beta:
+                    score = alpha
+                    break
         game.switch_player() # Go back to previous player
-        if game.nplayer != 1: # If it was player 1
-            return max(scores)
-        else: # Else it was second player
-            return min(scores)
-            
+        return score
+
 
 ###################
 ### DEFINITIONS ###

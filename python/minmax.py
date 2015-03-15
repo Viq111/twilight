@@ -30,7 +30,10 @@ class MinMax():
     def ask_move(self):
         "Ask best move"
         moves = self.ask_moves()
-        return moves[0][1]
+        if len(moves) > 0:
+            return moves[0][1]
+        else:
+            return None # No move possible
 
     def ask_moves(self):
         "Return a list of moves and their score"

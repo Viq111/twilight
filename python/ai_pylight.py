@@ -213,19 +213,34 @@ class PylightParty():
             game = BoardGame(us, ennemy, objectives)
             start = time.time()
             mm = minmax.MinMax(game, MINMAX_LEVEL)
-            move = mm.ask_move()[1]
-            print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
-            goal = world.find_path(us[0], move.pos)
-            print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
-            return [(1, (us[0], us[1], goal))] # Currently score is 1
-            #self.c.move([(us[0][0], us[0][1], us[1], goal[0], goal[1])])
-        else: # No more humans, attack the other player
-            ennemies = wh.get_ennemies()
-            ennemies.sort(key = lambda e : e[1])
-            goal = world.find_path(us[0], ennemies[0][0])
-            print("[AI](" + str(us[1]) + ") Going for ennemy at " + str(ennemies[0][0]) + " through " + str(goal))
-            return [(1, (us[0], us[1], goal))] # Currently score is 1
-            #self.c.move([(us[0][0], us[0][1], us[1], goal[0], goal[1])])
+            move = mm.ask_move()
+            if move: # If we can do a move
+                move = move[1]
+                print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
+                goal = world.find_path(us[0], move.pos)
+                print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
+                return [(1, (us[0], us[1], goal))] # Currently score is 1
+        # Either there is no more objectives on the map or the objective are too high
+        # Detect the best pray
+        ennemies = wh.get_ennemies()
+        ennemies.sort(key = lambda e : e[1])
+        ennemy = ennemies[0] # (pos, nb)
+        humans = wh.get_humans()
+        humans.sort(key = lambda e : e[1])
+        if len(humans) == 0: # If no more ennemy, go for the ennemy
+            go_for_ennemy = True
+        else: # Else compute static to win against human or ennemy
+            if ennemy[0][1] <= humans[0][1]: # It's better to attack the ennemy
+                go_for_ennemy = True
+            else:
+                go_for_ennemy = False
+        if go_for_ennemy:
+            goal = world.find_path(us[0], ennemy[0])
+            print("[AI](" + str(us[1]) + ") Going for ennemy at " + str(ennemy[0]) + " through " + str(goal))
+        else:
+            goal = world.find_path(us[0], humans[0][0])
+            print("[AI](" + str(us[1]) + ") Going for human at " + str(humans[0][0]) + " through " + str(goal))
+        return [(1, (us[0], us[1], goal))] # Currently score is 1
         
 
 class PylightAI():

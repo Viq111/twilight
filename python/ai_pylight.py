@@ -11,6 +11,7 @@ version = 1
 ### IMPORT ###
 ##############
 import os, time, traceback, copy
+import termcolor
 import client_api
 import minmax
 
@@ -22,6 +23,32 @@ MINMAX_LEVEL = 4
 FAST_MINMAX_LEVEL = 2
 PENALITY_COEFF = 2
 DEBUG = True # In production, remove Debug so error are caught and a dumbed down version is used
+
+# Print definition
+
+def print_main(*args):
+    "Print thing with main color"
+    COLOR = "magenta"
+    s = "[MAIN] "
+    for a in args:
+        s += str(a)
+    termcolor.cprint(s, COLOR)
+
+def print_party(*args):
+    "Print with party color"
+    COLOR = "cyan"
+    s = "[PARTY] "
+    for a in args:
+        s += str(a)
+    termcolor.cprint(s, COLOR)
+
+def print_perf(*args):
+    "Print with perf color"
+    COLOR = "blue"
+    s = "[PERF] "
+    for a in args:
+        s += str(a)
+    termcolor.cprint(s, COLOR)
 
 ###############
 ### CLASSES ###
@@ -48,6 +75,19 @@ class WorldHelper():
                 if cell["human"] != 0:
                     self.pos_humans.append(((i, j), cell["human"]))
         return self.pos_humans
+
+    def get_us(self):
+        "Get all our positions"
+        if self.pos_us:
+            return self.pos_us
+        size = self.world.get_size()
+        self.pos_us = []
+        for i in range(size[0]):
+            for j in range(size[1]):
+                cell = self.world.get_cell(i, j)
+                if cell["us"] != 0:
+                    self.pos_us.append(((i, j), cell["us"]))
+        return self.pos_us
 
     def get_ennemies(self):
         "Get position of ennemies as a list"
@@ -237,16 +277,16 @@ class PylightParty():
                     print traceback.format_exc()
             if move: # If we can do a move
                 move = move[1]
-                print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
+                print_perf("Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
                 goal = world.find_path(us[0], move.pos)
-                print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
+                print_party("(" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))
                 # Try to detect if we can fork
                 group_move = (us[0], us[1], move.pos)
                 group_objectives = copy.deepcopy(objectives)
                 group_objectives.remove(move)
                 groups = self.check_group(world, group_move, ennemy, group_objectives)
                 if groups:
-                    print("[FORK] Want to create groups: " + str(groups))
+                    print_party("[FORK] Want to create groups: " + str(groups))
                 return [(1, (us[0], us[1], goal))] # Currently score is 1
         # Either there is no more objectives on the map or the objective are too high
         if self.parent != None:
@@ -268,10 +308,10 @@ class PylightParty():
                 go_for_ennemy = False
         if go_for_ennemy:
             goal = world.find_path(us[0], ennemy[0])
-            print("[AI](" + str(us[1]) + ") Going for ennemy at " + str(ennemy[0]) + " through " + str(goal))
+            print_party("(" + str(us[1]) + ") Going for ennemy at " + str(ennemy[0]) + " through " + str(goal))
         else:
             goal = world.find_path(us[0], humans[0][0])
-            print("[AI](" + str(us[1]) + ") Going for human at " + str(humans[0][0]) + " through " + str(goal))
+            print_party("(" + str(us[1]) + ") Going for human at " + str(humans[0][0]) + " through " + str(goal))
         return [(1, (us[0], us[1], goal))] # Currently score is 1
 
     def check_group(self, world, move, ennemy, objectives, parent = None):
@@ -314,15 +354,75 @@ class PylightAI():
     def __init__(self, client):
         "Store the client"
         self.c = client
+        pos = self.c.get_world().get_starting_position()
+        nb = self.c.get_world().get_cell(pos)
         # Create one PyParty
-        self.master = PylightParty()
+        self.parties = [PylightParty()]
+        self.tracking = {} # Associate a party to its old position (in case of) and size and current supposed position
+        self.tracking[self.parties[0]] = (pos, nb, pos) # And set the start position of our group
 
     def callback(self, world):
         "Play best objective"
-        pos = world.get_starting_position() # Get our only position
-        nb = world.get_cell(pos)["us"]
-        moves = self.master.select_moves(pos, nb, world)
-        move = moves[0][1] # Take only first move
+        
+        # First try to detect all positions and number of each of our groups
+        wh = WorldHelper(world)
+        us = wh.get_us()
+        us = dict(us) # Transform to {(x,y) -> nb} dict
+        new_tracking = {}
+        not_found = {} # Parties not found
+        # First put all units in their previous group
+        for p in self.tracking.keys():
+            nb = self.tracking[p][1]
+            pos = self.tracking[p][2]
+            old_pos = self.tracking[p][0]
+            if us.get(pos, 0) < nb:
+                not_found[p] = self.tracking[p]
+            else:
+                new_tracking[p] = (pos, nb)
+                us[pos] -= nb
+        # Then try to find not found parties
+        for p in not_found.keys():
+            ## Can be because we lost some members
+            if us.get(pos, 0) > 0:
+                new_tracking[p] = (pos, us.get(pos, 0))
+                del us[pos]
+            ## Or because we did not move
+            elif us.get(old_pos, 0) > 0:
+                new_tracking[p] = (old_pos, us.get(old_pos, 0))
+                del us[old_pos]
+            else:
+                ## Nothing found, kill it
+                self.parties.remove(p)
+        # Then add remaining number to groups
+        for pos in us.keys(): # For each position
+            new_nb = us[pos]
+            if new_nb > 0:
+                # Find group at pos
+                for p in new_tracking.keys():
+                    if new_tracking[p][0] == pos:
+                        new_tracking[p] = (pos, new_tracking[p][1] + new_nb)
+                        us[pos] = 0
+                        break
+        assert sum(us.values()) == 0
+        self.tracking = dict(new_tracking)
+        
+        # Then for each group ask moves
+        parties_moves = {}
+        for party in self.parties:
+            pos = self.tracking[party][0]
+            nb = self.tracking[party][1]
+            moves = party.select_moves(pos, nb, world)
+            parties_moves[party] = moves
+            # ToDo: Create parties
+            
+        # ToDo: best moves
+        # Only first one
+        move = parties_moves[self.parties[0]][0][1]
+
+        # Update tracking with moves
+        # ToDo: Currently only one group
+        for party in self.parties:
+            self.tracking[party] = move
         self.c.move([(move[0][0], move[0][1], move[1], move[2][0], move[2][1])])
 
 ###################
@@ -334,8 +434,8 @@ class PylightAI():
 ##################
 
 if __name__ == "__main__":
-    print "> Welcome to " + str(prog_name) + " (r" + str(version) + ")"
-    print "> By Viq (under CC BY-SA 3.0 license)"
-    print "> Loading program ..."
+    print_main("> Welcome to " + str(prog_name) + " (r" + str(version) + ")")
+    print_main("> By Viq (under CC BY-SA 3.0 license)")
+    print_main("> Loading program ...")
     with client_api.ClientAPI() as client:
         client.mainloop(PylightAI)

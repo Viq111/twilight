@@ -11,14 +11,14 @@ version = 1
 ### IMPORT ###
 ##############
 import os, time
-import easyAI
 import client_api
+import minmax
 
 ###############
 ### GLOBALS ###
 ###############
 
-MINMAX_LEVEL = 8
+MINMAX_LEVEL = 4
 PENALITY_COEFF = 2
 
 ###############
@@ -34,12 +34,10 @@ class Objective():
     def __repr__(self):
         return "<" + str(self.nb) + " at " + str(self.pos) + ">"
 
-class BoardGame(easyAI.TwoPlayersGame):
+class BoardGame():
     "Create a simuation of the board game"
-    def __init__(self, players, player1, player2, objectives):
+    def __init__(self, player1, player2, objectives):
         "Store information about the player and objectives"
-        # easyAI initialization
-        self.players = players
         self.nplayer = 1
         # Store
         self.p1_obj = [player1] # P1 objectives he got, this is a list of ((current_x, current_y), total_nb, nb_moves)
@@ -47,6 +45,13 @@ class BoardGame(easyAI.TwoPlayersGame):
         self.free_objectives = objectives
         self.p1_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
         self.p2_penalities = 0 # Nubmer of penalities because we are farther from the objective relative to the ennemy
+
+    def switch_player(self):
+        "Switch players"
+        if self.nplayer == 1:
+            self.nplayer = 2
+        else:
+            self.nplayer = 1
 
     # Helper functions
     def __flight_distance(self, start, stop):
@@ -116,19 +121,16 @@ class BoardGame(easyAI.TwoPlayersGame):
 
     def scoring(self):
         "Return a score of current player"
-        if self.nplayer == 1 and len(self.p1_obj) == 1: # No move, no gain
-            return 0
-        if self.nplayer == 2 and len(self.p2_obj) == 1:
-            return 0
         # Score is (nb / nb_moves of us) minus ennemy's score
-        p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]) - (self.p1_penalities * PENALITY_COEFF)
-        p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]) - (self.p2_penalities * PENALITY_COEFF)
-        #if self.nplayer == 1:
-        #    score = p1_score - p2_score
-        #    return score
-        #else:
-        #    score = p2_score - p1_score
-        #    return score
+        if self.p1_obj[-1][2] ==0: # No move, no gain
+            p1_score = 0
+        else:
+            p1_score = (1.0 * self.p1_obj[-1][1] / self.p1_obj[-1][2]) - (self.p1_penalities * PENALITY_COEFF)
+        if self.p2_obj[-1][2] ==0:
+            p2_score = 0  
+        else:
+            p2_score = (1.0 * self.p2_obj[-1][1] / self.p2_obj[-1][2]) - (self.p2_penalities * PENALITY_COEFF)
+
         return p1_score - p2_score
             
     def show(self):
@@ -142,8 +144,6 @@ class Objective_path():
     def __init__(self, client):
         "Connect to the client"
         self.c = client
-        self.ai = easyAI.AI_Player(easyAI.Negamax(MINMAX_LEVEL))
-        self.ennemy = easyAI.AI_Player(easyAI.Negamax(MINMAX_LEVEL))
 
     def callback(self, world):
         "Play nearest objective"
@@ -163,9 +163,10 @@ class Objective_path():
                     objectives.append(obj)
         if len(objectives) > 0: # There is still humans on the map
             # Ask AI solver what he wants to play
-            game = BoardGame([self.ai, self.ennemy], us, ennemy, objectives)
+            game = BoardGame(us, ennemy, objectives)
             start = time.time()
-            move = self.ai.ask_move(game)[1]
+            mm = minmax.MinMax(game, MINMAX_LEVEL)
+            move = mm.ask_move()[1]
             print("[PERF] Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
             goal = world.find_path(us[0], move.pos)
             print("[AI](" + str(us[1]) + ") Going for humans at " + str(move.pos) + " through " + str(goal))

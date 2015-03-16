@@ -480,7 +480,21 @@ class PylightAI():
                 final_moves[party] = (current_pos, main_nb - sum, main_goal)
             else: # Regroup with parent
                 regroup_parties.append(party)
-
+                
+        # Check master wants to regroup
+        temp_master = None
+        for party in parties:
+            if party.parent == None: # This is master
+                if (len(parties) + len(new_parties) - len(remove_parties)) > 1: # We still need regrouping
+                    if wanted_moves[party][0][0] == PIRATIONAL_CONST: # Score is PIRATIONAL_CONST
+                        print_main("Master waiting for children!")
+                        all_moves = final_moves.values()
+                        goals = [ move[0] for move in all_moves ] # Take goal
+                        master_goal = self._barycenter(goals)
+                        master_goal = world.find_path(final_moves[party][0], master_goal)
+                        temp_master = final_moves[party]
+                        final_moves[party] = (final_moves[party][0], final_moves[party][1], master_goal)
+                        
         # Now regroup orphan parties
         for party in regroup_parties:
             sub_pos = self.tracking[party][0]
@@ -514,18 +528,13 @@ class PylightAI():
                     goal = world.find_path(sub_pos, parent_goal, sub_nb)
                     final_moves[party] = (sub_pos, sub_nb, goal)
 
-        # Check master want to regroup
-        for party in parties:
-            if party.parent == None: # This is master
-                if len(parties) > 1: # We still need regrouping
-                    if wanted_moves[party][0][0] == PIRATIONAL_CONST: # Score is PIRATIONAL_CONST
-                        print_main("Master waiting for children!")
-                        all_moves = final_moves.values()
-                        goals = [ move[0] for move in all_moves ] # Take goal
-                        master_goal = self._barycenter(goals)
-                        master_goal = world.find_path(final_moves[party][0], master_goal)
-                        final_moves[party] = (final_moves[party][0], final_moves[party][1], master_goal)            
-
+        # Check again
+        still_dont_move = False
+        if (len(parties) + len(new_parties) - len(remove_parties)) > 1: # We still need regrouping
+            still_dont_move = True
+        if not still_dont_move and temp_master:
+            final_moves[party] = temp_master
+        
         return (new_parties, remove_parties, final_moves)
             
     def _barycenter(self, goals):

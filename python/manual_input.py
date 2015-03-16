@@ -18,6 +18,10 @@ import gui
 ### GLOBALS ###
 ###############
 
+def callback(world):
+        "Nothing callback"
+        pass
+
 ###############
 ### CLASSES ###
 ###############
@@ -49,6 +53,7 @@ class ManualInput():
     def mainloop(self):
         "Enter the main loop"
         with client_api.ClientAPI() as self.c, gui.GUI(self.__callback) as self.g:
+            self.c.set_callback(callback)
             self.c.connect(self.name)
             # Get my position
             time.sleep(0.2)

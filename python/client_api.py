@@ -153,12 +153,11 @@ class World():
                             for l in range(-1, 2):
                                 a = x + k
                                 b = y + l
-                                if (k != 0 or l != 0) and a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
+                                if a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
                                     sum += self.get_cell(a, b)["ennemy"]
-                    if cell["ennemy"] == 0 and sum == 0 and cell["human"] == 0:
+                    if sum == 0 and cell["human"] == 0:
                         neightboors.append((x, y))
-                    #elif count != None and ((1.5 * sum) <= count) and cell["human"] <= count:
-                    elif count != None and (sum <= count) and cell["human"] <= count: # ToDo: Do not go near 1.5 ennemies
+                    elif count != None and ((1.5 * sum) <= count) and cell["human"] <= count:
                         neightboors.append((x, y))
                     elif goal != None:
                         if x == goal[0] and y == goal[1]:

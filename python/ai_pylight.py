@@ -494,9 +494,9 @@ class PylightAI():
                 party.parent = None
                 party.grouping = False
                 # And do a quick search
-                wh = WorldHelper(world)
-                us2 = wh.get_us()[0]
-                move = party.select_moves(us2[0], us2[1], world, FAST_MINMAX_LEVEL)[0][1]
+                pos = self.tracking[party][0]
+                nb = self.tracking[party][1]
+                move = party.select_moves(pos, nb, world, FAST_MINMAX_LEVEL)[0][1]
                 goal = world.find_path(move[0], move[2])
                 final_moves[party] = (move[0], move[1], goal)
             else:

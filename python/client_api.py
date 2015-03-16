@@ -199,6 +199,8 @@ class World():
             
     def find_path(self, start, stop, count = None):
         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
+        if start == stop:
+            return start
         self.__wait_init()
         res = self._a_star(start, stop, count)
         if len(res) == 0:
@@ -383,6 +385,12 @@ class ClientAPI(threading.Thread):
         removed_list = []
         if autoremove_forbiden_moves:
             # Remove forbiden moves
+            rem = []
+            for move in moves:
+                if ((move[0], move[1]) == (move[3], move[4])):
+                    rem.append(move)
+            for m in rem:
+                moves.remove(m)
             while 1:
                 sources = {}
                 dest = {}

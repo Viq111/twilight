@@ -287,7 +287,7 @@ class PylightParty():
                     group_move = (us[0], us[1], m[1][1].pos)
                     group_objectives = copy.deepcopy(objectives)
                     group_objectives.remove(m[1][1])
-                    groups = self.check_group(world, group_move, ennemy, group_objectives)
+                    groups = self.check_group(world, group_move, ennemy, group_objectives, parent=self.get_id())
                     result.append((m[0], (us[0], us[1], m[1][1].pos), groups)) # (score, move, group division) with move = (pos, nb, goal) 
                 return result
         # Either there is no more objectives on the map or the objective are too high

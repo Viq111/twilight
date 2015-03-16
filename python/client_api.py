@@ -381,6 +381,7 @@ class ClientAPI(threading.Thread):
 
     def move(self, moves, autoremove_forbiden_moves = True):
         "Send multiple moves command, moves is a list of (initial_x, initial_y, nb, dest_x, dest_y). Autoremove removes fordien moves (same source and destination cell)."
+        removed_list = []
         if autoremove_forbiden_moves:
             # Remove forbiden moves
             while 1:
@@ -395,6 +396,7 @@ class ClientAPI(threading.Thread):
                         removed = True
                         color_print("Forbiden move: " + str(move))
                         moves.remove(dest[d])
+                        removed_list.append(dest[d])
                         break
                 if not removed: # We did not remove anything, there is no more something wrong
                     break
@@ -405,6 +407,7 @@ class ClientAPI(threading.Thread):
             for i in range(len(move)):
                 cmd += chr(move[i])
         self.s.send(cmd)
+        return removed_list
 
     def mainloop(self, AI_class):
         "Mainloop while the connection is open, recreate an AI "

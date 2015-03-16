@@ -411,6 +411,7 @@ class PylightAI():
             print("Tracking before: ")
             pprint(self.tracking)
             print("Us: " + str(us))
+            print("Original: " + str(wh.get_us()))
             print("Tracking after: ")
             pprint(new_tracking)
             if DEBUG:
@@ -539,7 +540,14 @@ class PylightAI():
         # Update tracking with moves
         self.tracking = dict(moves)
 
-        self.c.move(end_moves)
+        removed_moves = self.c.move(end_moves)
+        removed_moves = [ ((m[0], m[1]), (m[3], m[4])) for m in removed_moves ] # Set as (old_pos, new_pos)
+        # For removed moves, put new_pos = old_pos
+        for p in self.tracking.keys():
+            temp = self.tracking[p]
+            if (temp[0], temp[2]) in removed_moves:
+                temp = (temp[0], temp[1], temp[0])
+                self.tracking[p] = temp
 
 
 ###################

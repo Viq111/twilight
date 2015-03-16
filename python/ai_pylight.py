@@ -487,20 +487,29 @@ class PylightAI():
                 #if DEBUG and party.parent in parties:
                 #    raise RuntimeError("No moves ?")
                 parent = parties[0]
+                
+            if parent == party: # Master is dead :'(, promote to master
+                print_main("Master seems dead, promoting!")
+                party.parent = None
+                party.grouping = False
+                # And do a quick search
+                wh = WorldHelper(world)
+                us2 = wh.get_us()[0]
+                move = party.select_moves(us2[0], us2[1], world, FAST_MINMAX_LEVEL)[0][1]
+                goal = world.find_path(move[0], move[2])
+                final_moves[party] = (move[0], move[1], goal)
+            else:
+                parent_pos = final_moves[parent][0]
+                if sub_pos == parent_pos: # They already are on the same cell, group them
+                    temp = final_moves[parent]
+                    temp = (temp[0], temp[1] + sub_nb, temp[2])
+                    final_moves[parent] = temp
+                    remove_parties.append(party)
+                else: # Go to parent goal
+                    parent_goal = final_moves[parent][2]
+                    goal = world.find_path(sub_pos, parent_goal)
+                    final_moves[party] = (sub_pos, sub_nb, goal)
 
-            parent_pos = final_moves[parent][0]
-            if sub_pos == parent_pos: # They already are on the same cell, group them
-                temp = final_moves[parent]
-                temp = (temp[0], temp[1] + sub_nb, temp[2])
-                final_moves[parent] = temp
-                remove_parties.append(party)
-            else: # Go to parent goal
-                parent_goal = final_moves[parent][2]
-                goal = world.find_path(sub_pos, parent_goal)
-                final_moves[party] = (sub_pos, sub_nb, goal)
-    
-
-    
         return (new_parties, remove_parties, final_moves)
             
 

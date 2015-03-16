@@ -200,7 +200,7 @@ class World():
     def find_path(self, start, stop, count = None):
         "Find a free path (no obstacle like an ennemy or human) from start to stop with A*"
         self.__wait_init()
-        res = self._a_star(start, stop)
+        res = self._a_star(start, stop, count)
         if len(res) == 0:
             # If there is no path with A* still try to get closer
             current = start
@@ -214,10 +214,10 @@ class World():
         else:
             return res[0]
 
-    def find_path_time(self, start, stop):
+    def find_path_time(self, start, stop, count = None):
         "Find the time to move from start to stop"
         self.__wait_init()
-        res = self._a_star(start, stop)
+        res = self._a_star(start, stop, count)
         if start == stop:
             return 0
         if len(res) == 0:

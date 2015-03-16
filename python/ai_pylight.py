@@ -468,12 +468,12 @@ class PylightAI():
                     moves = new_party.select_moves(current_pos, group[0], world, FAST_MINMAX_LEVEL)
                     if type(moves) == list:
                         sum += group[0]
-                        goal = world.find_path(current_pos, moves[0][1][2])
+                        goal = world.find_path(current_pos, moves[0][1][2], moves[0][1][1])
                         new_parties.append(new_party)
                         print_party("New party (" + str(group[0]) + ") Going to " + str(moves[0][1][2]) + " throught " + str(goal))
                         final_moves[new_party] = (current_pos, group[0], goal)
                 
-                main_goal = world.find_path(current_pos, action[0][2])
+                main_goal = world.find_path(current_pos, action[0][2], main_nb)
                 if DEBUG:
                     assert main_nb - sum > 0
                 print_party("(" + str(main_nb - sum) + ") Going to " + str(action[0][2]) + " throught " + str(main_goal))
@@ -500,7 +500,7 @@ class PylightAI():
                 pos = self.tracking[party][0]
                 nb = self.tracking[party][1]
                 move = party.select_moves(pos, nb, world, FAST_MINMAX_LEVEL)[0][1]
-                goal = world.find_path(move[0], move[2])
+                goal = world.find_path(move[0], move[2], move[1])
                 final_moves[party] = (move[0], move[1], goal)
             else:
                 parent_pos = final_moves[parent][0]
@@ -511,7 +511,7 @@ class PylightAI():
                     remove_parties.append(party)
                 else: # Go to parent goal
                     parent_goal = final_moves[parent][2]
-                    goal = world.find_path(sub_pos, parent_goal)
+                    goal = world.find_path(sub_pos, parent_goal, sub_nb)
                     final_moves[party] = (sub_pos, sub_nb, goal)
 
         # Check master want to regroup

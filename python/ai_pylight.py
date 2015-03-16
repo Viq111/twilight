@@ -25,6 +25,9 @@ FAST_MINMAX_LEVEL = 2
 PENALITY_COEFF = 2
 DEBUG = True # In production, remove Debug so error are caught and a dumbed down version is used
 
+# DO NOT TOUCH
+PIRATIONAL_CONST = 0
+
 # Print definition
 
 def print_main(*args):
@@ -313,7 +316,7 @@ class PylightParty():
             goal = ennemy[0]
         else:
             goal = humans[0][0]
-        return [(0, (us[0], us[1], goal), None)] # Score of 0 means we either attack smth or wait for our children
+        return [(PIRATIONAL_CONST, (us[0], us[1], goal), None)] # Score of PIRATIONAL_CONST means we either attack smth or wait for our children
 
     def check_group(self, world, move, ennemy, objectives, parent = None):
         "For a move check if we can create a group. Returns None is not possible or a tuple of units, list of (tuple of (nb, Pylight party)) (move is (pos, nb, objective_pos))"
@@ -511,9 +514,29 @@ class PylightAI():
                     goal = world.find_path(sub_pos, parent_goal)
                     final_moves[party] = (sub_pos, sub_nb, goal)
 
+        # Check master want to regroup
+        for party in parties:
+            if party.parent == None: # This is master
+                if len(parties) > 1: # We still need regrouping
+                    if wanted_moves[party][0][0] == PIRATIONAL_CONST: # Score is PIRATIONAL_CONST
+                        print_main("Master waiting for children!")
+                        all_moves = final_moves.values()
+                        goals = [ move[0] for move in all_moves ] # Take goal
+                        master_goal = self._barycenter(goals)
+                        master_goal = world.find_path(final_moves[party][0], master_goal)
+                        final_moves[party] = (final_moves[party][0], final_moves[party][1], master_goal)            
+
         return (new_parties, remove_parties, final_moves)
             
-
+    def _barycenter(self, goals):
+        "Compute baryenter of goals"
+        xs = 0
+        ys = 0
+        for g in goals:
+            xs += g[0]
+            ys += g[1]
+        return (int(round(xs/len(goals))), int(round(ys/len(goals))))
+        
     def callback(self, world):
         "Play best objective"
         # Update tracking with the new map

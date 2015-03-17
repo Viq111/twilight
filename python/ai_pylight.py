@@ -21,7 +21,7 @@ from pprint import pprint
 ### GLOBALS ###
 ###############
 
-INITIAL_MINMAX_LEVEL = 1
+INITIAL_MINMAX_LEVEL = 2
 INITIAL_FAST_MINMAX_LEVEL = 1
 PENALITY_COEFF = 2
 DEBUG = False # In production, remove Debug so error are caught and a dumbed down version is used

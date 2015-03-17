@@ -58,6 +58,10 @@ def print_perf(*args):
 ### CLASSES ###
 ###############
 
+cdef float flight_distance(startx, starty, stopx, stopy):
+        "Flight distance to go from start to stop"
+        return max(abs(starty - stopy), abs(startx - stopx))
+
 class WorldHelper():
     "Class for some helper functions about the world with optimisations"
     def __init__(self, world):
@@ -109,7 +113,7 @@ class WorldHelper():
     def get_nearest_ennemy(self, pos):
         "Get nearest ennemy from us"
         # List of (distance, group of ennemies)
-        dist = [ (self._flight_distance(pos, e[0]), e) for e in self.get_ennemies() ]
+        dist = [ (flight_distance(pos[0], pos[1], e[0][0], e[0][1]), e) for e in self.get_ennemies() ]
         dist.sort() # Nearest ennemy
         if len(dist) == 0: # No ennemy
             return None
@@ -124,10 +128,6 @@ class WorldHelper():
             return None
         else:
             return ennemies
-
-    def _flight_distance(self, pos1, pos2):
-        "Distance from pos1 to pos2"
-        return max(abs(pos1[0] - pos2[0]), abs(pos1[1] - pos2[1]))
 
 class Objective():
     "An objective"
@@ -161,10 +161,6 @@ class BoardGame():
         else:
             self.nplayer = 1
 
-    def __flight_distance(self, start, stop):
-        "Flight distance to go from start to stop"
-        return max(abs(start[1] - stop[1]), abs(start[0] - stop[0]))
-
     def possible_moves(self):
         "Possible moves for current player"
         # I can move only on objectives where I'm nearer than the ennemy
@@ -175,7 +171,7 @@ class BoardGame():
             p = self.p2_obj[-1]
             e = self.p1_obj[-1]
         moves = filter(lambda obj : obj.nb <= p[1], self.free_objectives) # Only where I can attack safely
-        moves = filter(lambda obj : self.__flight_distance(p[0], obj.pos) <= self.__flight_distance(e[0], obj.pos), moves) # Only where I can be before the ennemy
+        moves = filter(lambda obj : flight_distance(p[0][0], p[0][1], obj.pos[0], obj.pos[1]) <= flight_distance(e[0][0], e[0][1], obj.pos[0], obj.pos[1]), moves) # Only where I can be before the ennemy
         moves = [ (False, move) for move in moves ] # First boolean is if we take a penality
         if len(moves) == 0:
             # We are farther from all objectives relating to the ennemy, take a penality
@@ -191,11 +187,11 @@ class BoardGame():
         else:
             p = self.p2_obj[-1]
         nb = p[1] + obj.nb
-        nb_moves = p[2] + self.__flight_distance(p[0], obj.pos)
+        nb_moves = p[2] + flight_distance(p[0][0], p[0][1], obj.pos[0], obj.pos[1])
         if move[0]: # We took a penality
-            nb_moves = p[2] + (self.__flight_distance(p[0], obj.pos) * PENALITY_COEFF)
+            nb_moves = p[2] + (flight_distance(p[0][0], p[0][1], obj.pos[0], obj.pos[1]) * PENALITY_COEFF)
         else:
-            nb_moves = p[2] + self.__flight_distance(p[0], obj.pos)
+            nb_moves = p[2] + flight_distance(p[0][0], p[0][1], obj.pos[0], obj.pos[1])
 
         self.free_objectives.remove(obj)
         if self.nplayer == 1: # P1 playing

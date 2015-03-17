@@ -25,6 +25,7 @@ inf = float('infinity')
 class MinMax():
     "A class to do a MinMax algorithm on a game"
     def __init__(self, game, depth):
+        
         "Do a MinMax on a game"
         self.game = game
         self.depth = depth

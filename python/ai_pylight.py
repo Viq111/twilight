@@ -10,10 +10,11 @@ version = 1
 ##############
 ### IMPORT ###
 ##############
-import os, time, traceback, copy
+import os, time, traceback, copy, argparse, sys
 import termcolor
 import client_api
 import minmax
+
 from pprint import pprint
 
 ###############
@@ -617,5 +618,13 @@ if __name__ == "__main__":
     print_main("> Welcome to " + str(prog_name) + " (r" + str(version) + ")")
     print_main("> By Viq (under CC BY-SA 3.0 license)")
     print_main("> Loading program ...")
-    with client_api.ClientAPI() as client:
+    if len(sys.argv) < 3:
+        print("Usage: " + str(sys.argv[0]) + " <ip> <port>")
+        IP = "127.0.0.1"
+        PORT = 5555
+    else:
+        IP = sys.argv[1]
+        PORT = int(sys.argv[2])
+        
+    with client_api.ClientAPI(server=IP, port=PORT) as client:
         client.mainloop(PylightAI)

@@ -425,6 +425,7 @@ class ClientAPI(threading.Thread):
         except:
             name = ""
         name += DEFAULT_NAME
+        name = "Pylight"
         self.connect(name)
 
         # Create an AI

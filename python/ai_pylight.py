@@ -20,8 +20,8 @@ from pprint import pprint
 ### GLOBALS ###
 ###############
 
-MINMAX_LEVEL = 4
-FAST_MINMAX_LEVEL = 2
+INITIAL_MINMAX_LEVEL = 4
+INITIAL_FAST_MINMAX_LEVEL = 2
 PENALITY_COEFF = 2
 DEBUG = True # In production, remove Debug so error are caught and a dumbed down version is used
 
@@ -282,7 +282,7 @@ class PylightParty():
                     raise
                 else:
                     print traceback.format_exc()
-            print_perf("Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
+            #print_perf("Computation took " + str(int((time.time()-start)*100)/100.0) + "secs")
             if len(moves) > 0: # If we can do a move
                 result = []
                 for m in moves: # m is (score, move) and move is (penality, obj)
@@ -553,13 +553,15 @@ class PylightAI():
     def _update_minmax_levels(self, timing):
         print_perf("Update minmax levels with timing %f seconds" % timing)
         if timing < 0.2 and not self.blocked:  # we're runnning fast: increase minmax level
-            self.minmax_level += 1
-        elif timing > 1.:  # we're running slowly: decrease minmax level
+            if self.minmax_level < 20: # Max is 20
+                self.minmax_level += 1
+        elif timing > 1.7:  # we're running slowly: decrease minmax level
             self.blocked = True
             if self.minmax_level > INITIAL_MINMAX_LEVEL:
                 self.minmax_level -= 1
             else:
                 self.fast_minmax_level = 1
+        print_perf("New minmax level " + str(self.minmax_level) + " and fast " + str(self.fast_minmax_level))
 
     def callback(self, world):
         "Play best objective"

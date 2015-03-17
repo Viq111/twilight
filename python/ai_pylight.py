@@ -21,8 +21,8 @@ from pprint import pprint
 ### GLOBALS ###
 ###############
 
-INITIAL_MINMAX_LEVEL = 2
-INITIAL_FAST_MINMAX_LEVEL = 2
+INITIAL_MINMAX_LEVEL = 1
+INITIAL_FAST_MINMAX_LEVEL = 1
 PENALITY_COEFF = 2
 DEBUG = False # In production, remove Debug so error are caught and a dumbed down version is used
 
@@ -556,7 +556,10 @@ class PylightAI():
         print_perf("Update minmax levels with timing %f seconds" % timing)
         if timing < 0.2 and not self.blocked:  # we're runnning fast: increase minmax level
             if self.minmax_level < 20: # Max is 20
-                self.minmax_level += 1
+                if self.minmax_level >= 4 and self.fast_minmax_level == 1:
+                    self.fast_minmax_level += 1
+                else:
+                    self.minmax_level += 1
         elif timing > 1.7:  # we're running slowly: decrease minmax level
             self.blocked = True
             if self.minmax_level > INITIAL_MINMAX_LEVEL:

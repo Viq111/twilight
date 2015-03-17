@@ -1,4 +1,4 @@
-Twilight - An OK IA
+Pylight - An OK IA
 ===================
 
 Let you win the Vampires VS Wolves game
@@ -36,9 +36,43 @@ You will need a game server which is available in the server/official directory.
 You can then launch each AI with:
 
 ```bash
-python gambling.py
+python ai_gambling.py
 python ai_nearest_possible.py
 python ai_objective_path.py
 ```
 
-**Press return to exit the AI when the game is over, it cannot autodetect the end!**
+## Python folder structure
+
+### client_api.py
+
+client_api stores the internals to communicate with the server. ClientAPI should be inited and then called with the AI to instanciate each reset.
+World object provide easy functions (such as A*) to let you move through the world.
+
+### gui.py
+
+Helper lib to show a board. Should not be used alone, use manual_input instead.
+
+### manual_input.py
+
+Let you play as a human by moving your whole units each turn
+
+### minmax.py
+
+Library to implement MiniMax (with Alpha Beta) used to find the best moves.
+
+### ai_nearest_possible.py
+
+Nearest Possible is the easier IA to understand, it tries to find the nearest prey and go to it
+
+### ai_objective_path.py
+
+Objective Path is an AI that still go to objectives one by one but use the MiniMax algorithm to select the best one (not only the nearest one)
+
+### ai_gambling.py
+
+Gambling is an outdated AI which was supposed to play as a multi-agent system.
+
+### ai_pylight.py
+
+Pylight is our main AI, it derivates from ObjectivePath but once it has an objective, it tries to free a group with the remaining units and let it live its life.
+Once the satellite has done its work, it will return to the parent. Hence this IA is a really fast splitting AI.

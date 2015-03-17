@@ -96,10 +96,13 @@ class World():
         self.__wait_init()
         return (len(self.world), len(self.world[0]))
 
-    def get_cell(self, x, y):
-        "Return the content of a cell"
+    def get_cell(self, x, y = None):
+        "Return the content of a cell. get_cell(pos) or get_cell(x, y)"
         self.__wait_init()
-        return self.world[x][y]
+        if y == None:
+            return self.world[x[0]][x[1]]
+        else:
+            return self.world[x][y]
 
     def get_world_as_matrix(self):
         "Return the world as a matrix"
@@ -114,10 +117,10 @@ class World():
             for p in positions:
                 if my_pos == (p[0], p[1]):
                     if p[3] != 0:
-                        # color_print("--Cython version-- You are a vampire")
+                        color_print("You are a vampire")
                         self.im_vampire = True
                     elif p[4] != 0:
-                        # color_print("--Cython version-- You are a wolf")
+                        color_print("You are a wolf")
                         self.im_vampire = False
                     else:
                         raise RuntimeError("Cannot detect your race :'( " + str(my_pos) + " and " + str(positions))
@@ -144,16 +147,18 @@ class World():
                 y = pos[1] + j
                 if (i != 0 or j != 0) and x >= 0 and y >= 0 and x < len(self.world) and y < len(self.world[0]): # Cell inside the grid
                     cell = self.get_cell(x, y)
-                    sum = 0;
-                    for k in range(-1, 2):
-                        for l in range(-1, 2):
-                            a = x + k
-                            b = y + l
-                            if (k != 0 or l != 0) and a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
-                                sum += self.get_cell(a, b)["ennemy"]
+                    sum = 0
+                    if count != None: # We have the number of our units, compute how many ennemy are arround the case
+                        for k in range(-1, 2):
+                            for l in range(-1, 2):
+                                a = x + k
+                                b = y + l
+                                if (k != 0 or l != 0) and a >= 0 and b >= 0 and a < len(self.world) and b < len(self.world[0]):
+                                    sum += self.get_cell(a, b)["ennemy"]
                     if cell["ennemy"] == 0 and sum == 0 and cell["human"] == 0:
                         neightboors.append((x, y))
-                    elif count != None and (1.5 * cell["ennemy"] <= count) and sum == 0 and cell["human"] <= count:
+                    #elif count != None and ((1.5 * sum) <= count) and cell["human"] <= count:
+                    elif count != None and (sum <= count) and cell["human"] <= count: # ToDo: Do not go near 1.5 ennemies
                         neightboors.append((x, y))
                     elif goal != None:
                         if x == goal[0] and y == goal[1]:
@@ -198,6 +203,7 @@ class World():
         self.__wait_init()
         res = self._a_star(start, stop)
         if len(res) == 0:
+            # If there is no path with A* still try to get closer
             current = start
             distance = 99999999999
             for next in self._get_neighboors(start, stop, count):
@@ -248,7 +254,7 @@ class ClientAPI(threading.Thread):
         count = 0
         while self.callback == self.__default_callback:
             count += 1
-            sys.stderr.write("[WARNING] client_api default_callback has not been overrided!")
+            sys.stderr.write("[WARNING] client_api default_callback has not been overrided!\n")
             time.sleep(0.1)
             if count >= 10:
                 break
@@ -369,6 +375,9 @@ class ClientAPI(threading.Thread):
     def get_map(self):
         "Get the Map Obejct"
         return self.world
+    def get_world(self):
+        "Return the world"
+        return self.get_map()
 
     def move(self, moves, autoremove_forbiden_moves = True):
         "Send multiple moves command, moves is a list of (initial_x, initial_y, nb, dest_x, dest_y). Autoremove removes fordien moves (same source and destination cell)."

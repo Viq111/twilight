@@ -537,6 +537,7 @@ class PylightAI():
         if (len(parties) + len(new_parties) - len(remove_parties)) > 1: # We still need regrouping
             still_dont_move = True
         if not still_dont_move and temp_master:
+            temp_master = (temp_master[0], final_moves[temp_master_party][1], temp_master[2])
             final_moves[temp_master_party] = temp_master
         
         return (new_parties, remove_parties, final_moves)

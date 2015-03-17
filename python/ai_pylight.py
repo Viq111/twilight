@@ -254,7 +254,7 @@ class PylightParty():
 
     # Core
 
-    def select_moves(self, pos, nb, world, level = MINMAX_LEVEL):
+    def select_moves(self, pos, nb, world, level, fast_level):
         "Update current pos and nb. Select a list of best moves and return them (score, move, group division). move is (pos, nb, goal). Group division is (pos, nb). If want to group with parent, return parent"
         if self.grouping: # We want to group with parent
             return self.parent
@@ -290,7 +290,7 @@ class PylightParty():
                     group_move = (us[0], us[1], m[1][1].pos)
                     group_objectives = copy.deepcopy(objectives)
                     group_objectives.remove(m[1][1])
-                    groups = self.check_group(world, group_move, ennemy, group_objectives, parent=self.get_id())
+                    groups = self.check_group(world, group_move, ennemy, group_objectives, fast_level, parent=self.get_id())
                     result.append((m[0], (us[0], us[1], m[1][1].pos), groups)) # (score, move, group division) with move = (pos, nb, goal) 
                 return result
         # Either there is no more objectives on the map or the objective are too high
@@ -318,7 +318,7 @@ class PylightParty():
             goal = humans[0][0]
         return [(PIRATIONAL_CONST, (us[0], us[1], goal), None)] # Score of PIRATIONAL_CONST means we either attack smth or wait for our children
 
-    def check_group(self, world, move, ennemy, objectives, parent = None):
+    def check_group(self, world, move, ennemy, objectives, level, parent = None):
         "For a move check if we can create a group. Returns None is not possible or a tuple of units, list of (tuple of (nb, Pylight party)) (move is (pos, nb, objective_pos))"
         if parent == None: # If parent was not given, take it from the object
             parent = self.parent
@@ -330,7 +330,7 @@ class PylightParty():
         # Ok now, try to find if there are sensible moves
         us = (move[0], remaining_units, 0)
         game = BoardGame(us, ennemy, objectives)
-        mm = minmax.MinMax(game, FAST_MINMAX_LEVEL)
+        mm = minmax.MinMax(game, level)
         obj = mm.ask_move()
         if not obj: # Do not need to do anything
             return None
@@ -341,7 +341,7 @@ class PylightParty():
         objectives2 = copy.deepcopy(objectives)
         objectives2.remove(obj)
         move2 = (move[0], remaining_units, obj.pos) # (pos, nb, objective_pos)
-        other_groups = self.check_group(world, move2, ennemy, objectives2, party.get_id())
+        other_groups = self.check_group(world, move2, ennemy, objectives2, level, party.get_id())
         if not other_groups: # No other groups, just return us
             return [(remaining_units, party)]
         else:
@@ -364,6 +364,9 @@ class PylightAI():
         self.parties = [PylightParty()]
         self.tracking = {} # Associate a party to its old position (in case of) and size and current supposed position
         self.tracking[self.parties[0]] = (pos, nb, pos) # And set the start position of our group
+        self.blocked = False # becomes True once the the total computation time has reached 1 sec at least once
+        self.minmax_level = INITIAL_MINMAX_LEVEL
+        self.fast_minmax_level = INITIAL_FAST_MINMAX_LEVEL
 
     def _update_tracking(self, world):
         "Update traking of differents parties with the new world"
@@ -465,7 +468,7 @@ class PylightAI():
                     print_main("[PARTY] Creating..." + str(new_party))
                     if DEBUG:
                         assert isinstance(new_party, PylightParty)
-                    moves = new_party.select_moves(current_pos, group[0], world, FAST_MINMAX_LEVEL)
+                    moves = new_party.select_moves(current_pos, group[0], world, self.fast_minmax_level, self.fast_minmax_level)
                     if type(moves) == list:
                         sum += group[0]
                         goal = world.find_path(current_pos, moves[0][1][2], moves[0][1][1])
@@ -513,7 +516,7 @@ class PylightAI():
                 # And do a quick search
                 pos = self.tracking[party][0]
                 nb = self.tracking[party][1]
-                move = party.select_moves(pos, nb, world, FAST_MINMAX_LEVEL)[0][1]
+                move = party.select_moves(pos, nb, world, self.fast_minmax_level, self.fast_minmax_level)[0][1]
                 goal = world.find_path(move[0], move[2], move[1])
                 final_moves[party] = (move[0], move[1], goal)
             else:
@@ -545,9 +548,23 @@ class PylightAI():
             xs += g[0]
             ys += g[1]
         return (int(round(xs/len(goals))), int(round(ys/len(goals))))
-        
+
+    def _update_minmax_levels(self, timing):
+        print_perf("Update minmax levels with timing %f seconds" % timing)
+        if timing < 0.2 and not self.blocked:  # we're runnning fast: increase minmax level
+            self.minmax_level += 1
+        elif timing > 1.:  # we're running slowly: decrease minmax level
+            self.blocked = True
+            if self.minmax_level > INITIAL_MINMAX_LEVEL:
+                self.minmax_level -= 1
+            else:
+                self.fast_minmax_level = 1
+
     def callback(self, world):
         "Play best objective"
+        # Start clock
+        start_time = time.time()
+
         # Update tracking with the new map
         self._update_tracking(world)
         
@@ -556,7 +573,7 @@ class PylightAI():
         for party in self.parties:
             pos = self.tracking[party][0]
             nb = self.tracking[party][1]
-            moves = party.select_moves(pos, nb, world)
+            moves = party.select_moves(pos, nb, world, self.minmax_level, self.fast_minmax_level)
             parties_moves[party] = moves
 
         # Now select best moves
@@ -581,6 +598,8 @@ class PylightAI():
                 temp = (temp[0], temp[1], temp[0])
                 self.tracking[p] = temp
 
+        # Update depth of min-maxes depending on the timing
+        self._update_minmax_levels(time.time() - start_time)
 
 ###################
 ### DEFINITIONS ###

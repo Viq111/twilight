@@ -496,6 +496,7 @@ class PylightAI():
                         master_goal = self._barycenter(goals)
                         master_goal = world.find_path(final_moves[party][0], master_goal)
                         temp_master = final_moves[party]
+                        temp_master_party = party
                         final_moves[party] = (final_moves[party][0], final_moves[party][1], master_goal)
                         
         # Now regroup orphan parties
@@ -536,7 +537,7 @@ class PylightAI():
         if (len(parties) + len(new_parties) - len(remove_parties)) > 1: # We still need regrouping
             still_dont_move = True
         if not still_dont_move and temp_master:
-            final_moves[party] = temp_master
+            final_moves[temp_master_party] = temp_master
         
         return (new_parties, remove_parties, final_moves)
             
